@@ -1,0 +1,118 @@
+# Temperature-aware source training configuration.
+#
+# Problem with default.yaml:
+#   voltage_weight: 100.0, temp_weight: 1.0 in the author training loss gives the
+#   transformer backbone almost zero incentive to encode temperature dynamics.
+#   Result: temperature RMSE is stuck at ~287 m°C even after fine-tuning, because
+#   the backbone has no useful temperature representations to transfer.
+#
+# Fix:
+#   Retrain RW9 source with balanced loss so the backbone learns both voltage AND
+#   temperature features. Then fine-tuning transfers both correctly.
+#
+# Usage:
+#   python3 scripts/train_twin.py --config configs/temp_aware_source.yaml
+#   python3 scripts/finetune_twin.py --config configs/temp_aware_source.yaml \
+#       --source_ckpt outputs/twin_source_tempaware/<timestamp>/twin_source_RW9.pt
+
+seed: 42
+
+data:
+  matlab_dir: "NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab"
+  step_mode: "all"
+  soc_step_mode: "rw_operational"
+  decimation: 1
+  soc_label_stride: 200
+  cells:
+    source: "RW9"
+    targets: ["RW10", "RW11", "RW12"]
+  q_rated_as: 7200.0
+  soc_q_norm: "per_file"
+
+windows:
+  seq_len: 150
+  stride: 50
+
+splits:
+  train_frac: 0.80
+  val_frac: 0.10
+
+transfer:
+  eval_tail_frac: 0.20
+
+twin:
+  pipeline: author
+  chunk_size: 150
+  d_model: 150
+  nhead: 20
+  num_layers: 1
+  dropout: 0.1
+  temp_delta_scale: 1.0   # CHANGED: 0.1 → 1.0
+                           # With 0.1, the model needs raw output of 3.0 to
+                           # predict a 0.3°C change — too restrictive for
+                           # meaningful temperature gradients.
+                           # At 1.0 the raw and predicted delta are 1:1.
+  author_style: true
+  voltage_weight: 10.0    # CHANGED: 100.0 → 10.0  (still prioritizes voltage)
+  temp_weight: 50.0        # CHANGED: 1.0 → 50.0  (5× more weight on temperature)
+  pearson_temp_weight: 5.0 # NEW: Pearson correlation loss on temperature trajectory
+  optimizer: adam
+  lr: 1.0e-3
+  batch_size: 128
+  epochs: 10000
+  early_stop_patience: 50
+  plateau_patience: 3
+  plateau_factor: 0.1
+  grad_clip: 1.0          # Enable gradient clipping — Pearson term can spike
+  num_workers: 0
+  author_split:
+    train_frac: 0.6
+    val_frac: 0.2
+    shuffle: true
+  temp_smooth_series_window: 0
+  smooth_temp_targets: false
+  loss:
+    mse_voltage: 10.0
+    mse_temp: 50.0
+    mape_voltage: 0.0
+    mape_temp: 0.0
+    corr_temp: 5.0
+  early_stop_metric: val_loss
+
+soc:
+  variants: ["v_only", "vta", "vta_i"]
+  hidden: 64
+  epochs: 1000
+  batch_size: 256
+  lr: 1.0e-3
+  log_every: 50
+  soc_input: "measured"
+
+phase2:
+  data_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+  finetune_lr: 5.0e-7
+
+# Fine-tuning with the new temp-aware source:
+# Stage 1 is short — the backbone already has temperature information,
+# so only a brief warmup is needed before full fine-tuning.
+finetune_temp:
+  stage1_epochs: 50          # shorter — backbone already has temperature
+  stage1_voltage_weight: 1.0
+  stage1_temp_weight: 100.0
+  stage1_pearson_weight: 5.0
+  stage1_lr: null
+
+  stage2_epochs: 500
+  stage2_voltage_weight: 10.0
+  stage2_temp_weight: 50.0
+  stage2_pearson_weight: 5.0
+
+phase3:
+  adaptation_hours: [0.5, 1, 2, 3, 6, 12, 24, 48, 72, null]
+  performance_thresholds: [0.90, 0.95, 0.98, 0.99]
+  primary_metric: "voltage_rmse"
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+output:
+  root: "outputs/temp_aware"

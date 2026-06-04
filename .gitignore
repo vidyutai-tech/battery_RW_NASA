@@ -1,0 +1,48 @@
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+venv
+.venv
+# Virtual environments
+venv/
+env/
+outputs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Models / large artifacts
+*.pt
+*.pth
+*.ckpt
+
+# Large dataset files — too big for GitHub (>50 MB)
+*.mat
+*.csv
+NASA_RW/dataset/
+
+# OS
+.DS_Store
+
+models/checkpoints
+.mplconfig/
+outputs/
+
+NASA_RW/
+

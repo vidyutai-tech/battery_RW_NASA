@@ -1,0 +1,74 @@
+# High-accuracy twin training — optimizes validation MAPE (V + T)
+# Usage: python scripts/train_twin.py --config configs/high_mape.yaml
+
+seed: 42
+
+data:
+  matlab_dir: "NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab"
+  step_mode: "rw_operational"
+  decimation: 5
+  soc_label_stride: 200
+  cells:
+    source: "RW9"
+    targets: ["RW10", "RW11", "RW12"]
+  q_rated_as: 7200.0
+  soc_q_norm: "global"
+
+windows:
+  seq_len: 150
+  stride: 30
+
+splits:
+  train_frac: 0.80
+  val_frac: 0.10
+
+transfer:
+  eval_tail_frac: 0.20
+
+twin:
+  d_model: 150
+  nhead: 10
+  num_layers: 2
+  dropout: 0.05
+  temp_delta_scale: 1.0
+  temp_smooth_series_window: 31
+  smooth_temp_targets: false
+  loss:
+    mse_voltage: 5.0
+    mse_temp: 5.0
+    mape_voltage: 200.0
+    mape_temp: 200.0
+    corr_temp: 8.0
+  mape_eps_voltage: 0.02
+  mape_eps_temp: 0.2
+  early_stop_metric: mape_sum
+  grad_clip: 1.0
+  epochs: 10000
+  batch_size: 128
+  lr: 2.0e-4
+  early_stop_patience: 80
+  plateau_patience: 15
+  num_workers: 4
+
+soc:
+  variants: ["v_only", "vta", "vta_i"]
+  hidden: 64
+  epochs: 1000
+  batch_size: 256
+  lr: 1.0e-3
+  soc_input: "measured"
+
+phase2:
+  data_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+phase3:
+  adaptation_hours: [0.5, 1, 2, 3, 6, 12, 24, 48, 72, null]
+  performance_thresholds: [0.90, 0.95, 0.98, 0.99]
+  primary_metric: "voltage_rmse"
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+output:
+  root: "outputs"

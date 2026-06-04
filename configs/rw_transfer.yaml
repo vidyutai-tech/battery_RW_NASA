@@ -1,0 +1,73 @@
+# RW operational windows + chronological split (transfer-learning experiments)
+
+seed: 42
+
+data:
+  matlab_dir: "NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab"
+  step_mode: "rw_operational"
+  decimation: 10
+  soc_step_mode: "rw_operational"
+  soc_label_stride: 200
+  cells:
+    source: "RW9"
+    targets: ["RW10", "RW11", "RW12"]
+  q_rated_as: 7200.0
+  soc_q_norm: "per_file"
+
+windows:
+  seq_len: 150
+  stride: 50
+
+splits:
+  train_frac: 0.80
+  val_frac: 0.10
+
+transfer:
+  eval_tail_frac: 0.20
+
+twin:
+  pipeline: rw_windows
+  d_model: 150
+  nhead: 20
+  num_layers: 1
+  dropout: 0.1
+  temp_delta_scale: 0.1
+  author_style: true
+  optimizer: adamw
+  lr: 2.0e-4
+  batch_size: 64
+  epochs: 10000
+  early_stop_patience: 80
+  plateau_patience: 20
+  grad_clip: 1.0
+  loss:
+    mse_voltage: 100.0
+    mse_temp: 1.0
+    mape_voltage: 0.0
+    mape_temp: 0.0
+    corr_temp: 0.0
+  early_stop_metric: val_loss
+
+soc:
+  variants: ["v_only", "vta", "vta_i"]
+  hidden: 64
+  epochs: 1000
+  batch_size: 256
+  lr: 1.0e-3
+  log_every: 50
+  soc_input: "measured"
+
+phase2:
+  data_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+phase3:
+  adaptation_hours: [0.5, 1, 2, 3, 6, 12, 24, 48, 72, null]
+  performance_thresholds: [0.90, 0.95, 0.98, 0.99]
+  primary_metric: "voltage_rmse"
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+output:
+  root: "outputs"

@@ -1,0 +1,114 @@
+# NASA RW transfer-learning — default follows original author twin recipe
+
+seed: 42
+
+data:
+  matlab_dir: "NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab"
+  step_mode: "all"  # author: every step in RW9.mat (not RW-only filter)
+  soc_step_mode: "rw_operational"  # SOC still uses RW-only steps
+  decimation: 1     # author: full resolution
+  soc_label_stride: 200
+  cells:
+    source: "RW9"
+    targets: ["RW10", "RW11", "RW12"]
+  q_rated_as: 7200.0
+  soc_q_norm: "per_file"   # per RW step (charge); discharge uses segment Q
+
+windows:
+  seq_len: 150
+  stride: 50
+
+splits:
+  train_frac: 0.80
+  val_frac: 0.10
+
+transfer:
+  eval_tail_frac: 0.20
+
+twin:
+  # author | rw_windows  — author matches Paarth's data_loading + training.py
+  pipeline: author
+  chunk_size: 150
+  d_model: 150
+  nhead: 20
+  num_layers: 1
+  dropout: 0.1
+  temp_delta_scale: 0.1   # T = T0 + residual/10
+  author_style: true
+  voltage_weight: 100.0
+  temp_weight: 1.0
+  optimizer: adam
+  lr: 1.0e-3              # fresh training (use 5e-7 only when loading a checkpoint)
+  batch_size: 128
+  epochs: 10000
+  early_stop_patience: 50
+  plateau_patience: 3
+  plateau_factor: 0.1
+  grad_clip: 0.0          # author had clip commented out
+  num_workers: 0
+  # Random chunk split (author: 60/20/remainder test, seed 42)
+  author_split:
+    train_frac: 0.6
+    val_frac: 0.2
+    shuffle: true
+  # RW-window pipeline options (used when pipeline: rw_windows)
+  temp_smooth_series_window: 0
+  smooth_temp_targets: false
+  loss:
+    mse_voltage: 10.0
+    mse_temp: 10.0
+    mape_voltage: 0.0
+    mape_temp: 0.0
+    corr_temp: 0.0
+  early_stop_metric: val_loss
+
+soc:
+  variants: ["v_only", "vta", "vta_i"]
+  hidden: 64
+  epochs: 1000
+  batch_size: 256
+  lr: 1.0e-3
+  log_every: 50             # console + soc_train_log.jsonl
+  soc_input: "measured"   # always measured V/T for training (never twin outputs)
+
+phase2:
+  data_fractions: [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+  finetune_lr: 5.0e-7          # stage-2 full fine-tune LR from RW9 checkpoint
+
+# Two-stage temperature-aware fine-tuning configuration.
+#
+# Root cause of poor temperature transfer: the author loss (100·MSE_V + 1·MSE_T)
+# gives temperature only 1% of the gradient signal. With a very small fine-tune
+# LR (5e-7), the temperature head receives virtually no updates.
+#
+# Fix — two stages:
+#   Stage 1: Freeze the transformer backbone; train ONLY the output projection
+#            head (linear_out1/2/3) with a temperature-biased loss + Pearson
+#            shape term. Higher LR is safe since backbone is frozen.
+#            → The head quickly re-calibrates to the target cell's temperature scale.
+#
+#   Stage 2: Unfreeze all layers; train with a balanced loss so both voltage and
+#            temperature refine together without one dominating.
+finetune_temp:
+  # Stage 1 — output head warmup (backbone frozen)
+  stage1_epochs: 150
+  stage1_voltage_weight: 1.0
+  stage1_temp_weight: 100.0    # 100× more gradient to temperature than voltage
+  stage1_pearson_weight: 5.0   # shape-matching: forces trajectory correlation
+  stage1_lr: null              # null → auto: finetune_lr * 1000 (e.g. 5e-4)
+
+  # Stage 2 — full fine-tuning, balanced loss
+  stage2_epochs: 500
+  stage2_voltage_weight: 50.0  # raised from 10 → 50 to prevent voltage regression
+  stage2_temp_weight: 50.0     # balanced with voltage (vs 1:100 in author recipe)
+  stage2_pearson_weight: 5.0
+
+phase3:
+  adaptation_hours: [0.5, 1, 2, 3, 6, 12, 24, 48, 72, null]
+  performance_thresholds: [0.90, 0.95, 0.98, 0.99]
+  primary_metric: "voltage_rmse"
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+output:
+  root: "outputs"
