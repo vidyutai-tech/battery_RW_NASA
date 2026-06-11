@@ -1,0 +1,78 @@
+{
+  "verified_at_utc": "2026-06-10T11:10:39.455273+00:00",
+  "repo_root": "/data/battery_RW_NASA",
+  "layout": {
+    "models": "outputs/charging_opt/models",
+    "plots": "outputs/charging_opt/plots",
+    "registry": "outputs/charging_opt/registry"
+  },
+  "required": {
+    "ocv_curve": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
+      "exists": false
+    },
+    "capacity_fade": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz",
+      "exists": false
+    },
+    "stage1_registry": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_state_estimation/registry.json",
+      "exists": false
+    },
+    "conformal_margins": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_drift/conformal_margins.npz",
+      "exists": false
+    },
+    "drift_registry": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_drift/registry.json",
+      "exists": false
+    }
+  },
+  "optional": {
+    "lifetime_bo_result": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage3_optimization/optimization_result.json",
+      "exists": false
+    },
+    "stage3_registry": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/models/stage3_optimization/registry.json",
+      "exists": false
+    },
+    "plot_ocv_soc": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage1_state_estimation/ocv_soc_curve.png",
+      "exists": false
+    },
+    "plot_capacity_fade": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage1_state_estimation/capacity_fade.png",
+      "exists": false
+    },
+    "plot_drift": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage1_drift/drift_vs_horizon.png",
+      "exists": false
+    },
+    "plot_per_action": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage1_drift/per_action_rmse.png",
+      "exists": false
+    },
+    "cc_sweep_json": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage2_reward_diagnostic/cc_sweep.json",
+      "exists": false
+    },
+    "plot_cc_sweep": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage2_reward_diagnostic/cc_sweep_sei_and_time.png",
+      "exists": false
+    },
+    "plot_cc_tradeoff": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage2_reward_diagnostic/cc_sweep_tradeoff.png",
+      "exists": false
+    },
+    "plot_best_profile": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage3_optimization/best_profile.png",
+      "exists": false
+    },
+    "plot_bo_convergence": {
+      "path": "/data/battery_RW_NASA/outputs/charging_opt/plots/stage3_optimization/bo_convergence.png",
+      "exists": false
+    }
+  },
+  "all_required_present": false
+}

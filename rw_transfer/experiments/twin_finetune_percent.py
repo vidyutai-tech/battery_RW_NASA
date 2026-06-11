@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import shutil
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -15,8 +17,14 @@ from rw_transfer.data.author_dataset import (
 )
 from rw_transfer.data.author_loader import load_author_stitched_series
 from rw_transfer.experiments.logging_utils import append_csv_row, experiment_dir, save_json
+from rw_transfer.metrics import metric_bundle
+from rw_transfer.registry import FinetuneRegistry, file_size_mb, measure_infer_ms
 from rw_transfer.training.twin_trainer import TwinTrainer, evaluate_twin_windows, trainer_from_twin_config
-from rw_transfer.viz.plots import plot_finetune_percent
+from rw_transfer.viz.plots import (
+    plot_actual_vs_predicted,
+    plot_finetune_percent,
+    plot_finetune_training_curves,
+)
 
 
 # ── Shared WindowBatch adapter (used by hours study) ─────────────────────────
@@ -84,6 +92,8 @@ def _adapt_two_stage(
     chunk_size: int,
     twin_cfg: Dict[str, Any],
     ft_cfg: Dict[str, Any],
+    *,
+    log_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """
     Fine-tune from source checkpoint using two-stage temperature-aware training.
@@ -115,16 +125,24 @@ def _adapt_two_stage(
         stage2_pearson_weight=float(ft_cfg.get("stage2_pearson_weight", 5.0)),
         batch_size=int(twin_cfg["batch_size"]),
         early_stop_patience=int(twin_cfg["early_stop_patience"]),
-        plateau_patience=int(twin_cfg.get("plateau_patience", 3)),
-        plateau_factor=float(twin_cfg.get("plateau_factor", 0.1)),
+        plateau_patience=int(ft_cfg.get("plateau_patience", twin_cfg.get("plateau_patience", 3))),
+        plateau_factor=float(ft_cfg.get("plateau_factor", twin_cfg.get("plateau_factor", 0.1))),
         num_workers=int(twin_cfg.get("num_workers", 0)),
+        log_path=log_path,
     )
 
     eval_metrics = evaluate_twin_windows(trainer.model, test_batch, trainer.device)
     return {
         "voltage_rmse": eval_metrics.get("voltage_rmse", float("nan")),
         "temperature_rmse": eval_metrics.get("temperature_rmse", float("nan")),
+        "voltage_metrics": eval_metrics.get("voltage", {}),
+        "temperature_metrics": eval_metrics.get("temperature", {}),
+        "v_pred": eval_metrics.get("v_pred"),
+        "v_ref":  eval_metrics.get("v_ref"),
+        "t_pred": eval_metrics.get("t_pred"),
+        "t_ref":  eval_metrics.get("t_ref"),
         "fit": fit_info,
+        "trainer": trainer,
     }
 
 
@@ -156,7 +174,10 @@ def _run_author_finetune_percent(
     matlab_dir = cfg["data"]["matlab_dir"]
     targets = cfg["data"]["cells"]["targets"]
     twin_cfg = cfg["twin"]
-    ft_cfg = cfg.get("finetune_temp", {})
+    ft_cfg = dict(cfg.get("finetune_temp", {}))
+    # finetune_lr lives under phase2 in the YAML, not finetune_temp — inject it so
+    # _adapt_two_stage reads the right value instead of always using the hard default.
+    ft_cfg.setdefault("finetune_lr", cfg.get("phase2", {}).get("finetune_lr", 5e-7))
     chunk_size = int(twin_cfg.get("chunk_size", cfg["windows"]["seq_len"]))
     split_cfg = twin_cfg.get("author_split", {})
     train_frac = float(split_cfg.get("train_frac", 0.6))
@@ -164,6 +185,12 @@ def _run_author_finetune_percent(
     seed = int(cfg.get("seed", 42))
     decimation = int(cfg["data"].get("decimation", 1))
     all_rows: List[Dict[str, Any]] = []
+
+    # ── output sub-directories ────────────────────────────────────────────────
+    plots_dir    = out_dir / "plots"
+    registry_dir = out_dir / "registry"
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    registry_dir.mkdir(parents=True, exist_ok=True)
 
     for target in targets:
         print(
@@ -183,25 +210,124 @@ def _run_author_finetune_percent(
             flush=True,
         )
 
+        registry = FinetuneRegistry(registry_dir, source_ckpt)
+
         for frac in fracs:
             adapt_train = subset_author_train_by_fraction(train_set, frac)
+            frac_tag = f"{target}_frac{frac:.2f}"
             print(
                 f"\n        fraction {frac:.0%}: adapt train chunks {len(adapt_train):,}",
                 flush=True,
             )
 
+            # ── JSONL log paths (Stage 1 and Stage 2 written by fit_two_stage_author) ──
+            log_path = registry_dir / f"train_log_{frac_tag}.jsonl"
+
+            t_start = time.perf_counter()
             ft_m = _adapt_two_stage(
                 source_ckpt, adapt_train, val_set, test_batch,
                 chunk_size, twin_cfg, ft_cfg,
+                log_path=log_path,
+            )
+            train_time_s = time.perf_counter() - t_start
+
+            if ft_m.get("skipped"):
+                continue
+
+            # ── save finetuned checkpoint ──────────────────────────────────────
+            ckpt_save = registry_dir / f"finetune_{frac_tag}.pt"
+            trainer: TwinTrainer = ft_m["trainer"]
+            trainer.save(ckpt_save)
+            size_mb  = file_size_mb(ckpt_save)
+            n_params = trainer.model.n_trainable_params
+            infer_ms = measure_infer_ms(trainer.model, trainer.device, seq_len=chunk_size)
+
+            # ── full metric bundle from evaluate_twin_windows ──────────────────
+            v_metrics = ft_m.get("voltage_metrics", {})
+            t_metrics = ft_m.get("temperature_metrics", {})
+
+            # If metric_bundle didn't include mse yet, add it here defensively
+            if "mse" not in v_metrics and "rmse" in v_metrics:
+                v_metrics = dict(v_metrics)
+                v_metrics["mse"] = round(v_metrics["rmse"] ** 2, 8)
+            if "mse" not in t_metrics and "rmse" in t_metrics:
+                t_metrics = dict(t_metrics)
+                t_metrics["mse"] = round(t_metrics["rmse"] ** 2, 8)
+
+            # ── register ───────────────────────────────────────────────────────
+            fit_info = ft_m.get("fit", {})
+            registry.register_fraction(
+                target=target,
+                fraction=frac,
+                n_adapt=len(adapt_train),
+                n_eval=len(test_set),
+                train_time_s=train_time_s,
+                model_size_mb=size_mb,
+                n_params=n_params,
+                infer_ms=infer_ms,
+                voltage_metrics=v_metrics,
+                temperature_metrics=t_metrics,
+                ckpt_path=ckpt_save,
+                stage1_epochs_run=fit_info.get("stage1", {}).get("epochs_run", 0),
+                stage2_epochs_run=fit_info.get("stage2", {}).get("epochs_run", 0),
+            )
+            registry.save()
+
+            # ── training curve plots (Stage 1 and Stage 2) ────────────────────
+            s1_log = Path(str(log_path).replace(".jsonl", "_stage1.jsonl"))
+            s2_log = Path(str(log_path).replace(".jsonl", "_stage2.jsonl"))
+            plot_finetune_training_curves(
+                s1_log,
+                plots_dir / f"finetune_curves_{frac_tag}_stage1.png",
+                stage_label=f"{target} {frac:.0%} — Stage 1 (head warmup)",
+            )
+            plot_finetune_training_curves(
+                s2_log,
+                plots_dir / f"finetune_curves_{frac_tag}_stage2.png",
+                stage_label=f"{target} {frac:.0%} — Stage 2 (full fine-tune)",
+            )
+
+            # ── actual vs predicted plot ───────────────────────────────────────
+            from rw_transfer.training.twin_trainer import predict_twin_batch
+            import numpy as np
+
+            v_pred_arr, t_pred_arr = predict_twin_batch(
+                trainer.model, test_batch, trainer.device,
+            )
+            plot_actual_vs_predicted(
+                v_pred_arr.ravel(), test_batch.Y_voltage.ravel(),
+                t_pred_arr.ravel(), test_batch.Y_temperature.ravel(),
+                plots_dir / f"actual_vs_pred_{frac_tag}.png",
+                target=target,
+                fraction=frac,
+            )
+
+            # ── print and build row ────────────────────────────────────────────
+            print(
+                f"        Voltage RMSE: {ft_m['voltage_rmse']:.5f} V  "
+                f"MAPE: {v_metrics.get('mape_pct', float('nan')):.3f}%  "
+                f"R²: {v_metrics.get('r2', float('nan')):.4f}",
+                flush=True,
+            )
+            print(
+                f"        Temp    RMSE: {ft_m['temperature_rmse']:.4f} °C  "
+                f"MAPE: {t_metrics.get('mape_pct', float('nan')):.3f}%  "
+                f"R²: {t_metrics.get('r2', float('nan')):.4f}",
+                flush=True,
+            )
+            print(
+                f"        Train time : {train_time_s/60:.1f} min  "
+                f"Model: {size_mb:.3f} MB  "
+                f"Infer: {infer_ms:.3f} ms/chunk  "
+                f"Params: {n_params:,}",
+                flush=True,
             )
 
             row = _row_from_metrics(target, frac, len(adapt_train), len(test_set), ft_m)
             all_rows.append(row)
-            print(
-                f"        Voltage RMSE: {ft_m['voltage_rmse']:.5f} V  "
-                f"Temp RMSE: {ft_m['temperature_rmse']:.4f} °C",
-                flush=True,
-            )
+
+        # ── print registry summary once per target ─────────────────────────────
+        registry.print_summary()
 
     return all_rows
 
@@ -231,7 +357,9 @@ def run_twin_finetune_percent(
     print(f"  Source ckpt  : {source_ckpt}")
     print(f"  Targets      : {cfg['data']['cells']['targets']}")
     print(f"  Fractions    : {fracs}")
-    print(f"  Output       : {out_dir}\n")
+    print(f"  Output       : {out_dir}")
+    print(f"  Plots        : {out_dir}/plots/")
+    print(f"  Registry     : {out_dir}/registry/\n")
 
     csv_path = out_dir / "finetune_percent_results.csv"
     fields = [
@@ -244,12 +372,13 @@ def run_twin_finetune_percent(
     for row in all_rows:
         append_csv_row(csv_path, row, fields)
 
+    # ── per-target RMSE vs fraction plot (saved to plots/) ────────────────────
     for target in cfg["data"]["cells"]["targets"]:
         target_rows = [r for r in all_rows if r["target"] == target]
         if target_rows:
             plot_finetune_percent(
                 target_rows, target,
-                out_dir / f"twin_finetune_percent_{target}.png",
+                out_dir / "plots" / f"twin_finetune_percent_{target}.png",
             )
 
     summary = {"source_ckpt": str(source_ckpt), "pipeline": "author_two_stage", "rows": all_rows}
@@ -257,5 +386,7 @@ def run_twin_finetune_percent(
 
     print(f"\n{'='*60}")
     print(f"  Stage 2 complete  —  {out_dir}")
+    print(f"  Plots    → {out_dir}/plots/")
+    print(f"  Registry → {out_dir}/registry/")
     print(f"{'='*60}\n")
     return summary

@@ -1,0 +1,44 @@
+{
+  "source_cell": "RW9",
+  "step_mode": "rw_operational",
+  "soc_input": "measured",
+  "label_method": "coulomb_soc_stitched_operational",
+  "soc_q_norm": "per_file",
+  "twin_checkpoint": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "soc_test_metrics": {
+    "v_only": {
+      "n": 3776,
+      "mse": 0.03385533,
+      "rmse": 0.183998,
+      "mae": 0.131244,
+      "mape_pct": 88.2504,
+      "r2": 0.57839,
+      "best_val_rmse": 0.188335,
+      "n_train": 30512,
+      "n_test": 3776
+    },
+    "vta": {
+      "n": 3776,
+      "mse": 0.034787,
+      "rmse": 0.186513,
+      "mae": 0.135498,
+      "mape_pct": 100.5821,
+      "r2": 0.566787,
+      "best_val_rmse": 0.191975,
+      "n_train": 30512,
+      "n_test": 3776
+    },
+    "vta_i": {
+      "n": 3776,
+      "mse": 0.02830938,
+      "rmse": 0.168254,
+      "mae": 0.111005,
+      "mape_pct": 77.5622,
+      "r2": 0.647455,
+      "best_val_rmse": 0.171326,
+      "n_train": 30512,
+      "n_test": 3776
+    }
+  },
+  "soc_train_log": "outputs/twin_source/20260610_111409/soc_train_log.jsonl"
+}

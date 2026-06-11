@@ -636,7 +636,20 @@ class TwinTrainer:
                     output = self.model.forward_author(state, action)
                     yv, yt = next_state[:, :, 0], next_state[:, :, 1]
                     v_hat, t_hat = output[:, :, 0], output[:, :, 1]
-                    val_losses.append(author_val_loss(v_hat, t_hat, yv, yt).item())
+                    # When training with a temperature-biased loss, use the same
+                    # weights for validation so early stopping is aligned with what
+                    # the model is actually optimising.  The plain author_val_loss
+                    # (unweighted MSE) would see voltage degradation as bad even when
+                    # Stage 1 is intentionally trading voltage for temperature gain,
+                    # causing early stopping to fire at epoch 1.
+                    if use_temp_aware:
+                        vl = (
+                            v_w * torch.nn.functional.mse_loss(v_hat, yv)
+                            + t_w * torch.nn.functional.mse_loss(t_hat, yt)
+                        ).item()
+                    else:
+                        vl = author_val_loss(v_hat, t_hat, yv, yt).item()
+                    val_losses.append(vl)
                     v_preds.append(output.cpu())
                     v_tgts.append(next_state.cpu())
 
@@ -655,9 +668,20 @@ class TwinTrainer:
                 tt = tgt[:, :, 1].numpy().ravel()
                 val_v_rmse = float(np.sqrt(np.mean((vp - vt) ** 2)))
                 val_t_rmse = float(np.sqrt(np.mean((tp - tt) ** 2)))
+                val_v_mse  = float(np.mean((vp - vt) ** 2))
+                val_t_mse  = float(np.mean((tp - tt) ** 2))
+                val_v_mae  = float(np.mean(np.abs(vp - vt)))
+                val_t_mae  = float(np.mean(np.abs(tp - tt)))
+                _vss = float(np.sum((vt - np.mean(vt)) ** 2))
+                _tss = float(np.sum((tt - np.mean(tt)) ** 2))
+                val_v_r2 = float(1 - np.sum((vp - vt) ** 2) / _vss) if _vss > 1e-12 else float("nan")
+                val_t_r2 = float(1 - np.sum((tp - tt) ** 2) / _tss) if _tss > 1e-12 else float("nan")
             else:
                 mape_v = mape_t = float("nan")
                 val_v_rmse = val_t_rmse = float("nan")
+                val_v_mse = val_t_mse = float("nan")
+                val_v_mae = val_t_mae = float("nan")
+                val_v_r2 = val_t_r2 = float("nan")
 
             improved = avg_val < best_val
             if improved:
@@ -676,8 +700,14 @@ class TwinTrainer:
                 "epoch": epoch,
                 "train_loss": avg_train,
                 "val_loss": avg_val,
+                "val_voltage_mse": val_v_mse,
                 "val_voltage_rmse": val_v_rmse,
+                "val_voltage_mae": val_v_mae,
+                "val_voltage_r2": val_v_r2,
+                "val_temp_mse": val_t_mse,
                 "val_temp_rmse": val_t_rmse,
+                "val_temp_mae": val_t_mae,
+                "val_temp_r2": val_t_r2,
                 "mape_v": mape_v,
                 "mape_t": mape_t,
                 "stop_score": avg_val,

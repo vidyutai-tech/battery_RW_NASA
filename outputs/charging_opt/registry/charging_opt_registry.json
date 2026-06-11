@@ -1,0 +1,64 @@
+{
+  "updated_at_utc": "2026-06-11T11:50:17.261287+00:00",
+  "layout": {
+    "models": "outputs/charging_opt/models",
+    "plots": "outputs/charging_opt/plots",
+    "registry": "outputs/charging_opt/registry"
+  },
+  "stages": {
+    "stage1_state_estimation": {
+      "updated_at_utc": "2026-06-11T11:10:08.302248+00:00",
+      "stage_dir": "outputs/charging_opt/models/stage1_state_estimation",
+      "metrics": {
+        "cell": "RW9",
+        "source": "soc_mlp",
+        "checkpoint": "outputs/soc_model/soc_model.pt",
+        "ocv_checks": {
+          "soc_at_v_min": 0.007272751536220312,
+          "soc_at_v_max": 0.9856480360031128,
+          "monotone": true
+        },
+        "heldout_soc_inversion": {
+          "n": 12722,
+          "rmse": 0.017570464307581933,
+          "mae": 0.015580845608169901,
+          "r2": 0.9962962613095517,
+          "step_age": 0.8138355476901133
+        },
+        "capacity_fade": {
+          "rebuilt": false,
+          "n_reference_discharges": 80,
+          "q_age0_ah": 2.2746230591212435,
+          "q_age1_ah": 0.8536740288411857
+        },
+        "note": "OCV from notebook VoltageSOCMLP; charging rollout still uses coulomb counting.",
+        "artifacts": {
+          "ocv_curve": "outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
+          "capacity_fade": "outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz"
+        }
+      }
+    },
+    "stage1_drift": {
+      "exists": false,
+      "path": "outputs/charging_opt/models/stage1_drift/registry.json"
+    },
+    "stage3_optimization": {
+      "exists": false,
+      "path": "outputs/charging_opt/models/stage3_optimization/registry.json"
+    }
+  },
+  "external_models": {
+    "bdt_source": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "bdt_finetune_rw10_20": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.20.pt",
+    "bdt_finetune_rw10_40": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.40.pt",
+    "bdt_finetune_rw10_60": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt"
+  },
+  "artifacts": {
+    "ocv_curve": "outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
+    "capacity_fade": "outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz",
+    "stage1_registry": "outputs/charging_opt/models/stage1_state_estimation/registry.json",
+    "conformal_margins": "outputs/charging_opt/models/stage1_drift/conformal_margins.npz",
+    "drift_registry": "outputs/charging_opt/models/stage1_drift/registry.json",
+    "master_registry": "outputs/charging_opt/registry/charging_opt_registry.json"
+  }
+}

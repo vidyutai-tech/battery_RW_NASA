@@ -1,0 +1,98 @@
+{
+  "source_ckpt": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "entries": {
+    "RW10_frac0.20": {
+      "completed_at": "2026-06-11T06:57:07.430841+00:00",
+      "target": "RW10",
+      "fraction": 0.2,
+      "n_adapt_windows": 6877,
+      "n_eval_windows": 11461,
+      "train_time_s": 992.7,
+      "train_time_human": "16.5min",
+      "model_size_mb": 7.657,
+      "n_params": 2004462,
+      "infer_ms": 1.184,
+      "stage1_epochs_run": 68,
+      "stage2_epochs_run": 50,
+      "checkpoint": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.20.pt",
+      "voltage": {
+        "n": 1719150,
+        "mse": 0.00199498,
+        "rmse": 0.044665,
+        "mae": 0.028638,
+        "mape_pct": 0.7755,
+        "r2": 0.977465
+      },
+      "temperature": {
+        "n": 1719150,
+        "mse": 0.08270902,
+        "rmse": 0.287592,
+        "mae": 0.128344,
+        "mape_pct": 0.4022,
+        "r2": 0.994009
+      }
+    },
+    "RW10_frac0.40": {
+      "completed_at": "2026-06-11T07:22:58.209974+00:00",
+      "target": "RW10",
+      "fraction": 0.4,
+      "n_adapt_windows": 13753,
+      "n_eval_windows": 11461,
+      "train_time_s": 1545.7,
+      "train_time_human": "25.8min",
+      "model_size_mb": 7.657,
+      "n_params": 2004462,
+      "infer_ms": 1.151,
+      "stage1_epochs_run": 72,
+      "stage2_epochs_run": 50,
+      "checkpoint": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.40.pt",
+      "voltage": {
+        "n": 1719150,
+        "mse": 0.00163758,
+        "rmse": 0.040467,
+        "mae": 0.023507,
+        "mape_pct": 0.639,
+        "r2": 0.981502
+      },
+      "temperature": {
+        "n": 1719150,
+        "mse": 0.08114921,
+        "rmse": 0.284867,
+        "mae": 0.12492,
+        "mape_pct": 0.3921,
+        "r2": 0.994122
+      }
+    },
+    "RW10_frac0.60": {
+      "completed_at": "2026-06-11T10:34:18.984113+00:00",
+      "target": "RW10",
+      "fraction": 0.6,
+      "n_adapt_windows": 20630,
+      "n_eval_windows": 11461,
+      "train_time_s": 11475.7,
+      "train_time_human": "3.2h",
+      "model_size_mb": 7.657,
+      "n_params": 2004462,
+      "infer_ms": 1.058,
+      "stage1_epochs_run": 59,
+      "stage2_epochs_run": 500,
+      "checkpoint": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+      "voltage": {
+        "n": 1719150,
+        "mse": 0.00104517,
+        "rmse": 0.032329,
+        "mae": 0.018827,
+        "mape_pct": 0.5143,
+        "r2": 0.988194
+      },
+      "temperature": {
+        "n": 1719150,
+        "mse": 0.08075077,
+        "rmse": 0.284167,
+        "mae": 0.125543,
+        "mape_pct": 0.3943,
+        "r2": 0.994151
+      }
+    }
+  }
+}

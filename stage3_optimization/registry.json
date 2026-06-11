@@ -1,0 +1,46 @@
+{
+  "updated_at_utc": "2026-06-11T11:50:17.260897+00:00",
+  "stage_dir": "stage3_optimization",
+  "metrics": {
+    "best_spec": {
+      "i_charge": 1.2469998495948282,
+      "pulse_on_min": 22.277184366013625,
+      "pulse_rest_min": 0.0,
+      "i_floor": 0.75
+    },
+    "best_metrics": {
+      "duration_min": 96.85,
+      "end_reason": "SoC target",
+      "soc_end": 0.9504310019307898,
+      "delta_soc_pct_total": 79.95994477796407,
+      "sei_proxy": 5481.402301054829,
+      "sei_per_pct_soc": 68.55185200885022,
+      "peak_voltage": 4.200268268585205,
+      "peak_temperature": 24.613325119018555,
+      "violated": false,
+      "feasible": true,
+      "loss": 70.48885200885022,
+      "reward": -70.48885200885022,
+      "components": {
+        "infeasible": false,
+        "reason": "ok",
+        "sei_per_pct_soc": 68.55185200885022,
+        "soc_shortfall_pct": 0.0,
+        "time_excess_min": 0.0,
+        "max_duration_min": 105.0,
+        "temp_excess_c": 0.0,
+        "duration_min": 96.85,
+        "temp_penalty": 0.0,
+        "time_penalty": 1.9369999999999998
+      }
+    },
+    "constraints": {
+      "soc_target": 0.95,
+      "max_duration_min": 105.0
+    },
+    "artifacts": {
+      "optimization_result": "outputs/charging_opt/models/stage3_optimization/optimization_result.json",
+      "best_profile_plot": "outputs/charging_opt/plots/stage3_optimization/best_profile.png"
+    }
+  }
+}

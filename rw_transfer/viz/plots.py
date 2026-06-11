@@ -534,6 +534,223 @@ def plot_threshold_bar_chart(rec: Dict[str, Any], out_path: Path) -> None:
     _savefig(fig, out_path)
 
 
+# ── Fine-tune training curves (Stage 1 + Stage 2 from JSONL) ─────────────────
+
+def plot_finetune_training_curves(
+    log_path: Path,
+    out_path: Path,
+    stage_label: str = "Stage",
+) -> None:
+    """Plot train loss + 5 val metrics (RMSE, MSE, MAE, MAPE, R²) from a JSONL log.
+
+    One column per metric.  Call once for Stage 1 log and once for Stage 2 log.
+    """
+    log_path = Path(log_path)
+    if not log_path.is_file():
+        return
+
+    epochs, train_loss = [], []
+    v_rmse, v_mse, v_mae, v_mape, v_r2 = [], [], [], [], []
+    t_rmse, t_mse, t_mae, t_mape, t_r2 = [], [], [], [], []
+
+    with log_path.open(encoding="utf-8") as f:
+        for line in f:
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            epochs.append(r["epoch"])
+            train_loss.append(r.get("train_loss"))
+            v_rmse.append(r.get("val_voltage_rmse"))
+            v_mse.append(r.get("val_voltage_mse"))
+            v_mae.append(r.get("val_voltage_mae"))
+            v_mape.append(r.get("mape_v"))
+            v_r2.append(r.get("val_voltage_r2"))
+            t_rmse.append(r.get("val_temp_rmse"))
+            t_mse.append(r.get("val_temp_mse"))
+            t_mae.append(r.get("val_temp_mae"))
+            t_mape.append(r.get("mape_t"))
+            t_r2.append(r.get("val_temp_r2"))
+
+    if not epochs:
+        return
+
+    metrics = [
+        ("Train loss",   [train_loss],        [""],                  [ACCENT]),
+        ("RMSE",         [v_rmse, t_rmse],    ["Voltage (V)", "Temp (°C)"], [ORANGE, GREEN]),
+        ("MSE",          [v_mse,  t_mse],     ["Voltage",     "Temp"],      [ORANGE, GREEN]),
+        ("MAE",          [v_mae,  t_mae],     ["Voltage (V)", "Temp (°C)"], [ORANGE, GREEN]),
+        ("MAPE (%)",     [v_mape, t_mape],    ["Voltage",     "Temp"],      [ORANGE, GREEN]),
+        ("R²",           [v_r2,   t_r2],      ["Voltage",     "Temp"],      [ORANGE, GREEN]),
+    ]
+
+    fig, axes = plt.subplots(1, len(metrics), figsize=(3.5 * len(metrics), 3.5),
+                             facecolor=LIGHT_BG)
+    for ax in axes:
+        ax.set_facecolor(LIGHT_BG)
+
+    for ax, (title, series_list, labels, colors) in zip(axes, metrics):
+        for series, label, color in zip(series_list, labels, colors):
+            clean = [v if v is not None and np.isfinite(v) else np.nan for v in series]
+            ax.plot(epochs, clean, color=color, lw=1.5,
+                    label=label if label else None)
+        ax.set_xlabel("Epoch")
+        ax.set_title(title, fontsize=9, fontweight="bold")
+        if len(series_list) > 1:
+            ax.legend(fontsize=7, framealpha=0.6)
+
+    fig.suptitle(f"{stage_label} — validation metrics per epoch",
+                 fontsize=10, fontweight="bold")
+    fig.tight_layout()
+    _savefig(fig, out_path)
+
+
+# ── Actual vs Predicted (scatter + time-series) ───────────────────────────────
+
+def plot_actual_vs_predicted(
+    v_pred: np.ndarray,
+    v_ref: np.ndarray,
+    t_pred: np.ndarray,
+    t_ref: np.ndarray,
+    out_path: Path,
+    *,
+    target: str = "",
+    fraction: float = 0.0,
+    n_series_panels: int = 3,
+    max_scatter: int = 8000,
+) -> None:
+    """Three-section figure: scatter (V), scatter (T), time-series overlay panels.
+
+    Parameters
+    ----------
+    v_pred / v_ref : flat arrays of all predicted / actual voltage values
+    t_pred / t_ref : flat arrays of all predicted / actual temperature values
+    n_series_panels: number of representative window overlays to show
+    """
+    from rw_transfer.metrics import rmse, mape, r2_score
+
+    v_pred = np.asarray(v_pred, dtype=np.float64).ravel()
+    v_ref  = np.asarray(v_ref,  dtype=np.float64).ravel()
+    t_pred = np.asarray(t_pred, dtype=np.float64).ravel()
+    t_ref  = np.asarray(t_ref,  dtype=np.float64).ravel()
+
+    title_tag = f"{target}  |  {fraction:.0%} data" if target else f"{fraction:.0%} data"
+
+    # ── scatter subsample ──────────────────────────────────────────────────────
+    rng = np.random.default_rng(42)
+    sc_idx = rng.choice(len(v_pred), size=min(max_scatter, len(v_pred)), replace=False)
+
+    fig = plt.figure(figsize=(16, 4.5 * (1 + n_series_panels // 2 + 1)),
+                     facecolor=LIGHT_BG)
+    gs = gridspec.GridSpec(
+        2 + n_series_panels, 2,
+        figure=fig,
+        height_ratios=[1.0, 1.0] + [0.8] * n_series_panels,
+        hspace=0.45, wspace=0.35,
+    )
+
+    # ── voltage scatter ────────────────────────────────────────────────────────
+    ax_vs = fig.add_subplot(gs[0, 0])
+    ax_vs.set_facecolor(LIGHT_BG)
+    ax_vs.scatter(v_ref[sc_idx], v_pred[sc_idx], s=3, alpha=0.35, color=ACCENT, rasterized=True)
+    lo, hi = min(v_ref.min(), v_pred.min()), max(v_ref.max(), v_pred.max())
+    ax_vs.plot([lo, hi], [lo, hi], color=GREY, lw=1.2, ls="--", label="Ideal")
+    v_r  = rmse(v_pred, v_ref)
+    v_mp = mape(v_pred, v_ref)
+    v_r2 = r2_score(v_pred, v_ref)
+    ax_vs.set_xlabel("Actual Voltage (V)")
+    ax_vs.set_ylabel("Predicted Voltage (V)")
+    ax_vs.set_title(
+        f"Voltage — Actual vs Predicted\n"
+        f"RMSE={v_r:.4f} V  MAPE={v_mp:.3f}%  R²={v_r2:.4f}",
+        fontsize=9, fontweight="bold",
+    )
+    ax_vs.legend(fontsize=8)
+
+    # ── temperature scatter ────────────────────────────────────────────────────
+    ax_ts = fig.add_subplot(gs[0, 1])
+    ax_ts.set_facecolor(LIGHT_BG)
+    ax_ts.scatter(t_ref[sc_idx], t_pred[sc_idx], s=3, alpha=0.35, color=ORANGE, rasterized=True)
+    lo, hi = min(t_ref.min(), t_pred.min()), max(t_ref.max(), t_pred.max())
+    ax_ts.plot([lo, hi], [lo, hi], color=GREY, lw=1.2, ls="--", label="Ideal")
+    t_r  = rmse(t_pred, t_ref)
+    t_mp = mape(t_pred, t_ref)
+    t_r2 = r2_score(t_pred, t_ref)
+    ax_ts.set_xlabel("Actual Temperature (°C)")
+    ax_ts.set_ylabel("Predicted Temperature (°C)")
+    ax_ts.set_title(
+        f"Temperature — Actual vs Predicted\n"
+        f"RMSE={t_r:.4f} °C  MAPE={t_mp:.3f}%  R²={t_r2:.4f}",
+        fontsize=9, fontweight="bold",
+    )
+    ax_ts.legend(fontsize=8)
+
+    # ── residual histograms ────────────────────────────────────────────────────
+    ax_vr = fig.add_subplot(gs[1, 0])
+    ax_tr = fig.add_subplot(gs[1, 1])
+    for ax in (ax_vr, ax_tr):
+        ax.set_facecolor(LIGHT_BG)
+
+    v_res = v_pred - v_ref
+    ax_vr.hist(v_res, bins=60, color=ACCENT, alpha=0.75, edgecolor="none")
+    ax_vr.axvline(0, color=GREY, lw=1.2, ls="--")
+    ax_vr.set_xlabel("Residual (V)")
+    ax_vr.set_ylabel("Count")
+    ax_vr.set_title(
+        f"Voltage residuals  (μ={v_res.mean():.4f}, σ={v_res.std():.4f})",
+        fontsize=9,
+    )
+
+    t_res = t_pred - t_ref
+    ax_tr.hist(t_res, bins=60, color=ORANGE, alpha=0.75, edgecolor="none")
+    ax_tr.axvline(0, color=GREY, lw=1.2, ls="--")
+    ax_tr.set_xlabel("Residual (°C)")
+    ax_tr.set_ylabel("Count")
+    ax_tr.set_title(
+        f"Temperature residuals  (μ={t_res.mean():.4f}, σ={t_res.std():.4f})",
+        fontsize=9,
+    )
+
+    # ── time-series overlay panels ─────────────────────────────────────────────
+    seq_len = len(v_pred) // max(1, len(v_pred) // 150)
+    seq_len = max(10, min(seq_len, 150))
+    n_wins  = len(v_pred) // seq_len
+    if n_wins >= n_series_panels:
+        panel_idxs = np.linspace(0, n_wins - 1, n_series_panels, dtype=int)
+        steps = np.arange(seq_len)
+        for pi, wi in enumerate(panel_idxs):
+            row_i = 2 + pi
+            s, e = wi * seq_len, (wi + 1) * seq_len
+            ax_v = fig.add_subplot(gs[row_i, 0])
+            ax_t = fig.add_subplot(gs[row_i, 1])
+            for ax in (ax_v, ax_t):
+                ax.set_facecolor(LIGHT_BG)
+
+            ax_v.plot(steps, v_ref[s:e],  color=GREY,   lw=1.3, label="Actual")
+            ax_v.plot(steps, v_pred[s:e], color=ACCENT, lw=1.5, ls="--", label="Predicted")
+            wv = float(np.sqrt(np.mean((v_pred[s:e] - v_ref[s:e]) ** 2)))
+            ax_v.set_title(f"Window {wi}  |  V RMSE={wv:.4f}", fontsize=8)
+            ax_v.set_ylabel("Voltage (V)")
+            ax_v.legend(fontsize=7, framealpha=0.6)
+
+            ax_t.plot(steps, t_ref[s:e],  color=GREY,   lw=1.3, label="Actual")
+            ax_t.plot(steps, t_pred[s:e], color=ORANGE, lw=1.5, ls="--", label="Predicted")
+            wt = float(np.sqrt(np.mean((t_pred[s:e] - t_ref[s:e]) ** 2)))
+            ax_t.set_title(f"Window {wi}  |  T RMSE={wt:.4f}", fontsize=8)
+            ax_t.set_ylabel("Temp (°C)")
+            ax_t.legend(fontsize=7, framealpha=0.6)
+
+            if pi == n_series_panels - 1:
+                ax_v.set_xlabel("Step in window")
+                ax_t.set_xlabel("Step in window")
+
+    fig.suptitle(
+        f"Finetuned twin — Actual vs Predicted  [{title_tag}]",
+        fontsize=11, fontweight="bold", y=1.01,
+    )
+    _savefig(fig, out_path)
+
+
 # ── EDA helpers ───────────────────────────────────────────────────────────────
 
 def plot_cell_overview(series, out_path: Path, max_points: int = 8000) -> None:

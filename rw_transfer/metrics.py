@@ -52,6 +52,7 @@ def metric_bundle(
         mp = mape(pred[mask], ref[mask]) if np.any(mask) else float("nan")
     return {
         "n": int(pred.size),
+        "mse": round(mse(pred, ref), 8),
         "rmse": round(rmse(pred, ref), 6),
         "mae": round(mae(pred, ref), 6),
         "mape_pct": round(mp, 4),

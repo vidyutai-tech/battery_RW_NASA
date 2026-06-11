@@ -25,6 +25,7 @@ from rw_transfer.training.soc_trainer import SOCTrainer, build_soc_arrays
 from rw_transfer.training.twin_trainer import TwinTrainer
 from rw_transfer.viz.plots import (
     ACCENT,
+    GREEN,
     GREY,
     LIGHT_BG,
     ORANGE,
@@ -46,6 +47,18 @@ def _mape_pct(pred: np.ndarray, ref: np.ndarray, eps: float = 1e-8) -> float:
     ref = np.asarray(ref, dtype=np.float64)
     pred = np.asarray(pred, dtype=np.float64)
     return float(np.mean(np.abs(pred - ref) / (np.abs(ref) + eps)) * 100.0)
+
+
+def _savgol_display(arr: np.ndarray, *, max_window: int = 21) -> np.ndarray:
+    """Light Savitzky–Golay smoothing for plot display (sensor quantization)."""
+    arr = np.asarray(arr, dtype=np.float64)
+    n = arr.size
+    if n < 5:
+        return arr
+    wl = min(max_window, n if n % 2 == 1 else n - 1)
+    wl = max(wl, 5)
+    po = min(3, wl - 2)
+    return savgol_filter(arr, window_length=wl, polyorder=po)
 
 
 @torch.no_grad()
@@ -178,19 +191,21 @@ def plot_digital_twin_validation(
         ax.legend(fontsize=8, loc="lower right", framealpha=0.85)
         ax.set_ylim(2.8, 4.5)
 
-        wl = min(21, len(t_p) if len(t_p) % 2 == 1 else len(t_p) - 1)
-        wl = max(wl, 5)
-        if len(t_p) >= wl:
-            t_smooth = savgol_filter(t_p, window_length=wl, polyorder=min(3, wl - 1))
-        else:
-            t_smooth = t_p
+        t_meas_smooth = _savgol_display(t_a)
+        t_pred_smooth = _savgol_display(t_p)
 
         ax = axes[1, col]
         ax.set_facecolor(LIGHT_BG)
-        ax.plot(t_axis, t_a, color=GREY, linestyle="--", label="Measured", alpha=0.85, lw=1.8)
-        ax.plot(t_axis, t_p, color=ORANGE, linestyle=":", alpha=0.4, linewidth=1.0)
-        ax.plot(t_axis, t_smooth, color=ORANGE, linestyle="-",
-                label="Digital Twin predicted", linewidth=2.0)
+        ax.plot(t_axis, t_a, color=ORANGE, linestyle=":", alpha=0.35, linewidth=0.9, zorder=1)
+        ax.plot(
+            t_axis, t_meas_smooth, color=GREY, linestyle="--",
+            label="Measured", alpha=0.85, lw=1.8, zorder=2,
+        )
+        ax.plot(t_axis, t_p, color=ORANGE, linestyle=":", alpha=0.4, linewidth=1.0, zorder=3)
+        ax.plot(
+            t_axis, t_pred_smooth, color=ORANGE, linestyle="-",
+            label="Digital Twin predicted", linewidth=2.0, zorder=4,
+        )
         ax.set_title(
             f"Temperature MAPE = {samp['mape_t']:.2f}%  (steps {st + 1}–{T})",
             fontsize=9,
@@ -299,13 +314,11 @@ def plot_digital_twin_validation_val_mean(
     axes[0].legend(fontsize=8, loc="lower right")
     axes[0].set_title(f"Voltage MAPE = {stats['pooled_mape_v_pct']:.2f}%", fontsize=9)
 
-    npt = len(t_ax)
-    wl = min(21, npt if npt % 2 == 1 else npt - 1)
-    wl = max(wl, 5)
-    po = min(3, max(1, wl - 2))
-    t_pred_smooth = savgol_filter(stats["t_pred_mean"], window_length=wl, polyorder=po)
+    t_meas_smooth = _savgol_display(stats["t_meas_mean"])
+    t_pred_smooth = _savgol_display(stats["t_pred_mean"])
 
-    axes[1].plot(t_ax, stats["t_meas_mean"], color=GREY, linestyle="--", lw=2.0, label="Measured")
+    axes[1].plot(t_ax, stats["t_meas_mean"], color=ORANGE, linestyle=":", alpha=0.35, lw=0.9)
+    axes[1].plot(t_ax, t_meas_smooth, color=GREY, linestyle="--", lw=2.0, label="Measured")
     axes[1].plot(t_ax, t_pred_smooth, color=ORANGE, lw=2.2, label="Digital Twin predicted")
     axes[1].set_xlabel("Time (min)")
     axes[1].set_ylabel("Temperature (°C)")

@@ -1,0 +1,27 @@
+{
+  "checkpoint": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "profiled_at": "2026-06-11T06:31:36.505686+00:00",
+  "n_params": 2004462,
+  "model_size_mb": 7.657,
+  "infer_ms_per_chunk": 1.069,
+  "seq_len": 150,
+  "train_time_s": null,
+  "best_val_mape_v_pct": 0.40293797850608826,
+  "best_val_mape_t_pct": 0.4235911965370178,
+  "test_voltage": {
+    "n": 1706550,
+    "mse": 0.00080353,
+    "rmse": 0.028347,
+    "mae": 0.015056,
+    "mape_pct": 0.4146,
+    "r2": 0.991107
+  },
+  "test_temperature": {
+    "n": 1706550,
+    "mse": 0.09514725,
+    "rmse": 0.308459,
+    "mae": 0.135266,
+    "mape_pct": 0.4182,
+    "r2": 0.993232
+  }
+}
