@@ -1,0 +1,240 @@
+{
+  "initial_state": {
+    "v0": 3.7109999656677246,
+    "t0": 24.68191909790039,
+    "age": 0.0002113103837473318,
+    "soc": 0.15083155415114913,
+    "prev_i": 0.0
+  },
+  "constraints": {
+    "soc_target": 0.95,
+    "max_duration_min": 105.0
+  },
+  "families_requested": [
+    "constant_cc",
+    "cc_taper",
+    "multi_step_taper",
+    "pulsed"
+  ],
+  "options": [
+    {
+      "option_id": "bo_iter_37",
+      "source": "bo_history",
+      "family": "cc_taper",
+      "family_label": "CC-taper (2-level)",
+      "spec": {
+        "i_charge": 1.2469998495948282,
+        "pulse_on_min": 22.277184366013625,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.75
+      },
+      "charge_levels_a": [
+        0.75,
+        1.247
+      ],
+      "n_charge_steps": 2,
+      "merged_segments": [
+        {
+          "current_a": -1.2469998495948282,
+          "duration_s": 4259
+        },
+        {
+          "current_a": -0.75,
+          "duration_s": 1552
+        }
+      ],
+      "metrics": {
+        "duration_min": 96.85,
+        "end_reason": "SoC target",
+        "soc_end": 0.9504310019307898,
+        "delta_soc_pct_total": 79.95994477796407,
+        "sei_proxy": 5481.402301054829,
+        "sei_per_pct_soc": 68.55185200885022,
+        "peak_voltage": 4.200268268585205,
+        "peak_temperature": 24.613325119018555,
+        "violated": false,
+        "feasible": true,
+        "loss": 70.48885200885022,
+        "reward": -70.48885200885022,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 68.55185200885022,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 96.85,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9369999999999998
+        }
+      },
+      "feasible": true,
+      "loss": 70.48885200885022
+    },
+    {
+      "option_id": "taper_2.0A",
+      "source": "candidate",
+      "family": "multi_step_taper",
+      "family_label": "Multi-step taper",
+      "spec": {
+        "i_charge": 2.0,
+        "pulse_on_min": 30.0,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.75
+      },
+      "charge_levels_a": [
+        0.75,
+        1.25,
+        2.0
+      ],
+      "n_charge_steps": 3,
+      "merged_segments": [
+        {
+          "current_a": -2.0,
+          "duration_s": 1110
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 1229
+        },
+        {
+          "current_a": -0.75,
+          "duration_s": 3621
+        }
+      ],
+      "metrics": {
+        "duration_min": 99.33333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9500639429192316,
+        "delta_soc_pct_total": 79.92323887680824,
+        "sei_proxy": 5749.404200194339,
+        "sei_per_pct_soc": 71.93657665771444,
+        "peak_voltage": 4.200329303741455,
+        "peak_temperature": 24.657472610473633,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.9232433243811,
+        "reward": -73.9232433243811,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.93657665771444,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 99.33333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9866666666666666
+        }
+      },
+      "feasible": true,
+      "loss": 73.9232433243811
+    },
+    {
+      "option_id": "pulsed_2A_10on_5rest",
+      "source": "candidate",
+      "family": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "spec": {
+        "i_charge": 2.0,
+        "pulse_on_min": 10.0,
+        "pulse_rest_min": 5.0,
+        "i_floor": 0.75
+      },
+      "charge_levels_a": [
+        1.25,
+        2.0
+      ],
+      "n_charge_steps": 2,
+      "merged_segments": [
+        {
+          "current_a": -2.0,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -2.0,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -2.0,
+          "duration_s": 332
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 600
+        },
+        {
+          "current_a": 0.0,
+          "duration_s": 300
+        },
+        {
+          "current_a": -1.25,
+          "duration_s": 330
+        }
+      ],
+      "metrics": {
+        "duration_min": 101.03333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9506196514713725,
+        "delta_soc_pct_total": 79.97880973202234,
+        "sei_proxy": 5784.127114590996,
+        "sei_per_pct_soc": 72.32074513200858,
+        "peak_voltage": 4.20021915435791,
+        "peak_temperature": 24.657472610473633,
+        "violated": false,
+        "feasible": true,
+        "loss": 74.34141179867525,
+        "reward": -74.34141179867525,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 72.32074513200858,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 101.03333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 2.0206666666666666
+        }
+      },
+      "feasible": true,
+      "loss": 74.34141179867525
+    }
+  ],
+  "all_feasible_count": 29
+}

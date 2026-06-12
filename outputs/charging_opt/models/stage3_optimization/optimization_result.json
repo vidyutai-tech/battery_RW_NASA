@@ -12,46 +12,50 @@
     "max_duration_min": 105.0
   },
   "best_spec": {
-    "i_charge": 1.2469998495948282,
-    "pulse_on_min": 22.277184366013625,
+    "i_charge": 1.8508653215224815,
+    "pulse_on_min": 24.846671099339833,
     "pulse_rest_min": 0.0,
-    "i_floor": 0.75
+    "i_floor": 0.803340092282075
   },
-  "best_reward": -70.48885200885022,
+  "best_reward": -73.73240373959476,
   "best_metrics": {
-    "duration_min": 96.85,
+    "duration_min": 91.35,
     "end_reason": "SoC target",
-    "soc_end": 0.9504310019307898,
-    "delta_soc_pct_total": 79.95994477796407,
-    "sei_proxy": 5481.402301054829,
-    "sei_per_pct_soc": 68.55185200885022,
-    "peak_voltage": 4.200268268585205,
-    "peak_temperature": 24.613325119018555,
+    "soc_end": 0.9501166516237245,
+    "delta_soc_pct_total": 79.92850974725754,
+    "sei_proxy": 5747.291763680689,
+    "sei_per_pct_soc": 71.90540373959476,
+    "peak_voltage": 4.200241565704346,
+    "peak_temperature": 24.653284072875977,
     "violated": false,
     "feasible": true,
-    "loss": 70.48885200885022,
-    "reward": -70.48885200885022,
+    "loss": 73.73240373959476,
+    "reward": -73.73240373959476,
     "components": {
       "infeasible": false,
       "reason": "ok",
-      "sei_per_pct_soc": 68.55185200885022,
+      "sei_per_pct_soc": 71.90540373959476,
       "soc_shortfall_pct": 0.0,
       "time_excess_min": 0.0,
       "max_duration_min": 105.0,
       "temp_excess_c": 0.0,
-      "duration_min": 96.85,
+      "duration_min": 91.35,
       "temp_penalty": 0.0,
-      "time_penalty": 1.9369999999999998
+      "time_penalty": 1.827
     }
   },
   "merged_profile": [
     {
-      "current_a": -1.2469998495948282,
-      "duration_s": 4259
+      "current_a": -1.8508653215224815,
+      "duration_s": 1544
     },
     {
-      "current_a": -0.75,
-      "duration_s": 1552
+      "current_a": -1.1008653215224815,
+      "duration_s": 1519
+    },
+    {
+      "current_a": -0.803340092282075,
+      "duration_s": 2418
     }
   ],
   "history": [
@@ -345,33 +349,33 @@
     },
     {
       "spec": {
-        "i_charge": 2.251171930698855,
+        "i_charge": 2.2511719334846996,
         "pulse_on_min": 30.0,
         "pulse_rest_min": 0.0,
         "i_floor": 0.75
       },
-      "loss": 215.40665809804187,
+      "loss": 215.40665809797488,
       "feasible": false,
       "metrics": {
         "duration_min": 109.11666666666666,
         "end_reason": "SoC target",
-        "soc_end": 0.9513079012052751,
-        "delta_soc_pct_total": 80.04763470541259,
-        "sei_proxy": 5742.076803886788,
-        "sei_per_pct_soc": 71.73324764708539,
+        "soc_end": 0.9513079026945492,
+        "delta_soc_pct_total": 80.04763485434,
+        "sei_proxy": 5742.07681451623,
+        "sei_per_pct_soc": 71.73324764641572,
         "peak_voltage": 4.201125144958496,
         "peak_temperature": 24.66300392150879,
         "violated": false,
         "feasible": false,
-        "loss": 215.40665809804187,
-        "reward": -215.40665809804187,
+        "loss": 215.40665809797488,
+        "reward": -215.40665809797488,
         "components": {
           "infeasible": true,
           "reason": "time_excess",
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 4.11666666666666,
           "max_duration_min": 105.0,
-          "sei_per_pct_soc": 71.73324764708539,
+          "sei_per_pct_soc": 71.73324764641572,
           "temp_excess_c": 0.0,
           "duration_min": 109.11666666666666
         }
@@ -380,352 +384,383 @@
     },
     {
       "spec": {
-        "i_charge": 3.998142679705515,
-        "pulse_on_min": 27.37533744127912,
+        "i_charge": 3.9805467806338988,
+        "pulse_on_min": 29.539867055911653,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.8686821034161367
+        "i_floor": 0.9323912197541007
       },
-      "loss": 220.33814782160886,
+      "loss": 75.13487407458517,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 92.46666666666667,
+        "end_reason": "SoC target",
+        "soc_end": 0.9500181653262503,
+        "delta_soc_pct_total": 79.91866111751011,
+        "sei_proxy": 5856.882295313586,
+        "sei_per_pct_soc": 73.28554074125184,
+        "peak_voltage": 4.200909614562988,
+        "peak_temperature": 25.214401245117188,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.13487407458517,
+        "reward": -75.13487407458517,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.28554074125184,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 92.46666666666667,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8493333333333335
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.9071782031085347,
+        "pulse_on_min": 23.77486393508712,
+        "pulse_rest_min": 5.1441795399625,
+        "i_floor": 0.8082292355190348
+      },
+      "loss": 73.94990494601858,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 98.21666666666667,
+        "end_reason": "SoC target",
+        "soc_end": 0.9517210569858077,
+        "delta_soc_pct_total": 80.08895028346585,
+        "sei_proxy": 5765.248866015219,
+        "sei_per_pct_soc": 71.98557161268525,
+        "peak_voltage": 4.200342655181885,
+        "peak_temperature": 24.65572738647461,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.94990494601858,
+        "reward": -73.94990494601858,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.98557161268525,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 98.21666666666667,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9643333333333335
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.6615195712159423,
+        "pulse_on_min": 23.36256721557077,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8271723319121576
+      },
+      "loss": 231.9864804038986,
       "feasible": false,
       "metrics": {
-        "duration_min": 91.08333333333333,
+        "duration_min": 93.21666666666667,
         "end_reason": "time budget",
-        "soc_end": 0.9240125571826023,
-        "delta_soc_pct_total": 77.31810030314531,
-        "sei_proxy": 5678.57098062448,
-        "sei_per_pct_soc": 73.44426412910038,
-        "peak_voltage": 4.200970649719238,
-        "peak_temperature": 25.216903686523438,
+        "soc_end": 0.9007078545237963,
+        "delta_soc_pct_total": 74.98763003726472,
+        "sei_proxy": 5504.39774365473,
+        "sei_per_pct_soc": 73.40407665796809,
+        "peak_voltage": 4.20234489440918,
+        "peak_temperature": 25.29206657409668,
         "violated": false,
         "feasible": false,
-        "loss": 220.33814782160886,
-        "reward": -220.33814782160886,
+        "loss": 231.9864804038986,
+        "reward": -231.9864804038986,
         "components": {
           "infeasible": true,
           "reason": "soc_shortfall",
-          "soc_shortfall_pct": 2.5987442817397692,
+          "soc_shortfall_pct": 4.9292145476203615,
           "time_excess_min": 0.0,
-          "sei_per_pct_soc": 73.44426412910038,
+          "sei_per_pct_soc": 73.40407665796809,
           "temp_excess_c": 0.0,
-          "duration_min": 91.08333333333333
+          "duration_min": 93.21666666666667
         }
       },
       "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 3.816990985795553,
-        "pulse_on_min": 29.991101392142433,
+        "i_charge": 3.4259312618832785,
+        "pulse_on_min": 18.868964358957484,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.7864996274345668
+        "i_floor": 0.8819586925583515
       },
-      "loss": 228.30347515634907,
+      "loss": 75.37903627578442,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 92.03333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9518959964454298,
+        "delta_soc_pct_total": 80.10644422942806,
+        "sei_proxy": 5890.897303815858,
+        "sei_per_pct_soc": 73.53836960911775,
+        "peak_voltage": 4.200741291046143,
+        "peak_temperature": 25.23958396911621,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.37903627578442,
+        "reward": -75.37903627578442,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.53836960911775,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 92.03333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8406666666666667
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 2.591741489701211,
+        "pulse_on_min": 16.821164945445304,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8174480303742039
+      },
+      "loss": 211.79590998346356,
       "feasible": false,
       "metrics": {
-        "duration_min": 100.55,
+        "duration_min": 93.95,
         "end_reason": "time budget",
-        "soc_end": 0.9079629052280828,
-        "delta_soc_pct_total": 75.71313510769336,
-        "sei_proxy": 5515.647205293599,
-        "sei_per_pct_soc": 72.84927770390455,
-        "peak_voltage": 4.200573444366455,
-        "peak_temperature": 25.24211311340332,
+        "soc_end": 0.9410159052178395,
+        "delta_soc_pct_total": 79.01843510666905,
+        "sei_proxy": 5771.3979228427415,
+        "sei_per_pct_soc": 73.03862592383386,
+        "peak_voltage": 4.2028889656066895,
+        "peak_temperature": 24.667917251586914,
         "violated": false,
         "feasible": false,
-        "loss": 228.30347515634907,
-        "reward": -228.30347515634907,
+        "loss": 211.79590998346356,
+        "reward": -211.79590998346356,
         "components": {
           "infeasible": true,
           "reason": "soc_shortfall",
-          "soc_shortfall_pct": 4.2037094771917225,
+          "soc_shortfall_pct": 0.8984094782160383,
           "time_excess_min": 0.0,
-          "sei_per_pct_soc": 72.84927770390455,
+          "sei_per_pct_soc": 73.03862592383386,
           "temp_excess_c": 0.0,
-          "duration_min": 100.55
+          "duration_min": 93.95
         }
       },
       "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 1.9797563100998534,
-        "pulse_on_min": 30.0,
+        "i_charge": 3.427955803601562,
+        "pulse_on_min": 29.023864707171963,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_floor": 0.9407620120502953
       },
-      "loss": 73.91421868090472,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 98.5,
-        "end_reason": "SoC target",
-        "soc_end": 0.950444930892773,
-        "delta_soc_pct_total": 79.9613376741624,
-        "sei_proxy": 5752.755963647605,
-        "sei_per_pct_soc": 71.94421868090473,
-        "peak_voltage": 4.200308799743652,
-        "peak_temperature": 24.656803131103516,
-        "violated": false,
-        "feasible": true,
-        "loss": 73.91421868090472,
-        "reward": -73.91421868090472,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 71.94421868090473,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 98.5,
-          "temp_penalty": 0.0,
-          "time_penalty": 1.97
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 2.5819334954784767,
-        "pulse_on_min": 30.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
-      },
-      "loss": 74.87410632137237,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 99.71666666666667,
-        "end_reason": "SoC target",
-        "soc_end": 0.9500839045387479,
-        "delta_soc_pct_total": 79.92523503875988,
-        "sei_proxy": 5824.932985640483,
-        "sei_per_pct_soc": 72.87977298803904,
-        "peak_voltage": 4.201254844665527,
-        "peak_temperature": 24.661401748657227,
-        "violated": false,
-        "feasible": true,
-        "loss": 74.87410632137237,
-        "reward": -74.87410632137237,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 72.87977298803904,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 99.71666666666667,
-          "temp_penalty": 0.0,
-          "time_penalty": 1.9943333333333335
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 3.631266375512249,
-        "pulse_on_min": 30.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
-      },
-      "loss": 213.02609318751425,
+      "loss": 288.75019009055086,
       "feasible": false,
       "metrics": {
-        "duration_min": 107.86666666666666,
-        "end_reason": "SoC target",
-        "soc_end": 0.9504514181830661,
-        "delta_soc_pct_total": 79.9619864031917,
-        "sei_proxy": 5831.435643017586,
-        "sei_per_pct_soc": 72.92759854180939,
-        "peak_voltage": 4.201787948608398,
-        "peak_temperature": 25.26414680480957,
+        "duration_min": 65.15,
+        "end_reason": "time budget",
+        "soc_end": 0.7875790824184954,
+        "delta_soc_pct_total": 63.674752826734625,
+        "sei_proxy": 4800.9052689467035,
+        "sei_per_pct_soc": 75.39731299798599,
+        "peak_voltage": 4.201006889343262,
+        "peak_temperature": 25.241901397705078,
         "violated": false,
         "feasible": false,
-        "loss": 213.02609318751425,
-        "reward": -213.02609318751425,
+        "loss": 288.75019009055086,
+        "reward": -288.75019009055086,
         "components": {
           "infeasible": true,
-          "reason": "time_excess",
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 2.86666666666666,
-          "max_duration_min": 105.0,
-          "sei_per_pct_soc": 72.92759854180939,
+          "reason": "soc_shortfall",
+          "soc_shortfall_pct": 16.24209175815046,
+          "time_excess_min": 0.0,
+          "sei_per_pct_soc": 75.39731299798599,
           "temp_excess_c": 0.0,
-          "duration_min": 107.86666666666666
+          "duration_min": 65.15
         }
       },
-      "end_reason": "SoC target"
+      "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 3.430085557588083,
+        "i_charge": 3.5240528212922264,
         "pulse_on_min": 30.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 1.2693538069645607
+        "pulse_rest_min": 6.850944052355588,
+        "i_floor": 1.0084014869634916
       },
-      "loss": 403.83214180036254,
+      "loss": 364.9153521828075,
       "feasible": false,
       "metrics": {
-        "duration_min": 32.15,
+        "duration_min": 43.38333333333333,
         "end_reason": "V ceiling @ min current",
-        "soc_end": 0.5580389218371302,
-        "delta_soc_pct_total": 40.72073676859811,
-        "sei_proxy": 3197.230475290634,
-        "sei_per_pct_soc": 78.51602718927683,
-        "peak_voltage": 4.2012858390808105,
-        "peak_temperature": 25.244766235351562,
+        "soc_end": 0.6355964760253101,
+        "delta_soc_pct_total": 48.4764921874161,
+        "sei_proxy": 3739.2779484727025,
+        "sei_per_pct_soc": 77.13590195462561,
+        "peak_voltage": 4.201060771942139,
+        "peak_temperature": 25.257749557495117,
         "violated": false,
         "feasible": false,
-        "loss": 403.83214180036254,
-        "reward": -403.83214180036254,
+        "loss": 364.9153521828075,
+        "reward": -364.9153521828075,
         "components": {
           "infeasible": true,
           "reason": "soc_shortfall",
-          "soc_shortfall_pct": 39.196107816286975,
+          "soc_shortfall_pct": 31.440352397468985,
           "time_excess_min": 0.0,
-          "sei_per_pct_soc": 78.51602718927683,
+          "sei_per_pct_soc": 77.13590195462561,
           "temp_excess_c": 0.0,
-          "duration_min": 32.15
+          "duration_min": 43.38333333333333
         }
       },
       "end_reason": "V ceiling @ min current"
     },
     {
       "spec": {
-        "i_charge": 2.5434679710153194,
-        "pulse_on_min": 29.790552885176012,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.7930113148647739
+        "i_charge": 1.9457310458474182,
+        "pulse_on_min": 27.107474386005787,
+        "pulse_rest_min": 7.679795453943448,
+        "i_floor": 0.77705903486812
       },
-      "loss": 74.83759799177912,
+      "loss": 74.0187804503155,
       "feasible": true,
       "metrics": {
-        "duration_min": 96.21666666666667,
-        "end_reason": "time budget",
-        "soc_end": 0.94933972789935,
-        "delta_soc_pct_total": 79.85081737482008,
-        "sei_proxy": 5822.183780443477,
-        "sei_per_pct_soc": 72.91326465844578,
-        "peak_voltage": 4.200315475463867,
-        "peak_temperature": 24.662029266357422,
+        "duration_min": 103.78333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9521779547996123,
+        "delta_soc_pct_total": 80.13464006484632,
+        "sei_proxy": 5765.135528196984,
+        "sei_per_pct_soc": 71.94311378364884,
+        "peak_voltage": 4.200355052947998,
+        "peak_temperature": 24.656288146972656,
         "violated": false,
         "feasible": true,
-        "loss": 74.83759799177912,
-        "reward": -74.83759799177912,
+        "loss": 74.0187804503155,
+        "reward": -74.0187804503155,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 72.91326465844578,
+          "sei_per_pct_soc": 71.94311378364884,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 96.21666666666667,
+          "duration_min": 103.78333333333333,
           "temp_penalty": 0.0,
-          "time_penalty": 1.9243333333333335
+          "time_penalty": 2.0756666666666668
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 4.0,
+        "pulse_on_min": 30.0,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.84340099412134
+      },
+      "loss": 215.10158312846906,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 94.0,
+        "end_reason": "time budget",
+        "soc_end": 0.9344632568340675,
+        "delta_soc_pct_total": 78.36317026829184,
+        "sei_proxy": 5746.537049536427,
+        "sei_per_pct_soc": 73.33211545502841,
+        "peak_voltage": 4.201455593109131,
+        "peak_temperature": 25.225048065185547,
+        "violated": false,
+        "feasible": false,
+        "loss": 215.10158312846906,
+        "reward": -215.10158312846906,
+        "components": {
+          "infeasible": true,
+          "reason": "soc_shortfall",
+          "soc_shortfall_pct": 1.553674316593245,
+          "time_excess_min": 0.0,
+          "sei_per_pct_soc": 73.33211545502841,
+          "temp_excess_c": 0.0,
+          "duration_min": 94.0
         }
       },
       "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 3.4102283101508304,
-        "pulse_on_min": 30.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_charge": 1.9918741500907178,
+        "pulse_on_min": 26.20269139379259,
+        "pulse_rest_min": 11.353481329253228,
+        "i_floor": 0.8114396848093006
       },
-      "loss": 75.44029498833247,
-      "feasible": true,
+      "loss": 232.8035921193235,
+      "feasible": false,
       "metrics": {
-        "duration_min": 100.95,
+        "duration_min": 117.8,
         "end_reason": "SoC target",
-        "soc_end": 0.9503279311618736,
-        "delta_soc_pct_total": 79.94963770107245,
-        "sei_proxy": 5870.005933860747,
-        "sei_per_pct_soc": 73.42129498833246,
-        "peak_voltage": 4.200506210327148,
-        "peak_temperature": 25.238128662109375,
+        "soc_end": 0.9525233849643386,
+        "delta_soc_pct_total": 80.16918308131895,
+        "sei_proxy": 5775.060954571914,
+        "sei_per_pct_soc": 72.03592119323493,
+        "peak_voltage": 4.200328826904297,
+        "peak_temperature": 24.6569881439209,
         "violated": false,
-        "feasible": true,
-        "loss": 75.44029498833247,
-        "reward": -75.44029498833247,
+        "feasible": false,
+        "loss": 232.8035921193235,
+        "reward": -232.8035921193235,
         "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 73.42129498833246,
+          "infeasible": true,
+          "reason": "time_excess",
           "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
+          "time_excess_min": 12.799999999999997,
           "max_duration_min": 105.0,
+          "sei_per_pct_soc": 72.03592119323493,
           "temp_excess_c": 0.0,
-          "duration_min": 100.95,
-          "temp_penalty": 0.0,
-          "time_penalty": 2.019
+          "duration_min": 117.8
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.9752959561584227,
-        "pulse_on_min": 28.666057997719093,
+        "i_charge": 1.893669188270912,
+        "pulse_on_min": 23.597361262280845,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_floor": 0.8297128714459825
       },
-      "loss": 73.90152383868192,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 98.66666666666667,
-        "end_reason": "SoC target",
-        "soc_end": 0.9514131643225217,
-        "delta_soc_pct_total": 80.05816101713725,
-        "sei_proxy": 5758.438657148521,
-        "sei_per_pct_soc": 71.9281905053486,
-        "peak_voltage": 4.200308322906494,
-        "peak_temperature": 24.656734466552734,
-        "violated": false,
-        "feasible": true,
-        "loss": 73.90152383868192,
-        "reward": -73.90152383868192,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 71.9281905053486,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 98.66666666666667,
-          "temp_penalty": 0.0,
-          "time_penalty": 1.9733333333333334
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.9614307501700978,
-        "pulse_on_min": 5.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8563954849810906
-      },
-      "loss": 73.91905115968729,
+      "loss": 73.84300086392147,
       "feasible": true,
       "metrics": {
         "duration_min": 91.23333333333333,
         "end_reason": "SoC target",
-        "soc_end": 0.9519771508696082,
-        "delta_soc_pct_total": 80.11455967184591,
-        "sei_proxy": 5775.809868471102,
-        "sei_per_pct_soc": 72.09438449302061,
-        "peak_voltage": 4.200318813323975,
-        "peak_temperature": 24.656524658203125,
+        "soc_end": 0.9516975251195657,
+        "delta_soc_pct_total": 80.08659709684166,
+        "sei_proxy": 5767.703314441239,
+        "sei_per_pct_soc": 72.0183341972548,
+        "peak_voltage": 4.2003045082092285,
+        "peak_temperature": 24.65529441833496,
         "violated": false,
         "feasible": true,
-        "loss": 73.91905115968729,
-        "reward": -73.91905115968729,
+        "loss": 73.84300086392147,
+        "reward": -73.84300086392147,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 72.09438449302061,
+          "sei_per_pct_soc": 72.0183341972548,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
@@ -739,756 +774,1089 @@
     },
     {
       "spec": {
-        "i_charge": 1.9067773110326065,
-        "pulse_on_min": 5.0,
+        "i_charge": 1.9269121754135803,
+        "pulse_on_min": 27.501061677218864,
         "pulse_rest_min": 0.0,
-        "i_floor": 1.0466018884466857
+        "i_floor": 0.7676305982429248
       },
-      "loss": 341.11259353408445,
-      "feasible": false,
-      "metrics": {
-        "duration_min": 47.416666666666664,
-        "end_reason": "V ceiling @ min current",
-        "soc_end": 0.6825814907988169,
-        "delta_soc_pct_total": 53.17499366476678,
-        "sei_proxy": 3936.725008866075,
-        "sei_per_pct_soc": 74.03338933492924,
-        "peak_voltage": 4.200797080993652,
-        "peak_temperature": 24.65572166442871,
-        "violated": false,
-        "feasible": false,
-        "loss": 341.11259353408445,
-        "reward": -341.11259353408445,
-        "components": {
-          "infeasible": true,
-          "reason": "soc_shortfall",
-          "soc_shortfall_pct": 26.741850920118303,
-          "time_excess_min": 0.0,
-          "sei_per_pct_soc": 74.03338933492924,
-          "temp_excess_c": 0.0,
-          "duration_min": 47.416666666666664
-        }
-      },
-      "end_reason": "V ceiling @ min current"
-    },
-    {
-      "spec": {
-        "i_charge": 1.9796790485202644,
-        "pulse_on_min": 5.0,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8067744337786783
-      },
-      "loss": 73.91975208925784,
+      "loss": 73.87090987254166,
       "feasible": true,
       "metrics": {
-        "duration_min": 94.63333333333334,
+        "duration_min": 95.68333333333334,
         "end_reason": "SoC target",
-        "soc_end": 0.9516814628434884,
-        "delta_soc_pct_total": 80.08499086923393,
-        "sei_proxy": 5768.288478405746,
-        "sei_per_pct_soc": 72.02708542259117,
-        "peak_voltage": 4.200348377227783,
-        "peak_temperature": 24.656801223754883,
+        "soc_end": 0.95107715582838,
+        "delta_soc_pct_total": 80.0245601677231,
+        "sei_proxy": 5758.3467384320265,
+        "sei_per_pct_soc": 71.95724320587499,
+        "peak_voltage": 4.200368881225586,
+        "peak_temperature": 24.656009674072266,
         "violated": false,
         "feasible": true,
-        "loss": 73.91975208925784,
-        "reward": -73.91975208925784,
+        "loss": 73.87090987254166,
+        "reward": -73.87090987254166,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 72.02708542259117,
+          "sei_per_pct_soc": 71.95724320587499,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 94.63333333333334,
+          "duration_min": 95.68333333333334,
           "temp_penalty": 0.0,
-          "time_penalty": 1.892666666666667
+          "time_penalty": 1.9136666666666668
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 3.442310189655045,
-        "pulse_on_min": 9.211122128807101,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8325658978644906
+        "i_charge": 1.8612366980889927,
+        "pulse_on_min": 24.869354238422083,
+        "pulse_rest_min": 10.039043836100392,
+        "i_floor": 0.8079756389516926
       },
-      "loss": 75.48984543678542,
+      "loss": 74.32091767334433,
       "feasible": true,
       "metrics": {
-        "duration_min": 94.28333333333333,
-        "end_reason": "time budget",
-        "soc_end": 0.9454713796821574,
-        "delta_soc_pct_total": 79.46398255310083,
-        "sei_proxy": 5848.881177624031,
-        "sei_per_pct_soc": 73.60417877011875,
-        "peak_voltage": 4.201377868652344,
-        "peak_temperature": 25.243865966796875,
+        "duration_min": 92.41666666666667,
+        "end_reason": "SoC target",
+        "soc_end": 0.9511025861515299,
+        "delta_soc_pct_total": 80.02710320003807,
+        "sei_proxy": 5799.770986151523,
+        "sei_per_pct_soc": 72.472584340011,
+        "peak_voltage": 4.200295448303223,
+        "peak_temperature": 24.653762817382812,
         "violated": false,
         "feasible": true,
-        "loss": 75.48984543678542,
-        "reward": -75.48984543678542,
+        "loss": 74.32091767334433,
+        "reward": -74.32091767334433,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 73.60417877011875,
+          "sei_per_pct_soc": 72.472584340011,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 94.28333333333333,
+          "duration_min": 92.41666666666667,
           "temp_penalty": 0.0,
-          "time_penalty": 1.8856666666666666
+          "time_penalty": 1.8483333333333334
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.8688822941112015,
+        "pulse_on_min": 20.222764047418288,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8137246774465745
+      },
+      "loss": 73.7890811430831,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 91.33333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9509456262965285,
+        "delta_soc_pct_total": 80.01140721453794,
+        "sei_proxy": 5757.814048813914,
+        "sei_per_pct_soc": 71.96241447641643,
+        "peak_voltage": 4.200249671936035,
+        "peak_temperature": 24.654117584228516,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.7890811430831,
+        "reward": -73.7890811430831,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.96241447641643,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 91.33333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8266666666666667
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.4187518134302533,
+        "pulse_on_min": 14.914202567160247,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8470583247713022
+      },
+      "loss": 75.45047949290239,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 93.98333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9505503345543179,
+        "delta_soc_pct_total": 79.97187804031688,
+        "sei_proxy": 5883.596070666705,
+        "sei_per_pct_soc": 73.57081282623572,
+        "peak_voltage": 4.200298309326172,
+        "peak_temperature": 25.236507415771484,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.45047949290239,
+        "reward": -75.45047949290239,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.57081282623572,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 93.98333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8796666666666668
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.9788062172285414,
+        "pulse_on_min": 20.633166246188317,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.9727831697010199
+      },
+      "loss": 252.07327833592922,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 78.35,
+        "end_reason": "time budget",
+        "soc_end": 0.8606859002476956,
+        "delta_soc_pct_total": 70.98543460965465,
+        "sei_proxy": 5264.442003817621,
+        "sei_per_pct_soc": 74.1622845977703,
+        "peak_voltage": 4.2007670402526855,
+        "peak_temperature": 25.213199615478516,
+        "violated": false,
+        "feasible": false,
+        "loss": 252.07327833592922,
+        "reward": -252.07327833592922,
+        "components": {
+          "infeasible": true,
+          "reason": "soc_shortfall",
+          "soc_shortfall_pct": 8.931409975230437,
+          "time_excess_min": 0.0,
+          "sei_per_pct_soc": 74.1622845977703,
+          "temp_excess_c": 0.0,
+          "duration_min": 78.35
         }
       },
       "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 2.6126541174818776,
-        "pulse_on_min": 10.622734526444093,
-        "pulse_rest_min": 0.0,
-        "i_floor": 1.0170638136140129
+        "i_charge": 3.971686718711183,
+        "pulse_on_min": 19.553663827092908,
+        "pulse_rest_min": 14.612012641157841,
+        "i_floor": 0.9128007307804578
       },
-      "loss": 356.6565370337604,
+      "loss": 270.09190097242475,
       "feasible": false,
       "metrics": {
-        "duration_min": 45.516666666666666,
-        "end_reason": "V ceiling @ min current",
-        "soc_end": 0.6518968027709497,
-        "delta_soc_pct_total": 50.10652486198006,
-        "sei_proxy": 3810.57035977241,
-        "sei_per_pct_soc": 76.04938419235302,
-        "peak_voltage": 4.20078182220459,
-        "peak_temperature": 24.679956436157227,
-        "violated": false,
-        "feasible": false,
-        "loss": 356.6565370337604,
-        "reward": -356.6565370337604,
-        "components": {
-          "infeasible": true,
-          "reason": "soc_shortfall",
-          "soc_shortfall_pct": 29.81031972290502,
-          "time_excess_min": 0.0,
-          "sei_per_pct_soc": 76.04938419235302,
-          "temp_excess_c": 0.0,
-          "duration_min": 45.516666666666666
-        }
-      },
-      "end_reason": "V ceiling @ min current"
-    },
-    {
-      "spec": {
-        "i_charge": 0.77577185708462,
-        "pulse_on_min": 23.29949430708153,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
-      },
-      "loss": 275.54482450087085,
-      "feasible": false,
-      "metrics": {
-        "duration_min": 139.5,
+        "duration_min": 136.4,
         "end_reason": "SoC target",
-        "soc_end": 0.9526832373667141,
-        "delta_soc_pct_total": 80.1851683215565,
-        "sei_proxy": 5247.978542373776,
-        "sei_per_pct_soc": 65.44824500870868,
-        "peak_voltage": 3.93217134475708,
-        "peak_temperature": 24.60309600830078,
+        "soc_end": 0.9516051036991087,
+        "delta_soc_pct_total": 80.07735495479595,
+        "sei_proxy": 5839.161424640777,
+        "sei_per_pct_soc": 72.9190097242474,
+        "peak_voltage": 4.200883388519287,
+        "peak_temperature": 25.22364044189453,
         "violated": false,
         "feasible": false,
-        "loss": 275.54482450087085,
-        "reward": -275.54482450087085,
+        "loss": 270.09190097242475,
+        "reward": -270.09190097242475,
         "components": {
           "infeasible": true,
           "reason": "time_excess",
           "soc_shortfall_pct": 0.0,
-          "time_excess_min": 34.5,
+          "time_excess_min": 31.400000000000006,
           "max_duration_min": 105.0,
-          "sei_per_pct_soc": 65.44824500870868,
+          "sei_per_pct_soc": 72.9190097242474,
           "temp_excess_c": 0.0,
-          "duration_min": 139.5
+          "duration_min": 136.4
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.8499229536795123,
-        "pulse_on_min": 9.315169269445969,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8241747821875444
+        "i_charge": 3.4199859996520985,
+        "pulse_on_min": 19.69237599927994,
+        "pulse_rest_min": 8.428716762197245,
+        "i_floor": 0.8363071916344766
       },
-      "loss": 73.77723124112224,
+      "loss": 75.95876673753367,
       "feasible": true,
       "metrics": {
-        "duration_min": 90.45,
+        "duration_min": 104.45,
         "end_reason": "SoC target",
-        "soc_end": 0.9508995044332501,
-        "delta_soc_pct_total": 80.00679502821009,
-        "sei_proxy": 5757.947525451294,
-        "sei_per_pct_soc": 71.96823124112224,
-        "peak_voltage": 4.200290203094482,
-        "peak_temperature": 24.653242111206055,
+        "soc_end": 0.9511103643947838,
+        "delta_soc_pct_total": 80.02788102436347,
+        "sei_proxy": 5911.640903768826,
+        "sei_per_pct_soc": 73.86976673753367,
+        "peak_voltage": 4.200565338134766,
+        "peak_temperature": 25.23782730102539,
         "violated": false,
         "feasible": true,
-        "loss": 73.77723124112224,
-        "reward": -73.77723124112224,
+        "loss": 75.95876673753367,
+        "reward": -75.95876673753367,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 71.96823124112224,
+          "sei_per_pct_soc": 73.86976673753367,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 90.45,
+          "duration_min": 104.45,
           "temp_penalty": 0.0,
-          "time_penalty": 1.8090000000000002
+          "time_penalty": 2.089
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 2.5028512917967416,
-        "pulse_on_min": 5.6570881633162085,
+        "i_charge": 3.4497780747336253,
+        "pulse_on_min": 25.535416537807198,
         "pulse_rest_min": 0.0,
-        "i_floor": 1.7528512917967416
+        "i_floor": 0.7615567548490948
       },
-      "loss": 460.8213002137526,
-      "feasible": false,
+      "loss": 75.42912695583159,
+      "feasible": true,
       "metrics": {
-        "duration_min": 19.233333333333334,
-        "end_reason": "V ceiling @ min current",
-        "soc_end": 0.4439728032890673,
-        "delta_soc_pct_total": 29.314124913791815,
-        "sei_proxy": 2288.759475634469,
-        "sei_per_pct_soc": 78.07701858286225,
-        "peak_voltage": 4.200235366821289,
-        "peak_temperature": 24.662633895874023,
+        "duration_min": 100.81666666666666,
+        "end_reason": "SoC target",
+        "soc_end": 0.9510786122146125,
+        "delta_soc_pct_total": 80.02470580634635,
+        "sei_proxy": 5874.837212062442,
+        "sei_per_pct_soc": 73.41279362249826,
+        "peak_voltage": 4.20171594619751,
+        "peak_temperature": 25.245485305786133,
         "violated": false,
-        "feasible": false,
-        "loss": 460.8213002137526,
-        "reward": -460.8213002137526,
+        "feasible": true,
+        "loss": 75.42912695583159,
+        "reward": -75.42912695583159,
         "components": {
-          "infeasible": true,
-          "reason": "soc_shortfall",
-          "soc_shortfall_pct": 50.60271967109327,
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.41279362249826,
+          "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
-          "sei_per_pct_soc": 78.07701858286225,
+          "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 19.233333333333334
+          "duration_min": 100.81666666666666,
+          "temp_penalty": 0.0,
+          "time_penalty": 2.0163333333333333
         }
       },
-      "end_reason": "V ceiling @ min current"
+      "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 4.0,
-        "pulse_on_min": 28.946999353837544,
+        "i_charge": 3.3659650668985517,
+        "pulse_on_min": 17.11039789740185,
         "pulse_rest_min": 0.0,
-        "i_floor": 2.25
+        "i_floor": 0.8672833528062576
       },
-      "loss": 552.3944643284452,
-      "feasible": false,
+      "loss": 75.53397397024078,
+      "feasible": true,
       "metrics": {
-        "duration_min": 4.866666666666666,
-        "end_reason": "V ceiling @ min current",
-        "soc_end": 0.26141755602720257,
-        "delta_soc_pct_total": 11.058600187605345,
-        "sei_proxy": 896.1051728396735,
-        "sei_per_pct_soc": 81.03242342046532,
-        "peak_voltage": 4.201455593109131,
-        "peak_temperature": 25.225048065185547,
+        "duration_min": 91.7,
+        "end_reason": "time budget",
+        "soc_end": 0.9457568379856669,
+        "delta_soc_pct_total": 79.49252838345177,
+        "sei_proxy": 5858.597272689021,
+        "sei_per_pct_soc": 73.69997397024078,
+        "peak_voltage": 4.200465679168701,
+        "peak_temperature": 25.263004302978516,
         "violated": false,
-        "feasible": false,
-        "loss": 552.3944643284452,
-        "reward": -552.3944643284452,
+        "feasible": true,
+        "loss": 75.53397397024078,
+        "reward": -75.53397397024078,
         "components": {
-          "infeasible": true,
-          "reason": "soc_shortfall",
-          "soc_shortfall_pct": 68.85824439727973,
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.69997397024078,
+          "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
-          "sei_per_pct_soc": 81.03242342046532,
+          "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 4.866666666666666
+          "duration_min": 91.7,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.834
         }
       },
-      "end_reason": "V ceiling @ min current"
+      "end_reason": "time budget"
     },
     {
       "spec": {
-        "i_charge": 0.75,
-        "pulse_on_min": 10.277349109066993,
-        "pulse_rest_min": 0.0,
+        "i_charge": 1.9601685964252138,
+        "pulse_on_min": 24.80027411930703,
+        "pulse_rest_min": 10.923592894123633,
         "i_floor": 0.75
       },
-      "loss": 284.5330382118934,
+      "loss": 237.32682494972497,
       "feasible": false,
       "metrics": {
-        "duration_min": 144.0,
+        "duration_min": 120.06666666666666,
         "end_reason": "SoC target",
-        "soc_end": 0.9510518692341489,
-        "delta_soc_pct_total": 80.02203150829997,
-        "sei_proxy": 5227.869896370615,
-        "sei_per_pct_soc": 65.33038211893401,
-        "peak_voltage": 3.9204537868499756,
-        "peak_temperature": 24.603729248046875,
+        "soc_end": 0.9514798311804625,
+        "delta_soc_pct_total": 80.06482770293134,
+        "sei_proxy": 5759.456668488782,
+        "sei_per_pct_soc": 71.93491616391647,
+        "peak_voltage": 4.200048446655273,
+        "peak_temperature": 24.656505584716797,
         "violated": false,
         "feasible": false,
-        "loss": 284.5330382118934,
-        "reward": -284.5330382118934,
-        "components": {
-          "infeasible": true,
-          "reason": "time_excess",
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 39.0,
-          "max_duration_min": 105.0,
-          "sei_per_pct_soc": 65.33038211893401,
-          "temp_excess_c": 0.0,
-          "duration_min": 144.0
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.588438153176052,
-        "pulse_on_min": 26.162403976291372,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8384381531760521
-      },
-      "loss": 72.34118701745544,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 98.65,
-        "end_reason": "SoC target",
-        "soc_end": 0.9500288009784118,
-        "delta_soc_pct_total": 79.91972468272627,
-        "sei_proxy": 5623.806132857631,
-        "sei_per_pct_soc": 70.36818701745544,
-        "peak_voltage": 4.2003254890441895,
-        "peak_temperature": 24.64044761657715,
-        "violated": false,
-        "feasible": true,
-        "loss": 72.34118701745544,
-        "reward": -72.34118701745544,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 70.36818701745544,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 98.65,
-          "temp_penalty": 0.0,
-          "time_penalty": 1.973
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.5535861593547147,
-        "pulse_on_min": 6.42661317679025,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8035861593547147
-      },
-      "loss": 72.13288063490073,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 102.0,
-        "end_reason": "SoC target",
-        "soc_end": 0.9513540876563823,
-        "delta_soc_pct_total": 80.05225335052332,
-        "sei_proxy": 5611.093038653062,
-        "sei_per_pct_soc": 70.09288063490072,
-        "peak_voltage": 4.200353145599365,
-        "peak_temperature": 24.638898849487305,
-        "violated": false,
-        "feasible": true,
-        "loss": 72.13288063490073,
-        "reward": -72.13288063490073,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 70.09288063490072,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 102.0,
-          "temp_penalty": 0.0,
-          "time_penalty": 2.04
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.3856643399560684,
-        "pulse_on_min": 11.708260751962314,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
-      },
-      "loss": 71.25812845184448,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 100.51666666666667,
-        "end_reason": "SoC target",
-        "soc_end": 0.9515797292258404,
-        "delta_soc_pct_total": 80.07481750746913,
-        "sei_proxy": 5545.004556909393,
-        "sei_per_pct_soc": 69.24779511851115,
-        "peak_voltage": 4.2003278732299805,
-        "peak_temperature": 24.62776756286621,
-        "violated": false,
-        "feasible": true,
-        "loss": 71.25812845184448,
-        "reward": -71.25812845184448,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 69.24779511851115,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 100.51666666666667,
-          "temp_penalty": 0.0,
-          "time_penalty": 2.0103333333333335
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.416121084929216,
-        "pulse_on_min": 5.921426920917229,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
-      },
-      "loss": 71.42515522970578,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 101.68333333333334,
-        "end_reason": "SoC target",
-        "soc_end": 0.9502527567504271,
-        "delta_soc_pct_total": 79.94212025992779,
-        "sei_proxy": 5547.302723721878,
-        "sei_per_pct_soc": 69.39148856303912,
-        "peak_voltage": 4.200309753417969,
-        "peak_temperature": 24.631776809692383,
-        "violated": false,
-        "feasible": true,
-        "loss": 71.42515522970578,
-        "reward": -71.42515522970578,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 69.39148856303912,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 101.68333333333334,
-          "temp_penalty": 0.0,
-          "time_penalty": 2.033666666666667
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.6429738071793487,
-        "pulse_on_min": 12.781930405426301,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8929738071793487
-      },
-      "loss": 72.59559465596638,
-      "feasible": true,
-      "metrics": {
-        "duration_min": 93.1,
-        "end_reason": "SoC target",
-        "soc_end": 0.9504840199201054,
-        "delta_soc_pct_total": 79.96524657689564,
-        "sei_proxy": 5656.229337934539,
-        "sei_per_pct_soc": 70.73359465596639,
-        "peak_voltage": 4.20013952255249,
-        "peak_temperature": 24.64232063293457,
-        "violated": false,
-        "feasible": true,
-        "loss": 72.59559465596638,
-        "reward": -72.59559465596638,
-        "components": {
-          "infeasible": false,
-          "reason": "ok",
-          "sei_per_pct_soc": 70.73359465596639,
-          "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.0,
-          "max_duration_min": 105.0,
-          "temp_excess_c": 0.0,
-          "duration_min": 93.1,
-          "temp_penalty": 0.0,
-          "time_penalty": 1.8619999999999999
-        }
-      },
-      "end_reason": "SoC target"
-    },
-    {
-      "spec": {
-        "i_charge": 1.874823309334084,
-        "pulse_on_min": 6.855279353146768,
-        "pulse_rest_min": 0.0,
-        "i_floor": 1.124823309334084
-      },
-      "loss": 333.5893284664005,
-      "feasible": false,
-      "metrics": {
-        "duration_min": 49.333333333333336,
-        "end_reason": "V ceiling @ min current",
-        "soc_end": 0.6975841832352552,
-        "delta_soc_pct_total": 54.6752629084106,
-        "sei_proxy": 4035.810837316598,
-        "sei_per_pct_soc": 73.8142008402812,
-        "peak_voltage": 4.200788974761963,
-        "peak_temperature": 24.65439796447754,
-        "violated": false,
-        "feasible": false,
-        "loss": 333.5893284664005,
-        "reward": -333.5893284664005,
-        "components": {
-          "infeasible": true,
-          "reason": "soc_shortfall",
-          "soc_shortfall_pct": 25.241581676474482,
-          "time_excess_min": 0.0,
-          "sei_per_pct_soc": 73.8142008402812,
-          "temp_excess_c": 0.0,
-          "duration_min": 49.333333333333336
-        }
-      },
-      "end_reason": "V ceiling @ min current"
-    },
-    {
-      "spec": {
-        "i_charge": 1.5171974428452593,
-        "pulse_on_min": 23.87238336505997,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.7671974428452593
-      },
-      "loss": 207.21935831443133,
-      "feasible": false,
-      "metrics": {
-        "duration_min": 105.11666666666666,
-        "end_reason": "SoC target",
-        "soc_end": 0.9514796749209999,
-        "delta_soc_pct_total": 80.06481207698508,
-        "sei_proxy": 5593.347772767351,
-        "sei_per_pct_soc": 69.86024981098006,
-        "peak_voltage": 4.200366020202637,
-        "peak_temperature": 24.636783599853516,
-        "violated": false,
-        "feasible": false,
-        "loss": 207.21935831443133,
-        "reward": -207.21935831443133,
+        "loss": 237.32682494972497,
+        "reward": -237.32682494972497,
         "components": {
           "infeasible": true,
           "reason": "time_excess",
           "soc_shortfall_pct": 0.0,
-          "time_excess_min": 0.11666666666666003,
+          "time_excess_min": 15.066666666666663,
           "max_duration_min": 105.0,
-          "sei_per_pct_soc": 69.86024981098006,
+          "sei_per_pct_soc": 71.93491616391647,
           "temp_excess_c": 0.0,
-          "duration_min": 105.11666666666666
+          "duration_min": 120.06666666666666
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.5238302135167363,
-        "pulse_on_min": 5.0,
+        "i_charge": 1.9408909444842148,
+        "pulse_on_min": 29.798604894396405,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.7738302135167363
+        "i_floor": 0.7784579417879487
       },
-      "loss": 72.00108833441989,
+      "loss": 73.88908098602089,
       "feasible": true,
       "metrics": {
-        "duration_min": 104.51666666666667,
+        "duration_min": 95.36666666666666,
         "end_reason": "SoC target",
-        "soc_end": 0.9516309507599651,
-        "delta_soc_pct_total": 80.07993966088159,
-        "sei_proxy": 5598.449042133688,
-        "sei_per_pct_soc": 69.91075500108656,
-        "peak_voltage": 4.2003350257873535,
-        "peak_temperature": 24.63738441467285,
+        "soc_end": 0.9504111844384261,
+        "delta_soc_pct_total": 79.95796302872769,
+        "sei_proxy": 5755.513917556798,
+        "sei_per_pct_soc": 71.98174765268756,
+        "peak_voltage": 4.200353622436523,
+        "peak_temperature": 24.65621566772461,
         "violated": false,
         "feasible": true,
-        "loss": 72.00108833441989,
-        "reward": -72.00108833441989,
+        "loss": 73.88908098602089,
+        "reward": -73.88908098602089,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 69.91075500108656,
+          "sei_per_pct_soc": 71.98174765268756,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 104.51666666666667,
+          "duration_min": 95.36666666666666,
           "temp_penalty": 0.0,
-          "time_penalty": 2.090333333333333
+          "time_penalty": 1.9073333333333333
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.2469998495948282,
-        "pulse_on_min": 22.277184366013625,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_charge": 1.8821243168269008,
+        "pulse_on_min": 28.200601177393533,
+        "pulse_rest_min": 6.727078106670124,
+        "i_floor": 0.7919600429202003
       },
-      "loss": 70.48885200885022,
+      "loss": 73.96033419461372,
       "feasible": true,
       "metrics": {
-        "duration_min": 96.85,
+        "duration_min": 100.21666666666667,
         "end_reason": "SoC target",
-        "soc_end": 0.9504310019307898,
-        "delta_soc_pct_total": 79.95994477796407,
-        "sei_proxy": 5481.402301054829,
-        "sei_per_pct_soc": 68.55185200885022,
-        "peak_voltage": 4.200268268585205,
-        "peak_temperature": 24.613325119018555,
+        "soc_end": 0.9529324593197906,
+        "delta_soc_pct_total": 80.21009051686416,
+        "sei_proxy": 5771.597342314855,
+        "sei_per_pct_soc": 71.95600086128039,
+        "peak_voltage": 4.200334072113037,
+        "peak_temperature": 24.654743194580078,
         "violated": false,
         "feasible": true,
-        "loss": 70.48885200885022,
-        "reward": -70.48885200885022,
+        "loss": 73.96033419461372,
+        "reward": -73.96033419461372,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 68.55185200885022,
+          "sei_per_pct_soc": 71.95600086128039,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 96.85,
+          "duration_min": 100.21666666666667,
           "temp_penalty": 0.0,
-          "time_penalty": 1.9369999999999998
+          "time_penalty": 2.0043333333333333
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.3767923369898682,
-        "pulse_on_min": 7.602783265091615,
+        "i_charge": 1.8508653215224815,
+        "pulse_on_min": 24.846671099339833,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_floor": 0.803340092282075
       },
-      "loss": 71.20626331198616,
+      "loss": 73.73240373959476,
       "feasible": true,
       "metrics": {
-        "duration_min": 99.96666666666667,
+        "duration_min": 91.35,
         "end_reason": "SoC target",
-        "soc_end": 0.9501745735652971,
-        "delta_soc_pct_total": 79.9343019414148,
-        "sei_proxy": 5532.007637351987,
-        "sei_per_pct_soc": 69.20692997865282,
-        "peak_voltage": 4.20034646987915,
-        "peak_temperature": 24.626605987548828,
+        "soc_end": 0.9501166516237245,
+        "delta_soc_pct_total": 79.92850974725754,
+        "sei_proxy": 5747.291763680689,
+        "sei_per_pct_soc": 71.90540373959476,
+        "peak_voltage": 4.200241565704346,
+        "peak_temperature": 24.653284072875977,
         "violated": false,
         "feasible": true,
-        "loss": 71.20626331198616,
-        "reward": -71.20626331198616,
+        "loss": 73.73240373959476,
+        "reward": -73.73240373959476,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 69.20692997865282,
+          "sei_per_pct_soc": 71.90540373959476,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 99.96666666666667,
+          "duration_min": 91.35,
           "temp_penalty": 0.0,
-          "time_penalty": 1.9993333333333334
+          "time_penalty": 1.827
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.3768996011631744,
-        "pulse_on_min": 25.844781588454573,
+        "i_charge": 3.3908054035791104,
+        "pulse_on_min": 19.690845885798183,
         "pulse_rest_min": 0.0,
-        "i_floor": 0.75
+        "i_floor": 0.8165701109239341
       },
-      "loss": 71.20805524993266,
+      "loss": 210.55137229463458,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 94.78333333333333,
+        "end_reason": "time budget",
+        "soc_end": 0.943622196204285,
+        "delta_soc_pct_total": 79.27906420531359,
+        "sei_proxy": 5836.897632958127,
+        "sei_per_pct_soc": 73.62470396777105,
+        "peak_voltage": 4.201175212860107,
+        "peak_temperature": 25.269886016845703,
+        "violated": false,
+        "feasible": false,
+        "loss": 210.55137229463458,
+        "reward": -210.55137229463458,
+        "components": {
+          "infeasible": true,
+          "reason": "soc_shortfall",
+          "soc_shortfall_pct": 0.6377803795714954,
+          "time_excess_min": 0.0,
+          "sei_per_pct_soc": 73.62470396777105,
+          "temp_excess_c": 0.0,
+          "duration_min": 94.78333333333333
+        }
+      },
+      "end_reason": "time budget"
+    },
+    {
+      "spec": {
+        "i_charge": 1.79773597860184,
+        "pulse_on_min": 13.758514928023468,
+        "pulse_rest_min": 6.499350397276506,
+        "i_floor": 0.8186409084215442
+      },
+      "loss": 74.24901312594513,
       "feasible": true,
       "metrics": {
-        "duration_min": 100.05,
+        "duration_min": 100.91666666666667,
         "end_reason": "SoC target",
-        "soc_end": 0.9506019730316757,
-        "delta_soc_pct_total": 79.97704188805265,
-        "sei_proxy": 5534.975556672638,
-        "sei_per_pct_soc": 69.20705524993265,
-        "peak_voltage": 4.2003254890441895,
-        "peak_temperature": 24.626619338989258,
+        "soc_end": 0.9514622567663373,
+        "delta_soc_pct_total": 80.06307026151882,
+        "sei_proxy": 5783.009991273146,
+        "sei_per_pct_soc": 72.2306797926118,
+        "peak_voltage": 4.200314044952393,
+        "peak_temperature": 24.650222778320312,
         "violated": false,
         "feasible": true,
-        "loss": 71.20805524993266,
-        "reward": -71.20805524993266,
+        "loss": 74.24901312594513,
+        "reward": -74.24901312594513,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 69.20705524993265,
+          "sei_per_pct_soc": 72.2306797926118,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 100.05,
+          "duration_min": 100.91666666666667,
           "temp_penalty": 0.0,
-          "time_penalty": 2.001
+          "time_penalty": 2.0183333333333335
         }
       },
       "end_reason": "SoC target"
     },
     {
       "spec": {
-        "i_charge": 1.581596444442349,
-        "pulse_on_min": 29.057772988542514,
-        "pulse_rest_min": 0.0,
-        "i_floor": 0.8315964444423489
+        "i_charge": 3.4473372764304058,
+        "pulse_on_min": 9.653313260244872,
+        "pulse_rest_min": 6.452514915219906,
+        "i_floor": 0.8610377844033408
       },
-      "loss": 72.30288939620412,
+      "loss": 231.47489971369032,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 117.11666666666666,
+        "end_reason": "SoC target",
+        "soc_end": 0.9539748733268971,
+        "delta_soc_pct_total": 80.3143319175748,
+        "sei_proxy": 5816.015658751425,
+        "sei_per_pct_soc": 72.41566380356996,
+        "peak_voltage": 4.201718330383301,
+        "peak_temperature": 25.246902465820312,
+        "violated": false,
+        "feasible": false,
+        "loss": 231.47489971369032,
+        "reward": -231.47489971369032,
+        "components": {
+          "infeasible": true,
+          "reason": "time_excess",
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 12.11666666666666,
+          "max_duration_min": 105.0,
+          "sei_per_pct_soc": 72.41566380356996,
+          "temp_excess_c": 0.0,
+          "duration_min": 117.11666666666666
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.995467316421102,
+        "pulse_on_min": 20.129422020406096,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.9056099995054174
+      },
+      "loss": 75.03947207344439,
       "feasible": true,
       "metrics": {
-        "duration_min": 99.38333333333334,
+        "duration_min": 93.56666666666666,
         "end_reason": "SoC target",
-        "soc_end": 0.9510283563669069,
-        "delta_soc_pct_total": 80.01968022157577,
-        "sei_proxy": 5626.601637526463,
-        "sei_per_pct_soc": 70.31522272953745,
-        "peak_voltage": 4.200352191925049,
-        "peak_temperature": 24.64012908935547,
+        "soc_end": 0.9516981220059318,
+        "delta_soc_pct_total": 80.08665678547827,
+        "sei_proxy": 5859.79161491153,
+        "sei_per_pct_soc": 73.16813874011105,
+        "peak_voltage": 4.200753688812256,
+        "peak_temperature": 25.215030670166016,
         "violated": false,
         "feasible": true,
-        "loss": 72.30288939620412,
-        "reward": -72.30288939620412,
+        "loss": 75.03947207344439,
+        "reward": -75.03947207344439,
         "components": {
           "infeasible": false,
           "reason": "ok",
-          "sei_per_pct_soc": 70.31522272953745,
+          "sei_per_pct_soc": 73.16813874011105,
           "soc_shortfall_pct": 0.0,
           "time_excess_min": 0.0,
           "max_duration_min": 105.0,
           "temp_excess_c": 0.0,
-          "duration_min": 99.38333333333334,
+          "duration_min": 93.56666666666666,
           "temp_penalty": 0.0,
-          "time_penalty": 1.987666666666667
+          "time_penalty": 1.8713333333333333
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.8089166617758499,
+        "pulse_on_min": 22.47097599809643,
+        "pulse_rest_min": 9.07261634554393,
+        "i_floor": 0.8313355981373283
+      },
+      "loss": 74.19759128709545,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 96.48333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.953170175972505,
+        "delta_soc_pct_total": 80.23386218213558,
+        "sei_proxy": 5798.334704184446,
+        "sei_per_pct_soc": 72.26792462042879,
+        "peak_voltage": 4.200067520141602,
+        "peak_temperature": 24.65123748779297,
+        "violated": false,
+        "feasible": true,
+        "loss": 74.19759128709545,
+        "reward": -74.19759128709545,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 72.26792462042879,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 96.48333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9296666666666666
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.383574358043038,
+        "pulse_on_min": 19.053243243277475,
+        "pulse_rest_min": 9.20509365796178,
+        "i_floor": 0.7803708674382387
+      },
+      "loss": 216.13636722851297,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 109.38333333333334,
+        "end_reason": "SoC target",
+        "soc_end": 0.9522542199645566,
+        "delta_soc_pct_total": 80.14226658134075,
+        "sei_proxy": 5906.245070521423,
+        "sei_per_pct_soc": 73.69700561846294,
+        "peak_voltage": 4.200488567352295,
+        "peak_temperature": 25.261863708496094,
+        "violated": false,
+        "feasible": false,
+        "loss": 216.13636722851297,
+        "reward": -216.13636722851297,
+        "components": {
+          "infeasible": true,
+          "reason": "time_excess",
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 4.38333333333334,
+          "max_duration_min": 105.0,
+          "sei_per_pct_soc": 73.69700561846294,
+          "temp_excess_c": 0.0,
+          "duration_min": 109.38333333333334
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.841223463090607,
+        "pulse_on_min": 18.334159193104107,
+        "pulse_rest_min": 9.002028994816307,
+        "i_floor": 0.7622907278615478
+      },
+      "loss": 208.9830825756026,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 105.88333333333334,
+        "end_reason": "SoC target",
+        "soc_end": 0.9536822896251137,
+        "delta_soc_pct_total": 80.28507354739645,
+        "sei_proxy": 5793.704819975227,
+        "sei_per_pct_soc": 72.16415908935927,
+        "peak_voltage": 4.2000322341918945,
+        "peak_temperature": 24.652849197387695,
+        "violated": false,
+        "feasible": false,
+        "loss": 208.9830825756026,
+        "reward": -208.9830825756026,
+        "components": {
+          "infeasible": true,
+          "reason": "time_excess",
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.88333333333334,
+          "max_duration_min": 105.0,
+          "sei_per_pct_soc": 72.16415908935927,
+          "temp_excess_c": 0.0,
+          "duration_min": 105.88333333333334
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.8807091139855605,
+        "pulse_on_min": 28.73821051683845,
+        "pulse_rest_min": 8.302188762110095,
+        "i_floor": 0.8108644041080468
+      },
+      "loss": 74.0000873030304,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 100.7,
+        "end_reason": "SoC target",
+        "soc_end": 0.9529525445723962,
+        "delta_soc_pct_total": 80.2120990421247,
+        "sei_proxy": 5774.155164405711,
+        "sei_per_pct_soc": 71.9860873030304,
+        "peak_voltage": 4.200288772583008,
+        "peak_temperature": 24.654674530029297,
+        "violated": false,
+        "feasible": true,
+        "loss": 74.0000873030304,
+        "reward": -74.0000873030304,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.9860873030304,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 100.7,
+          "temp_penalty": 0.0,
+          "time_penalty": 2.0140000000000002
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.384128385222564,
+        "pulse_on_min": 20.770876467815768,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8667745363746265
+      },
+      "loss": 213.2374749008439,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 90.73333333333333,
+        "end_reason": "time budget",
+        "soc_end": 0.9382719782037321,
+        "delta_soc_pct_total": 78.7440424052583,
+        "sei_proxy": 5806.163621030382,
+        "sei_per_pct_soc": 73.73464002709954,
+        "peak_voltage": 4.200541019439697,
+        "peak_temperature": 25.262475967407227,
+        "violated": false,
+        "feasible": false,
+        "loss": 213.2374749008439,
+        "reward": -213.2374749008439,
+        "components": {
+          "infeasible": true,
+          "reason": "soc_shortfall",
+          "soc_shortfall_pct": 1.1728021796267853,
+          "time_excess_min": 0.0,
+          "sei_per_pct_soc": 73.73464002709954,
+          "temp_excess_c": 0.0,
+          "duration_min": 90.73333333333333
+        }
+      },
+      "end_reason": "time budget"
+    },
+    {
+      "spec": {
+        "i_charge": 3.472239292287855,
+        "pulse_on_min": 5.891919888534245,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8407281627285199
+      },
+      "loss": 75.3919243697708,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 95.51666666666667,
+        "end_reason": "SoC target",
+        "soc_end": 0.9513721475705592,
+        "delta_soc_pct_total": 80.05405934194101,
+        "sei_proxy": 5882.499649371207,
+        "sei_per_pct_soc": 73.48159103643748,
+        "peak_voltage": 4.203094959259033,
+        "peak_temperature": 25.25925636291504,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.3919243697708,
+        "reward": -75.3919243697708,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.48159103643748,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 95.51666666666667,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9103333333333334
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.8529234831450216,
+        "pulse_on_min": 6.967168245520797,
+        "pulse_rest_min": 9.753297172480602,
+        "i_floor": 0.8545960893531117
+      },
+      "loss": 274.1879656178162,
+      "feasible": false,
+      "metrics": {
+        "duration_min": 138.5,
+        "end_reason": "SoC target",
+        "soc_end": 0.9539861864674024,
+        "delta_soc_pct_total": 80.31546323162533,
+        "sei_proxy": 5773.047882879032,
+        "sei_per_pct_soc": 71.8796561781619,
+        "peak_voltage": 4.181762218475342,
+        "peak_temperature": 24.653379440307617,
+        "violated": false,
+        "feasible": false,
+        "loss": 274.1879656178162,
+        "reward": -274.1879656178162,
+        "components": {
+          "infeasible": true,
+          "reason": "time_excess",
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 33.5,
+          "max_duration_min": 105.0,
+          "sei_per_pct_soc": 71.8796561781619,
+          "temp_excess_c": 0.0,
+          "duration_min": 138.5
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.819183240053898,
+        "pulse_on_min": 29.340932545990253,
+        "pulse_rest_min": 9.578138296105266,
+        "i_floor": 0.8325326368288135
+      },
+      "loss": 73.91296899920583,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 99.73333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.951453277835516,
+        "delta_soc_pct_total": 80.06217236843669,
+        "sei_proxy": 5757.935517793094,
+        "sei_per_pct_soc": 71.91830233253917,
+        "peak_voltage": 4.200301170349121,
+        "peak_temperature": 24.65187644958496,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.91296899920583,
+        "reward": -73.91296899920583,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.91830233253917,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 99.73333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9946666666666668
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.992447092160194,
+        "pulse_on_min": 30.0,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.9129386622841476
+      },
+      "loss": 75.06269116089733,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 93.06666666666666,
+        "end_reason": "SoC target",
+        "soc_end": 0.9504945655883852,
+        "delta_soc_pct_total": 79.96630114372361,
+        "sei_proxy": 5853.641824168452,
+        "sei_per_pct_soc": 73.201357827564,
+        "peak_voltage": 4.200508117675781,
+        "peak_temperature": 25.21300506591797,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.06269116089733,
+        "reward": -75.06269116089733,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.201357827564,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 93.06666666666666,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8613333333333333
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 3.462847418129771,
+        "pulse_on_min": 14.413033743804583,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.8652079959746016
+      },
+      "loss": 75.43730549993013,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 93.53333333333333,
+        "end_reason": "SoC target",
+        "soc_end": 0.9518312299648627,
+        "delta_soc_pct_total": 80.09996758137136,
+        "sei_proxy": 5892.685385614859,
+        "sei_per_pct_soc": 73.56663883326347,
+        "peak_voltage": 4.20273494720459,
+        "peak_temperature": 25.254541397094727,
+        "violated": false,
+        "feasible": true,
+        "loss": 75.43730549993013,
+        "reward": -75.43730549993013,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 73.56663883326347,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 93.53333333333333,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8706666666666667
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.9259698919774548,
+        "pulse_on_min": 23.611833576548655,
+        "pulse_rest_min": 7.206910113740503,
+        "i_floor": 0.8361846983991089
+      },
+      "loss": 74.03440603367108,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 98.9,
+        "end_reason": "SoC target",
+        "soc_end": 0.9506297325706837,
+        "delta_soc_pct_total": 79.97981784195346,
+        "sei_proxy": 5763.05822891885,
+        "sei_per_pct_soc": 72.05640603367108,
+        "peak_voltage": 4.200323581695557,
+        "peak_temperature": 24.655996322631836,
+        "violated": false,
+        "feasible": true,
+        "loss": 74.03440603367108,
+        "reward": -74.03440603367108,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 72.05640603367108,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 98.9,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9780000000000002
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.916939806298795,
+        "pulse_on_min": 24.062701396076562,
+        "pulse_rest_min": 0.0,
+        "i_floor": 0.7549445656120981
+      },
+      "loss": 73.850909953848,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 96.35,
+        "end_reason": "SoC target",
+        "soc_end": 0.9515736922532362,
+        "delta_soc_pct_total": 80.0742138102087,
+        "sei_proxy": 5759.250543710623,
+        "sei_per_pct_soc": 71.923909953848,
+        "peak_voltage": 4.2003374099731445,
+        "peak_temperature": 24.655864715576172,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.850909953848,
+        "reward": -73.850909953848,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.923909953848,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 96.35,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.9269999999999998
+        }
+      },
+      "end_reason": "SoC target"
+    },
+    {
+      "spec": {
+        "i_charge": 1.7680909350767056,
+        "pulse_on_min": 27.034649578121805,
+        "pulse_rest_min": 8.094946598363777,
+        "i_floor": 0.8609419175566677
+      },
+      "loss": 74.01095461963311,
+      "feasible": true,
+      "metrics": {
+        "duration_min": 87.95,
+        "end_reason": "SoC target",
+        "soc_end": 0.9512299190929799,
+        "delta_soc_pct_total": 80.03983649418308,
+        "sei_proxy": 5783.034634140569,
+        "sei_per_pct_soc": 72.25195461963311,
+        "peak_voltage": 4.200341701507568,
+        "peak_temperature": 24.647817611694336,
+        "violated": false,
+        "feasible": true,
+        "loss": 74.01095461963311,
+        "reward": -74.01095461963311,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 72.25195461963311,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 87.95,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.7590000000000001
         }
       },
       "end_reason": "SoC target"

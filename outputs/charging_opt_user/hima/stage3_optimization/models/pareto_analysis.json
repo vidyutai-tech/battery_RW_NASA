@@ -1,0 +1,2174 @@
+{
+  "objectives": [
+    "duration_min",
+    "sei_per_pct_soc",
+    "voltage_stress_v2_min",
+    "temperature_penalty_c2_min"
+  ],
+  "n_feasible_total": 112,
+  "n_pareto_global": 37,
+  "pareto_front": [
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.8771054180315008,
+        "pulse_on_min": 1.0038938292050716,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.34789712100862874,
+        "i_floor": 1.5218518870346458
+      },
+      "duration_min": 50.5,
+      "sei_per_pct_soc": 81.48234991524178,
+      "voltage_stress_v2_min": 0.8851827022985655,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 82.56316453142567,
+      "peak_voltage": 4.187604904174805,
+      "peak_temperature": 25.16566276550293,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.5,
+        "pulse_on_min": 2.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.12,
+        "i_floor": 0.75
+      },
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 79.42340180270067,
+      "voltage_stress_v2_min": 0.9691968596680643,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 80.59093755147411,
+      "peak_voltage": 4.183255672454834,
+      "peak_temperature": 24.680341720581055,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.35,
+        "i_floor": 1.4051744676379347
+      },
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 80.44433245099643,
+      "voltage_stress_v2_min": 0.7142732142112778,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 81.59147430813333,
+      "peak_voltage": 4.168708324432373,
+      "peak_temperature": 24.819509506225586,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08789405149649612,
+        "i_floor": 1.5208692101833172
+      },
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 80.44433245099643,
+      "voltage_stress_v2_min": 0.7142732142112778,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 81.59147430813333,
+      "peak_voltage": 4.168708324432373,
+      "peak_temperature": 24.819509506225586,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.933926677665621,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.26983937075051284,
+        "i_floor": 1.6550600186969835
+      },
+      "duration_min": 56.0,
+      "sei_per_pct_soc": 79.9906312399925,
+      "voltage_stress_v2_min": 0.7091781044279363,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 81.16736548834673,
+      "peak_voltage": 4.165783882141113,
+      "peak_temperature": 24.683250427246094,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.0,
+        "pulse_on_min": 3.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.15,
+        "i_floor": 0.75
+      },
+      "duration_min": 64.0,
+      "sei_per_pct_soc": 75.882453759496,
+      "voltage_stress_v2_min": 0.6534546659504448,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 77.21473013277203,
+      "peak_voltage": 4.141819000244141,
+      "peak_temperature": 24.675291061401367,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.223306320976562,
+        "pulse_on_min": 1.0353315260985871,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08622685476118226,
+        "i_floor": 1.4059683253229864
+      },
+      "duration_min": 65.5,
+      "sei_per_pct_soc": 76.18743181545507,
+      "voltage_stress_v2_min": 0.526710485561091,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 77.53956865429996,
+      "peak_voltage": 4.129096984863281,
+      "peak_temperature": 24.68043327331543,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.4029698041951413,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.2921550692725835,
+        "i_floor": 1.7083671242735528
+      },
+      "duration_min": 68.0,
+      "sei_per_pct_soc": 76.3733933324111,
+      "voltage_stress_v2_min": 0.5101846314933255,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 77.77420810293056,
+      "peak_voltage": 4.1309003829956055,
+      "peak_temperature": 24.6812686920166,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.339252986875424,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.35,
+        "i_floor": 0.75
+      },
+      "duration_min": 70.0,
+      "sei_per_pct_soc": 75.97925734426626,
+      "voltage_stress_v2_min": 0.4741581804240051,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 77.41718999870018,
+      "peak_voltage": 4.125089645385742,
+      "peak_temperature": 24.681175231933594,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.287412632474713,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.35,
+        "i_floor": 1.0696713268067854
+      },
+      "duration_min": 71.5,
+      "sei_per_pct_soc": 75.69032999900514,
+      "voltage_stress_v2_min": 0.4408095553122052,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 77.15559476343013,
+      "peak_voltage": 4.120102882385254,
+      "peak_temperature": 24.680944442749023,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.9312479831099258,
+        "pulse_on_min": 1.2898250841973375,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08,
+        "i_floor": 1.7066815197962288
+      },
+      "duration_min": 75.5,
+      "sei_per_pct_soc": 74.11915610286674,
+      "voltage_stress_v2_min": 0.2725728718005371,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 75.65096193261078,
+      "peak_voltage": 4.091441631317139,
+      "peak_temperature": 24.673730850219727,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.8916655057071825,
+        "pulse_on_min": 1.4998745790900145,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.20399720083078415,
+        "i_floor": 1.1671357639237774
+      },
+      "duration_min": 77.0,
+      "sei_per_pct_soc": 73.83910910140557,
+      "voltage_stress_v2_min": 0.2394324790601748,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 75.39826369973039,
+      "peak_voltage": 4.086255073547363,
+      "peak_temperature": 24.672935485839844,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.1820338177836067,
+        "pulse_on_min": 5.4750841682957905,
+        "pulse_rest_min": 0.7525055074826432,
+        "rest_fraction": 0.13744181538616837,
+        "i_floor": 1.1845871221283149
+      },
+      "duration_min": 79.0,
+      "sei_per_pct_soc": 73.40220130288124,
+      "voltage_stress_v2_min": 0.49160289500033516,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 75.02152953448126,
+      "peak_voltage": 4.200009346008301,
+      "peak_temperature": 24.680082321166992,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.7997219434305112,
+        "pulse_on_min": 1.2333283160680772,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.34291399008719403,
+        "i_floor": 1.0409641755378805
+      },
+      "duration_min": 81.0,
+      "sei_per_pct_soc": 73.1115411476917,
+      "voltage_stress_v2_min": 0.15582175650578545,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 74.74400688821217,
+      "peak_voltage": 4.069070339202881,
+      "peak_temperature": 24.668203353881836,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.512747014733357,
+        "pulse_on_min": 1.9398563138299263,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.15480829770962684,
+        "i_floor": 1.4234347295733063
+      },
+      "duration_min": 90.5,
+      "sei_per_pct_soc": 71.3743397842287,
+      "voltage_stress_v2_min": 0.026771487264587297,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 73.18648150320986,
+      "peak_voltage": 4.032567024230957,
+      "peak_temperature": 24.654178619384766,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.5,
+        "pulse_on_min": 4.0,
+        "pulse_rest_min": 0.8,
+        "rest_fraction": 0.2,
+        "i_floor": 0.75
+      },
+      "duration_min": 91.0,
+      "sei_per_pct_soc": 70.76297343830092,
+      "voltage_stress_v2_min": 0.11143677962130975,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 72.59188838067061,
+      "peak_voltage": 4.06091833114624,
+      "peak_temperature": 24.65358543395996,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.2857336358438816,
+        "pulse_on_min": 4.254442364744265,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.09523112633731708,
+        "i_floor": 1.2357336358438815
+      },
+      "duration_min": 94.0,
+      "sei_per_pct_soc": 68.9237568780661,
+      "voltage_stress_v2_min": 0.0,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.8037568780661,
+      "peak_voltage": 3.996884822845459,
+      "peak_temperature": 24.634977340698242,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.144040975792312,
+        "v_cv": 4.2,
+        "i_cutoff": 0.22783347901325784
+      },
+      "duration_min": 97.16666666666667,
+      "sei_per_pct_soc": 68.78302264513691,
+      "voltage_stress_v2_min": 0.9221465933696019,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.8001277059398,
+      "peak_voltage": 4.200047492980957,
+      "peak_temperature": 24.6231746673584,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.1300708879146888,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 97.3,
+      "sei_per_pct_soc": 68.68706063353434,
+      "voltage_stress_v2_min": 0.8053772902134029,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.69749081675141,
+      "peak_voltage": 4.200004577636719,
+      "peak_temperature": 24.622499465942383,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.1291937611811165,
+        "v_cv": 4.2,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 97.45,
+      "sei_per_pct_soc": 68.68014748163723,
+      "voltage_stress_v2_min": 0.8032455355460267,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.69340712448091,
+      "peak_voltage": 4.200169563293457,
+      "peak_temperature": 24.62245750427246,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.1250452785698795,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 97.5,
+      "sei_per_pct_soc": 68.64871271643491,
+      "voltage_stress_v2_min": 0.7674386797933759,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.66010781081839,
+      "peak_voltage": 4.200024604797363,
+      "peak_temperature": 24.622268676757812,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.116819944644516,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 97.83333333333333,
+      "sei_per_pct_soc": 68.58401166000228,
+      "voltage_stress_v2_min": 0.704360024813487,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.59702712865402,
+      "peak_voltage": 4.2001729011535645,
+      "peak_temperature": 24.621904373168945,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.11591264211373,
+        "v_cv": 4.2,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 97.98333333333333,
+      "sei_per_pct_soc": 68.57686866519033,
+      "voltage_stress_v2_min": 0.7010505966213108,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.5926193795867,
+      "peak_voltage": 4.200356483459473,
+      "peak_temperature": 24.621864318847656,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.1150928908833406,
+        "v_cv": 4.2,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 98.0,
+      "sei_per_pct_soc": 68.57009497383154,
+      "voltage_stress_v2_min": 0.693324996280118,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.58556097353394,
+      "peak_voltage": 4.199440002441406,
+      "peak_temperature": 24.621829986572266,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "reduced_cv_cccv",
+      "family_label": "Reduced-CV CCCV",
+      "params": {
+        "family_id": "reduced_cv_cccv",
+        "i_cc": 1.1129563292077784,
+        "v_cv": 4.2,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 98.5,
+      "sei_per_pct_soc": 68.55392835315622,
+      "voltage_stress_v2_min": 0.6912242415981343,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.57922629248408,
+      "peak_voltage": 4.199002265930176,
+      "peak_temperature": 24.62173843383789,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.1044850908156714,
+        "v_cv": 4.191598891086931,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 99.0,
+      "sei_per_pct_soc": 68.48497794141309,
+      "voltage_stress_v2_min": 0.6251490187206931,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.51498986291075,
+      "peak_voltage": 4.19109582901001,
+      "peak_temperature": 24.621456146240234,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.0982421605412167,
+        "v_cv": 4.186872213469228,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 99.5,
+      "sei_per_pct_soc": 68.4344690443055,
+      "voltage_stress_v2_min": 0.5822835252696602,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.47105172632708,
+      "peak_voltage": 4.185708999633789,
+      "peak_temperature": 24.621337890625,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.0969749498638897,
+        "v_cv": 4.18606309643212,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 100.0,
+      "sei_per_pct_soc": 68.42538718772425,
+      "voltage_stress_v2_min": 0.5871975717947332,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.47236299346784,
+      "peak_voltage": 4.186140537261963,
+      "peak_temperature": 24.621313095092773,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.0965733630811072,
+        "v_cv": 4.181920501393451,
+        "i_cutoff": 0.05
+      },
+      "duration_min": 100.01666666666667,
+      "sei_per_pct_soc": 68.42111608195478,
+      "voltage_stress_v2_min": 0.5830594301380491,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.46809416969916,
+      "peak_voltage": 4.1837239265441895,
+      "peak_temperature": 24.621305465698242,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.0916134224093992,
+        "v_cv": 4.179940475275812,
+        "i_cutoff": 0.5
+      },
+      "duration_min": 100.5,
+      "sei_per_pct_soc": 68.38208121068635,
+      "voltage_stress_v2_min": 0.5527216296910562,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.43629894106164,
+      "peak_voltage": 4.181637287139893,
+      "peak_temperature": 24.6212100982666,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.264099726376633,
+        "pulse_on_min": 6.0,
+        "pulse_rest_min": 0.6846228299425607,
+        "rest_fraction": 0.1141038049904268,
+        "i_floor": 1.2140997263766329
+      },
+      "duration_min": 100.5,
+      "sei_per_pct_soc": 68.60665870715867,
+      "voltage_stress_v2_min": 3.7240128362251806e-05,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.61666168636894,
+      "peak_voltage": 4.005035877227783,
+      "peak_temperature": 24.633153915405273,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.0767085644945338,
+        "i2": 1.0767085644945338,
+        "soc_switch": 0.7023923846740487
+      },
+      "duration_min": 101.5,
+      "sei_per_pct_soc": 68.25909038521317,
+      "voltage_stress_v2_min": 0.44824465366570315,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.32494995750643,
+      "peak_voltage": 4.16718864440918,
+      "peak_temperature": 24.62095832824707,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.07218663717894,
+        "i2": 1.07218663717894,
+        "soc_switch": 0.8
+      },
+      "duration_min": 102.0,
+      "sei_per_pct_soc": 68.22160991534625,
+      "voltage_stress_v2_min": 0.42322834342878274,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.29546818282056,
+      "peak_voltage": 4.163357257843018,
+      "peak_temperature": 24.620893478393555,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.0642305836114432,
+        "i2": 1.0642305836114432,
+        "soc_switch": 0.6127112127822688
+      },
+      "duration_min": 103.0,
+      "sei_per_pct_soc": 68.15507713060993,
+      "voltage_stress_v2_min": 0.3828831705620625,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.24570778425489,
+      "peak_voltage": 4.156710624694824,
+      "peak_temperature": 24.620790481567383,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.0559315501228608,
+        "i2": 1.0559315501228608,
+        "soc_switch": 0.6030820117603581
+      },
+      "duration_min": 103.5,
+      "sei_per_pct_soc": 68.0826332598789,
+      "voltage_stress_v2_min": 0.32965710591160663,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.17900582835182,
+      "peak_voltage": 4.147215366363525,
+      "peak_temperature": 24.62070083618164,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.050902509770959,
+        "i2": 1.050902509770959,
+        "soc_switch": 0.7747171391616634
+      },
+      "duration_min": 104.0,
+      "sei_per_pct_soc": 68.03931342407144,
+      "voltage_stress_v2_min": 0.30333602473965204,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.14358030605061,
+      "peak_voltage": 4.14188289642334,
+      "peak_temperature": 24.62065315246582,
+      "end_reason": "SoC target"
+    },
+    {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.0468592893037965,
+        "i2": 1.0468592893037965,
+        "soc_switch": 0.8
+      },
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0047562260174,
+      "voltage_stress_v2_min": 0.2846629944916837,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.11752926557675,
+      "peak_voltage": 4.13778829574585,
+      "peak_temperature": 24.62061882019043,
+      "end_reason": "SoC target"
+    }
+  ],
+  "tagged_global": {
+    "fastest": {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.8771054180315008,
+        "pulse_on_min": 1.0038938292050716,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.34789712100862874,
+        "i_floor": 1.5218518870346458
+      },
+      "duration_min": 50.5,
+      "sei_per_pct_soc": 81.48234991524178,
+      "voltage_stress_v2_min": 0.8851827022985655,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 82.56316453142567,
+      "peak_voltage": 4.187604904174805,
+      "peak_temperature": 25.16566276550293,
+      "end_reason": "SoC target"
+    },
+    "lifetime": {
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.0468592893037965,
+        "i2": 1.0468592893037965,
+        "soc_switch": 0.8
+      },
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0047562260174,
+      "voltage_stress_v2_min": 0.2846629944916837,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 70.11752926557675,
+      "peak_voltage": 4.13778829574585,
+      "peak_temperature": 24.62061882019043,
+      "end_reason": "SoC target"
+    },
+    "balanced": {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.7997219434305112,
+        "pulse_on_min": 1.2333283160680772,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.34291399008719403,
+        "i_floor": 1.0409641755378805
+      },
+      "duration_min": 81.0,
+      "sei_per_pct_soc": 73.1115411476917,
+      "voltage_stress_v2_min": 0.15582175650578545,
+      "temperature_penalty_c2_min": 0.0,
+      "loss": 74.74400688821217,
+      "peak_voltage": 4.069070339202881,
+      "peak_temperature": 24.668203353881836,
+      "end_reason": "SoC target"
+    }
+  },
+  "per_family": {
+    "cccv": {
+      "family_label": "CCCV",
+      "n_feasible": 16,
+      "n_pareto": 9,
+      "pareto_front": [
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1405774791098338,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.36666666666666,
+          "sei_per_pct_soc": 68.76011951302858,
+          "voltage_stress_v2_min": 0.9006092970701275,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.77950159012752,
+          "peak_voltage": 4.200047492980957,
+          "peak_temperature": 24.623003005981445,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1402687858968896,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 97.38333333333334,
+          "sei_per_pct_soc": 68.75775234817134,
+          "voltage_stress_v2_min": 0.8988269594861095,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.77732517159689,
+          "peak_voltage": 4.200150489807129,
+          "peak_temperature": 24.62298583984375,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1250452785698795,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.5,
+          "sei_per_pct_soc": 68.64871271643491,
+          "voltage_stress_v2_min": 0.7674386797933759,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.66010781081839,
+          "peak_voltage": 4.200024604797363,
+          "peak_temperature": 24.622268676757812,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.123090545125346,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 98.01666666666667,
+          "sei_per_pct_soc": 68.63421151067625,
+          "voltage_stress_v2_min": 0.7691709515883189,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.65607852013666,
+          "peak_voltage": 4.2003092765808105,
+          "peak_temperature": 24.62217903137207,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1044850908156714,
+            "v_cv": 4.191598891086931,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 99.0,
+          "sei_per_pct_soc": 68.48497794141309,
+          "voltage_stress_v2_min": 0.6251490187206931,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.51498986291075,
+          "peak_voltage": 4.19109582901001,
+          "peak_temperature": 24.621456146240234,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.0982421605412167,
+            "v_cv": 4.186872213469228,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 99.5,
+          "sei_per_pct_soc": 68.4344690443055,
+          "voltage_stress_v2_min": 0.5822835252696602,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.47105172632708,
+          "peak_voltage": 4.185708999633789,
+          "peak_temperature": 24.621337890625,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.0969749498638897,
+            "v_cv": 4.18606309643212,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 100.0,
+          "sei_per_pct_soc": 68.42538718772425,
+          "voltage_stress_v2_min": 0.5871975717947332,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.47236299346784,
+          "peak_voltage": 4.186140537261963,
+          "peak_temperature": 24.621313095092773,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.0965733630811072,
+            "v_cv": 4.181920501393451,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 100.01666666666667,
+          "sei_per_pct_soc": 68.42111608195478,
+          "voltage_stress_v2_min": 0.5830594301380491,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.46809416969916,
+          "peak_voltage": 4.1837239265441895,
+          "peak_temperature": 24.621305465698242,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.0916134224093992,
+            "v_cv": 4.179940475275812,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 100.5,
+          "sei_per_pct_soc": 68.38208121068635,
+          "voltage_stress_v2_min": 0.5527216296910562,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.43629894106164,
+          "peak_voltage": 4.181637287139893,
+          "peak_temperature": 24.6212100982666,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1405774791098338,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.36666666666666,
+          "sei_per_pct_soc": 68.76011951302858,
+          "voltage_stress_v2_min": 0.9006092970701275,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.77950159012752,
+          "peak_voltage": 4.200047492980957,
+          "peak_temperature": 24.623003005981445,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.0916134224093992,
+            "v_cv": 4.179940475275812,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 100.5,
+          "sei_per_pct_soc": 68.38208121068635,
+          "voltage_stress_v2_min": 0.5527216296910562,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.43629894106164,
+          "peak_voltage": 4.181637287139893,
+          "peak_temperature": 24.6212100982666,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "cccv",
+          "family_label": "CCCV",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.1044850908156714,
+            "v_cv": 4.191598891086931,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 99.0,
+          "sei_per_pct_soc": 68.48497794141309,
+          "voltage_stress_v2_min": 0.6251490187206931,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.51498986291075,
+          "peak_voltage": 4.19109582901001,
+          "peak_temperature": 24.621456146240234,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "reduced_cv_cccv": {
+      "family_label": "Reduced-CV CCCV",
+      "n_feasible": 11,
+      "n_pareto": 7,
+      "pareto_front": [
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.144040975792312,
+            "v_cv": 4.2,
+            "i_cutoff": 0.22783347901325784
+          },
+          "duration_min": 97.16666666666667,
+          "sei_per_pct_soc": 68.78302264513691,
+          "voltage_stress_v2_min": 0.9221465933696019,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.8001277059398,
+          "peak_voltage": 4.200047492980957,
+          "peak_temperature": 24.6231746673584,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.1300708879146888,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.3,
+          "sei_per_pct_soc": 68.68706063353434,
+          "voltage_stress_v2_min": 0.8053772902134029,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.69749081675141,
+          "peak_voltage": 4.200004577636719,
+          "peak_temperature": 24.622499465942383,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.1291937611811165,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 97.45,
+          "sei_per_pct_soc": 68.68014748163723,
+          "voltage_stress_v2_min": 0.8032455355460267,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.69340712448091,
+          "peak_voltage": 4.200169563293457,
+          "peak_temperature": 24.62245750427246,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.116819944644516,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.83333333333333,
+          "sei_per_pct_soc": 68.58401166000228,
+          "voltage_stress_v2_min": 0.704360024813487,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.59702712865402,
+          "peak_voltage": 4.2001729011535645,
+          "peak_temperature": 24.621904373168945,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.11591264211373,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 97.98333333333333,
+          "sei_per_pct_soc": 68.57686866519033,
+          "voltage_stress_v2_min": 0.7010505966213108,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.5926193795867,
+          "peak_voltage": 4.200356483459473,
+          "peak_temperature": 24.621864318847656,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.1150928908833406,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 98.0,
+          "sei_per_pct_soc": 68.57009497383154,
+          "voltage_stress_v2_min": 0.693324996280118,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.58556097353394,
+          "peak_voltage": 4.199440002441406,
+          "peak_temperature": 24.621829986572266,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.1129563292077784,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 98.5,
+          "sei_per_pct_soc": 68.55392835315622,
+          "voltage_stress_v2_min": 0.6912242415981343,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.57922629248408,
+          "peak_voltage": 4.199002265930176,
+          "peak_temperature": 24.62173843383789,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.144040975792312,
+            "v_cv": 4.2,
+            "i_cutoff": 0.22783347901325784
+          },
+          "duration_min": 97.16666666666667,
+          "sei_per_pct_soc": 68.78302264513691,
+          "voltage_stress_v2_min": 0.9221465933696019,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.8001277059398,
+          "peak_voltage": 4.200047492980957,
+          "peak_temperature": 24.6231746673584,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.1129563292077784,
+            "v_cv": 4.2,
+            "i_cutoff": 0.5
+          },
+          "duration_min": 98.5,
+          "sei_per_pct_soc": 68.55392835315622,
+          "voltage_stress_v2_min": 0.6912242415981343,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.57922629248408,
+          "peak_voltage": 4.199002265930176,
+          "peak_temperature": 24.62173843383789,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "reduced_cv_cccv",
+          "family_label": "Reduced-CV CCCV",
+          "params": {
+            "family_id": "reduced_cv_cccv",
+            "i_cc": 1.116819944644516,
+            "v_cv": 4.2,
+            "i_cutoff": 0.05
+          },
+          "duration_min": 97.83333333333333,
+          "sei_per_pct_soc": 68.58401166000228,
+          "voltage_stress_v2_min": 0.704360024813487,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.59702712865402,
+          "peak_voltage": 4.2001729011535645,
+          "peak_temperature": 24.621904373168945,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "adaptive_two_step": {
+      "family_label": "Adaptive 2-step (SoC)",
+      "n_feasible": 11,
+      "n_pareto": 7,
+      "pareto_front": [
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.2684817989459505,
+            "i2": 0.9943725566597259,
+            "soc_switch": 0.45454698768779206
+          },
+          "duration_min": 101.0,
+          "sei_per_pct_soc": 69.0655049892887,
+          "voltage_stress_v2_min": 0.7169154755163276,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 71.14285822733,
+          "peak_voltage": 4.186446666717529,
+          "peak_temperature": 24.633695602416992,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0767085644945338,
+            "i2": 1.0767085644945338,
+            "soc_switch": 0.7023923846740487
+          },
+          "duration_min": 101.5,
+          "sei_per_pct_soc": 68.25909038521317,
+          "voltage_stress_v2_min": 0.44824465366570315,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.32494995750643,
+          "peak_voltage": 4.16718864440918,
+          "peak_temperature": 24.62095832824707,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.07218663717894,
+            "i2": 1.07218663717894,
+            "soc_switch": 0.8
+          },
+          "duration_min": 102.0,
+          "sei_per_pct_soc": 68.22160991534625,
+          "voltage_stress_v2_min": 0.42322834342878274,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.29546818282056,
+          "peak_voltage": 4.163357257843018,
+          "peak_temperature": 24.620893478393555,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0642305836114432,
+            "i2": 1.0642305836114432,
+            "soc_switch": 0.6127112127822688
+          },
+          "duration_min": 103.0,
+          "sei_per_pct_soc": 68.15507713060993,
+          "voltage_stress_v2_min": 0.3828831705620625,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.24570778425489,
+          "peak_voltage": 4.156710624694824,
+          "peak_temperature": 24.620790481567383,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0559315501228608,
+            "i2": 1.0559315501228608,
+            "soc_switch": 0.6030820117603581
+          },
+          "duration_min": 103.5,
+          "sei_per_pct_soc": 68.0826332598789,
+          "voltage_stress_v2_min": 0.32965710591160663,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.17900582835182,
+          "peak_voltage": 4.147215366363525,
+          "peak_temperature": 24.62070083618164,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.050902509770959,
+            "i2": 1.050902509770959,
+            "soc_switch": 0.7747171391616634
+          },
+          "duration_min": 104.0,
+          "sei_per_pct_soc": 68.03931342407144,
+          "voltage_stress_v2_min": 0.30333602473965204,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.14358030605061,
+          "peak_voltage": 4.14188289642334,
+          "peak_temperature": 24.62065315246582,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0468592893037965,
+            "i2": 1.0468592893037965,
+            "soc_switch": 0.8
+          },
+          "duration_min": 104.5,
+          "sei_per_pct_soc": 68.0047562260174,
+          "voltage_stress_v2_min": 0.2846629944916837,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.11752926557675,
+          "peak_voltage": 4.13778829574585,
+          "peak_temperature": 24.62061882019043,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.2684817989459505,
+            "i2": 0.9943725566597259,
+            "soc_switch": 0.45454698768779206
+          },
+          "duration_min": 101.0,
+          "sei_per_pct_soc": 69.0655049892887,
+          "voltage_stress_v2_min": 0.7169154755163276,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 71.14285822733,
+          "peak_voltage": 4.186446666717529,
+          "peak_temperature": 24.633695602416992,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0468592893037965,
+            "i2": 1.0468592893037965,
+            "soc_switch": 0.8
+          },
+          "duration_min": 104.5,
+          "sei_per_pct_soc": 68.0047562260174,
+          "voltage_stress_v2_min": 0.2846629944916837,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.11752926557675,
+          "peak_voltage": 4.13778829574585,
+          "peak_temperature": 24.62061882019043,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "adaptive_two_step",
+          "family_label": "Adaptive 2-step (SoC)",
+          "params": {
+            "family_id": "adaptive_two_step",
+            "i1": 1.0767085644945338,
+            "i2": 1.0767085644945338,
+            "soc_switch": 0.7023923846740487
+          },
+          "duration_min": 101.5,
+          "sei_per_pct_soc": 68.25909038521317,
+          "voltage_stress_v2_min": 0.44824465366570315,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.32494995750643,
+          "peak_voltage": 4.16718864440918,
+          "peak_temperature": 24.62095832824707,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "adaptive_three_step": {
+      "family_label": "Adaptive 3-step (SoC)",
+      "n_feasible": 3,
+      "n_pareto": 2,
+      "pareto_front": [
+        {
+          "family_id": "adaptive_three_step",
+          "family_label": "Adaptive 3-step (SoC)",
+          "params": {
+            "family_id": "adaptive_three_step",
+            "i1": 2.0,
+            "i2": 1.25,
+            "i3": 0.75,
+            "soc1": 0.3,
+            "soc2": 0.7
+          },
+          "duration_min": 99.13333333333334,
+          "sei_per_pct_soc": 71.3086804752392,
+          "voltage_stress_v2_min": 1.8015967187215627,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 73.4354748794036,
+          "peak_voltage": 4.200315475463867,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "adaptive_three_step",
+          "family_label": "Adaptive 3-step (SoC)",
+          "params": {
+            "family_id": "adaptive_three_step",
+            "i1": 1.1255841421273374,
+            "i2": 0.989940580110152,
+            "i3": 0.989940580110152,
+            "soc1": 0.47009997290166594,
+            "soc2": 0.5700999729016659
+          },
+          "duration_min": 105.0,
+          "sei_per_pct_soc": 68.4134061098632,
+          "voltage_stress_v2_min": 0.4154980012019981,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.54664594995936,
+          "peak_voltage": 4.153270244598389,
+          "peak_temperature": 24.622291564941406,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "adaptive_three_step",
+          "family_label": "Adaptive 3-step (SoC)",
+          "params": {
+            "family_id": "adaptive_three_step",
+            "i1": 2.0,
+            "i2": 1.25,
+            "i3": 0.75,
+            "soc1": 0.3,
+            "soc2": 0.7
+          },
+          "duration_min": 99.13333333333334,
+          "sei_per_pct_soc": 71.3086804752392,
+          "voltage_stress_v2_min": 1.8015967187215627,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 73.4354748794036,
+          "peak_voltage": 4.200315475463867,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "adaptive_three_step",
+          "family_label": "Adaptive 3-step (SoC)",
+          "params": {
+            "family_id": "adaptive_three_step",
+            "i1": 1.1255841421273374,
+            "i2": 0.989940580110152,
+            "i3": 0.989940580110152,
+            "soc1": 0.47009997290166594,
+            "soc2": 0.5700999729016659
+          },
+          "duration_min": 105.0,
+          "sei_per_pct_soc": 68.4134061098632,
+          "voltage_stress_v2_min": 0.4154980012019981,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.54664594995936,
+          "peak_voltage": 4.153270244598389,
+          "peak_temperature": 24.622291564941406,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "adaptive_three_step",
+          "family_label": "Adaptive 3-step (SoC)",
+          "params": {
+            "family_id": "adaptive_three_step",
+            "i1": 1.1255841421273374,
+            "i2": 0.989940580110152,
+            "i3": 0.989940580110152,
+            "soc1": 0.47009997290166594,
+            "soc2": 0.5700999729016659
+          },
+          "duration_min": 105.0,
+          "sei_per_pct_soc": 68.4134061098632,
+          "voltage_stress_v2_min": 0.4154980012019981,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.54664594995936,
+          "peak_voltage": 4.153270244598389,
+          "peak_temperature": 24.622291564941406,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "exponential_taper": {
+      "family_label": "Exponential taper I(SoC)",
+      "n_feasible": 0,
+      "n_pareto": 0,
+      "pareto_front": [],
+      "tagged": {
+        "fastest": null,
+        "lifetime": null,
+        "balanced": null
+      }
+    },
+    "cc_taper": {
+      "family_label": "CC-taper (2-level)",
+      "n_feasible": 17,
+      "n_pareto": 3,
+      "pareto_front": [
+        {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.9379096922290209,
+            "pulse_on_min": 8.440454836206753,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.8593662492445858
+          },
+          "duration_min": 91.86666666666666,
+          "sei_per_pct_soc": 72.83392193500428,
+          "voltage_stress_v2_min": 2.7213622145540626,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88896424550194,
+          "peak_voltage": 4.200315475463867,
+          "peak_temperature": 24.673828125,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.8959881986704903,
+            "pulse_on_min": 10.632953842812269,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.75
+          },
+          "duration_min": 97.66666666666667,
+          "sei_per_pct_soc": 72.67292125287096,
+          "voltage_stress_v2_min": 2.7945905724134605,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.84982183199737,
+          "peak_voltage": 4.2003397941589355,
+          "peak_temperature": 24.67314338684082,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.25,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.75
+          },
+          "duration_min": 98.66666666666667,
+          "sei_per_pct_soc": 69.32953076977903,
+          "voltage_stress_v2_min": 1.4680888117159687,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 71.42031120804964,
+          "peak_voltage": 4.200294494628906,
+          "peak_temperature": 24.631444931030273,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.9379096922290209,
+            "pulse_on_min": 8.440454836206753,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.8593662492445858
+          },
+          "duration_min": 91.86666666666666,
+          "sei_per_pct_soc": 72.83392193500428,
+          "voltage_stress_v2_min": 2.7213622145540626,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88896424550194,
+          "peak_voltage": 4.200315475463867,
+          "peak_temperature": 24.673828125,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.25,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.75
+          },
+          "duration_min": 98.66666666666667,
+          "sei_per_pct_soc": 69.32953076977903,
+          "voltage_stress_v2_min": 1.4680888117159687,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 71.42031120804964,
+          "peak_voltage": 4.200294494628906,
+          "peak_temperature": 24.631444931030273,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "cc_taper",
+          "family_label": "CC-taper (2-level)",
+          "params": {
+            "family_id": "cc_taper",
+            "i_charge": 1.25,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.75
+          },
+          "duration_min": 98.66666666666667,
+          "sei_per_pct_soc": 69.32953076977903,
+          "voltage_stress_v2_min": 1.4680888117159687,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 71.42031120804964,
+          "peak_voltage": 4.200294494628906,
+          "peak_temperature": 24.631444931030273,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "multi_step_taper": {
+      "family_label": "Multi-step taper (voltage)",
+      "n_feasible": 22,
+      "n_pareto": 3,
+      "pareto_front": [
+        {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.905287277661641
+          },
+          "duration_min": 90.55,
+          "sei_per_pct_soc": 72.88001541317443,
+          "voltage_stress_v2_min": 2.7579371261745638,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.9116503832684,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.8921263224729541
+          },
+          "duration_min": 91.18333333333334,
+          "sei_per_pct_soc": 72.83985997872149,
+          "voltage_stress_v2_min": 2.7709804569913863,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88520508194748,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.893404719709936
+          },
+          "duration_min": 91.36666666666666,
+          "sei_per_pct_soc": 72.83383086776645,
+          "voltage_stress_v2_min": 2.7794359268304447,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88351907524621,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.905287277661641
+          },
+          "duration_min": 90.55,
+          "sei_per_pct_soc": 72.88001541317443,
+          "voltage_stress_v2_min": 2.7579371261745638,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.9116503832684,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.893404719709936
+          },
+          "duration_min": 91.36666666666666,
+          "sei_per_pct_soc": 72.83383086776645,
+          "voltage_stress_v2_min": 2.7794359268304447,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88351907524621,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "multi_step_taper",
+          "family_label": "Multi-step taper (voltage)",
+          "params": {
+            "family_id": "multi_step_taper",
+            "i_charge": 2.0,
+            "pulse_on_min": 30.0,
+            "pulse_rest_min": 0.0,
+            "i_floor": 0.8921263224729541
+          },
+          "duration_min": 91.18333333333334,
+          "sei_per_pct_soc": 72.83985997872149,
+          "voltage_stress_v2_min": 2.7709804569913863,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.88520508194748,
+          "peak_voltage": 4.200516223907471,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        }
+      }
+    },
+    "pulsed": {
+      "family_label": "Pulsed charge/rest",
+      "n_feasible": 32,
+      "n_pareto": 18,
+      "pareto_front": [
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.8771054180315008,
+            "pulse_on_min": 1.0038938292050716,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.34789712100862874,
+            "i_floor": 1.5218518870346458
+          },
+          "duration_min": 50.5,
+          "sei_per_pct_soc": 81.48234991524178,
+          "voltage_stress_v2_min": 0.8851827022985655,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 82.56316453142567,
+          "peak_voltage": 4.187604904174805,
+          "peak_temperature": 25.16566276550293,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.5,
+            "pulse_on_min": 2.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.12,
+            "i_floor": 0.75
+          },
+          "duration_min": 54.5,
+          "sei_per_pct_soc": 79.42340180270067,
+          "voltage_stress_v2_min": 0.9691968596680643,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 80.59093755147411,
+          "peak_voltage": 4.183255672454834,
+          "peak_temperature": 24.680341720581055,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.0,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.35,
+            "i_floor": 1.4051744676379347
+          },
+          "duration_min": 54.5,
+          "sei_per_pct_soc": 80.44433245099643,
+          "voltage_stress_v2_min": 0.7142732142112778,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 81.59147430813333,
+          "peak_voltage": 4.168708324432373,
+          "peak_temperature": 24.819509506225586,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.0,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.08789405149649612,
+            "i_floor": 1.5208692101833172
+          },
+          "duration_min": 54.5,
+          "sei_per_pct_soc": 80.44433245099643,
+          "voltage_stress_v2_min": 0.7142732142112778,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 81.59147430813333,
+          "peak_voltage": 4.168708324432373,
+          "peak_temperature": 24.819509506225586,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.933926677665621,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.26983937075051284,
+            "i_floor": 1.6550600186969835
+          },
+          "duration_min": 56.0,
+          "sei_per_pct_soc": 79.9906312399925,
+          "voltage_stress_v2_min": 0.7091781044279363,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 81.16736548834673,
+          "peak_voltage": 4.165783882141113,
+          "peak_temperature": 24.683250427246094,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.0,
+            "pulse_on_min": 3.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.15,
+            "i_floor": 0.75
+          },
+          "duration_min": 64.0,
+          "sei_per_pct_soc": 75.882453759496,
+          "voltage_stress_v2_min": 0.6534546659504448,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 77.21473013277203,
+          "peak_voltage": 4.141819000244141,
+          "peak_temperature": 24.675291061401367,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.223306320976562,
+            "pulse_on_min": 1.0353315260985871,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.08622685476118226,
+            "i_floor": 1.4059683253229864
+          },
+          "duration_min": 65.5,
+          "sei_per_pct_soc": 76.18743181545507,
+          "voltage_stress_v2_min": 0.526710485561091,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 77.53956865429996,
+          "peak_voltage": 4.129096984863281,
+          "peak_temperature": 24.68043327331543,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.4029698041951413,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.2921550692725835,
+            "i_floor": 1.7083671242735528
+          },
+          "duration_min": 68.0,
+          "sei_per_pct_soc": 76.3733933324111,
+          "voltage_stress_v2_min": 0.5101846314933255,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 77.77420810293056,
+          "peak_voltage": 4.1309003829956055,
+          "peak_temperature": 24.6812686920166,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.339252986875424,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.35,
+            "i_floor": 0.75
+          },
+          "duration_min": 70.0,
+          "sei_per_pct_soc": 75.97925734426626,
+          "voltage_stress_v2_min": 0.4741581804240051,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 77.41718999870018,
+          "peak_voltage": 4.125089645385742,
+          "peak_temperature": 24.681175231933594,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.287412632474713,
+            "pulse_on_min": 1.0,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.35,
+            "i_floor": 1.0696713268067854
+          },
+          "duration_min": 71.5,
+          "sei_per_pct_soc": 75.69032999900514,
+          "voltage_stress_v2_min": 0.4408095553122052,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 77.15559476343013,
+          "peak_voltage": 4.120102882385254,
+          "peak_temperature": 24.680944442749023,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.9312479831099258,
+            "pulse_on_min": 1.2898250841973375,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.08,
+            "i_floor": 1.7066815197962288
+          },
+          "duration_min": 75.5,
+          "sei_per_pct_soc": 74.11915610286674,
+          "voltage_stress_v2_min": 0.2725728718005371,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 75.65096193261078,
+          "peak_voltage": 4.091441631317139,
+          "peak_temperature": 24.673730850219727,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.8916655057071825,
+            "pulse_on_min": 1.4998745790900145,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.20399720083078415,
+            "i_floor": 1.1671357639237774
+          },
+          "duration_min": 77.0,
+          "sei_per_pct_soc": 73.83910910140557,
+          "voltage_stress_v2_min": 0.2394324790601748,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 75.39826369973039,
+          "peak_voltage": 4.086255073547363,
+          "peak_temperature": 24.672935485839844,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.1820338177836067,
+            "pulse_on_min": 5.4750841682957905,
+            "pulse_rest_min": 0.7525055074826432,
+            "rest_fraction": 0.13744181538616837,
+            "i_floor": 1.1845871221283149
+          },
+          "duration_min": 79.0,
+          "sei_per_pct_soc": 73.40220130288124,
+          "voltage_stress_v2_min": 0.49160289500033516,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 75.02152953448126,
+          "peak_voltage": 4.200009346008301,
+          "peak_temperature": 24.680082321166992,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7997219434305112,
+            "pulse_on_min": 1.2333283160680772,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.34291399008719403,
+            "i_floor": 1.0409641755378805
+          },
+          "duration_min": 81.0,
+          "sei_per_pct_soc": 73.1115411476917,
+          "voltage_stress_v2_min": 0.15582175650578545,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 74.74400688821217,
+          "peak_voltage": 4.069070339202881,
+          "peak_temperature": 24.668203353881836,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.512747014733357,
+            "pulse_on_min": 1.9398563138299263,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.15480829770962684,
+            "i_floor": 1.4234347295733063
+          },
+          "duration_min": 90.5,
+          "sei_per_pct_soc": 71.3743397842287,
+          "voltage_stress_v2_min": 0.026771487264587297,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 73.18648150320986,
+          "peak_voltage": 4.032567024230957,
+          "peak_temperature": 24.654178619384766,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.5,
+            "pulse_on_min": 4.0,
+            "pulse_rest_min": 0.8,
+            "rest_fraction": 0.2,
+            "i_floor": 0.75
+          },
+          "duration_min": 91.0,
+          "sei_per_pct_soc": 70.76297343830092,
+          "voltage_stress_v2_min": 0.11143677962130975,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 72.59188838067061,
+          "peak_voltage": 4.06091833114624,
+          "peak_temperature": 24.65358543395996,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.2857336358438816,
+            "pulse_on_min": 4.254442364744265,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.09523112633731708,
+            "i_floor": 1.2357336358438815
+          },
+          "duration_min": 94.0,
+          "sei_per_pct_soc": 68.9237568780661,
+          "voltage_stress_v2_min": 0.0,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.8037568780661,
+          "peak_voltage": 3.996884822845459,
+          "peak_temperature": 24.634977340698242,
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.264099726376633,
+            "pulse_on_min": 6.0,
+            "pulse_rest_min": 0.6846228299425607,
+            "rest_fraction": 0.1141038049904268,
+            "i_floor": 1.2140997263766329
+          },
+          "duration_min": 100.5,
+          "sei_per_pct_soc": 68.60665870715867,
+          "voltage_stress_v2_min": 3.7240128362251806e-05,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.61666168636894,
+          "peak_voltage": 4.005035877227783,
+          "peak_temperature": 24.633153915405273,
+          "end_reason": "SoC target"
+        }
+      ],
+      "tagged": {
+        "fastest": {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.8771054180315008,
+            "pulse_on_min": 1.0038938292050716,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.34789712100862874,
+            "i_floor": 1.5218518870346458
+          },
+          "duration_min": 50.5,
+          "sei_per_pct_soc": 81.48234991524178,
+          "voltage_stress_v2_min": 0.8851827022985655,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 82.56316453142567,
+          "peak_voltage": 4.187604904174805,
+          "peak_temperature": 25.16566276550293,
+          "end_reason": "SoC target"
+        },
+        "lifetime": {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.264099726376633,
+            "pulse_on_min": 6.0,
+            "pulse_rest_min": 0.6846228299425607,
+            "rest_fraction": 0.1141038049904268,
+            "i_floor": 1.2140997263766329
+          },
+          "duration_min": 100.5,
+          "sei_per_pct_soc": 68.60665870715867,
+          "voltage_stress_v2_min": 3.7240128362251806e-05,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 70.61666168636894,
+          "peak_voltage": 4.005035877227783,
+          "peak_temperature": 24.633153915405273,
+          "end_reason": "SoC target"
+        },
+        "balanced": {
+          "family_id": "pulsed",
+          "family_label": "Pulsed charge/rest",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.8916655057071825,
+            "pulse_on_min": 1.4998745790900145,
+            "pulse_rest_min": 0.5,
+            "rest_fraction": 0.20399720083078415,
+            "i_floor": 1.1671357639237774
+          },
+          "duration_min": 77.0,
+          "sei_per_pct_soc": 73.83910910140557,
+          "voltage_stress_v2_min": 0.2394324790601748,
+          "temperature_penalty_c2_min": 0.0,
+          "loss": 75.39826369973039,
+          "peak_voltage": 4.086255073547363,
+          "peak_temperature": 24.672935485839844,
+          "end_reason": "SoC target"
+        }
+      }
+    }
+  }
+}

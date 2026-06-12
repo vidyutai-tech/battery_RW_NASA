@@ -57,6 +57,7 @@ from charging_opt.bayesian_optimizer import (
 from charging_opt import paths as P
 from charging_opt.profile_simulator import ProfileSimulator
 from charging_opt.soc_utils import load_ocv_curve
+from charging_opt.objective_cli import add_objective_args, objective_from_args
 from charging_opt.state_utils import extract_rest_states, pick_start_state
 
 
@@ -158,7 +159,16 @@ def main() -> None:
     p.add_argument("--v0", type=float, default=None)
     p.add_argument("--t0", type=float, default=None)
     p.add_argument("--age", type=float, default=None)
+    add_objective_args(p)
     args = p.parse_args()
+
+    weights, objective_mode, refs = objective_from_args(args)
+    objective_config = {
+        "objective_mode": objective_mode,
+        "v_ref_stress": refs["v_ref_stress"],
+        "t_comfort_c": refs["t_comfort_c"],
+        "weights": weights.to_dict(),
+    }
 
     P.ensure_layout(ROOT)
     models_dir = (ROOT / P.STAGE3_MODELS).resolve()
@@ -201,6 +211,7 @@ def main() -> None:
     else:
         print(f"Constraints: SoC>={args.soc_target:.0%} (no time limit)")
     print(f"Simulation horizon: {args.max_minutes} min")
+    print(f"Objective: {objective_mode}  weights={weights.to_dict()}")
     print(f"BO: {args.n_calls} evaluations ({args.n_initial} random initial)\n")
 
     sim = ProfileSimulator(
@@ -213,6 +224,10 @@ def main() -> None:
     optimizer = LifetimeBayesianOptimizer(
         sim, start, soc_target=args.soc_target,
         max_duration_min=max_duration,
+        weights=weights,
+        objective_mode=objective_mode,
+        v_ref_stress=refs["v_ref_stress"],
+        t_comfort_c=refs["t_comfort_c"],
         allow_pulsed=args.allow_pulsed,
         random_state=42,
     )
@@ -225,6 +240,7 @@ def main() -> None:
         bdt_path=str(bdt_display),
         soc_target=args.soc_target,
         max_duration_min=max_duration,
+        objective_config=objective_config,
     )
     plot_best_profile(
         result.best_session, result.best_metrics,
@@ -238,6 +254,7 @@ def main() -> None:
         "constraints": {
             "soc_target": args.soc_target,
             "max_duration_min": max_duration,
+            **objective_config,
         },
         "artifacts": {
             "optimization_result": OPTIONAL["lifetime_bo_result"],
@@ -257,7 +274,15 @@ def main() -> None:
     print(f"  SEI/%SoC: {m.get('sei_per_pct_soc', float('nan')):.2f}")
     print(f"  Duration: {m['duration_min']:.1f} min")
     print(f"  Feasible: {m.get('feasible', False)}")
-    print(f"  Loss: {m.get('loss', float('nan')):.3f}  (= SEI/%SoC + tiny tie-breakers if feasible)")
+    print(f"  Loss: {m.get('loss', float('nan')):.3f}")
+    comp = m.get("components", {})
+    if comp.get("objective_mode") == "composite":
+        print(
+            f"    SEI term={comp.get('sei_term', float('nan')):.2f}  "
+            f"time={comp.get('time_term', float('nan')):.2f}  "
+            f"temp={comp.get('temperature_term', float('nan')):.2f}  "
+            f"V-stress={comp.get('voltage_stress_term', float('nan')):.2f}"
+        )
     print(f"  End: {m['end_reason']}")
     print(f"\nOutputs:")
     print(f"  models  -> {models_dir}/")

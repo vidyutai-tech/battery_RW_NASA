@@ -16,7 +16,7 @@ import numpy as np
 from skopt import gp_minimize
 from skopt.space import Real
 
-from charging_opt.lifetime_reward import LifetimeWeights, aggregate_lifetime_reward
+from charging_opt.lifetime_reward import LifetimeWeights, ObjectiveMode, aggregate_lifetime_reward
 from charging_opt.profile_simulator import ProfileSimulator, ProfileSpec, TAPER_STEP_A
 
 
@@ -100,6 +100,9 @@ class LifetimeBayesianOptimizer:
         soc_target: float = 0.95,
         max_duration_min: Optional[float] = 105.0,
         weights: LifetimeWeights = LifetimeWeights(),
+        objective_mode: ObjectiveMode = "composite",
+        v_ref_stress: float = 4.0,
+        t_comfort_c: float = 35.0,
         search_space: Optional[List[Real]] = None,
         allow_pulsed: bool = False,
         random_state: int = 42,
@@ -109,6 +112,9 @@ class LifetimeBayesianOptimizer:
         self.soc_target = soc_target
         self.max_duration_min = max_duration_min
         self.weights = weights
+        self.objective_mode = objective_mode
+        self.v_ref_stress = v_ref_stress
+        self.t_comfort_c = t_comfort_c
         self.allow_pulsed = allow_pulsed
         self.search_space = search_space or default_search_space(allow_pulsed=allow_pulsed)
         self.random_state = random_state
@@ -122,6 +128,9 @@ class LifetimeBayesianOptimizer:
             soc_target=self.soc_target,
             max_duration_min=self.max_duration_min,
             weights=self.weights,
+            objective_mode=self.objective_mode,
+            v_ref_stress=self.v_ref_stress,
+            t_comfort_c=self.t_comfort_c,
         )
         loss = float(metrics.get("loss", 1e6))
         self.history.append({
@@ -178,6 +187,9 @@ class LifetimeBayesianOptimizer:
             soc_target=self.soc_target,
             max_duration_min=self.max_duration_min,
             weights=self.weights,
+            objective_mode=self.objective_mode,
+            v_ref_stress=self.v_ref_stress,
+            t_comfort_c=self.t_comfort_c,
         )
         opt = OptimizationResult(
             best_spec=best_spec,
@@ -200,6 +212,7 @@ def save_optimization_result(
     bdt_path: str,
     soc_target: float = 0.95,
     max_duration_min: Optional[float] = None,
+    objective_config: Optional[Dict] = None,
 ) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -210,6 +223,7 @@ def save_optimization_result(
         "constraints": {
             "soc_target": soc_target,
             "max_duration_min": max_duration_min,
+            **(objective_config or {}),
         },
         "best_spec": result.best_spec.to_dict(),
         "best_reward": result.best_reward,

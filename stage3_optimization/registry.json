@@ -1,37 +1,37 @@
 {
-  "updated_at_utc": "2026-06-11T11:50:17.260897+00:00",
+  "updated_at_utc": "2026-06-12T06:25:49.589218+00:00",
   "stage_dir": "stage3_optimization",
   "metrics": {
     "best_spec": {
-      "i_charge": 1.2469998495948282,
-      "pulse_on_min": 22.277184366013625,
+      "i_charge": 1.8508653215224815,
+      "pulse_on_min": 24.846671099339833,
       "pulse_rest_min": 0.0,
-      "i_floor": 0.75
+      "i_floor": 0.803340092282075
     },
     "best_metrics": {
-      "duration_min": 96.85,
+      "duration_min": 91.35,
       "end_reason": "SoC target",
-      "soc_end": 0.9504310019307898,
-      "delta_soc_pct_total": 79.95994477796407,
-      "sei_proxy": 5481.402301054829,
-      "sei_per_pct_soc": 68.55185200885022,
-      "peak_voltage": 4.200268268585205,
-      "peak_temperature": 24.613325119018555,
+      "soc_end": 0.9501166516237245,
+      "delta_soc_pct_total": 79.92850974725754,
+      "sei_proxy": 5747.291763680689,
+      "sei_per_pct_soc": 71.90540373959476,
+      "peak_voltage": 4.200241565704346,
+      "peak_temperature": 24.653284072875977,
       "violated": false,
       "feasible": true,
-      "loss": 70.48885200885022,
-      "reward": -70.48885200885022,
+      "loss": 73.73240373959476,
+      "reward": -73.73240373959476,
       "components": {
         "infeasible": false,
         "reason": "ok",
-        "sei_per_pct_soc": 68.55185200885022,
+        "sei_per_pct_soc": 71.90540373959476,
         "soc_shortfall_pct": 0.0,
         "time_excess_min": 0.0,
         "max_duration_min": 105.0,
         "temp_excess_c": 0.0,
-        "duration_min": 96.85,
+        "duration_min": 91.35,
         "temp_penalty": 0.0,
-        "time_penalty": 1.9369999999999998
+        "time_penalty": 1.827
       }
     },
     "constraints": {

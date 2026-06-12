@@ -16,6 +16,13 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from charging_opt.bdt_rollout import FrozenBDTSimulator
+from charging_opt.charging_profile_family import (
+    CcTaperLegacyFamily,
+    ChargingProfileFamily,
+    ProfileParams,
+    SimulationContext,
+    get_family,
+)
 from charging_opt.reward import (
     DEFAULT_K_ARRHENIUS,
     DEFAULT_T_MAX,
@@ -129,34 +136,44 @@ class ProfileSimulator:
             )
 
     def simulate(self, initial_state: Dict[str, float], spec: ProfileSpec) -> Dict:
+        """Legacy entry point — wraps :class:`ProfileSpec` as cc_taper_legacy."""
+        params = CcTaperLegacyFamily.from_vector(
+            [
+                spec.i_charge,
+                spec.pulse_on_min,
+                spec.pulse_rest_min,
+                spec.i_floor,
+            ],
+            allow_pulsed=spec.pulse_rest_min >= MIN_REST_MIN,
+        )
+        return self.simulate_params(initial_state, params)
+
+    def simulate_params(
+        self,
+        initial_state: Dict[str, float],
+        params: ProfileParams,
+        *,
+        family: Optional[ChargingProfileFamily] = None,
+    ) -> Dict:
+        """Closed-loop rollout for any registered profile family."""
+        family = family or get_family(params.family_id)
         state = dict(initial_state)
+        state.setdefault("prev_i", 0.0)
         q_as = float(self.q_of_age(state["age"]))
-        v_ceiling = self.v_max - self.v_margin
+        v_ceiling_global = self.v_max - self.v_margin
         n_decisions = self.max_minutes * 60 // self.decision_interval
 
-        i_level = float(spec.i_charge)
-        pulse_on_s = spec.pulse_on_min * 60.0
-        pulse_rest_s = spec.pulse_rest_min * 60.0
-        charge_elapsed = 0.0
-        rest_elapsed = 0.0
-        in_rest = False
-
+        ctx = family.init_context(params)
         i_all, v_all, t_all = [], [], []
         decisions: List[Dict] = []
         end_reason = "time budget"
 
         for _ in range(int(n_decisions)):
-            if in_rest:
-                target_i = 0.0
-            else:
-                target_i = -i_level
-                if pulse_rest_s > 0.0 and charge_elapsed >= pulse_on_s:
-                    in_rest = True
-                    rest_elapsed = 0.0
-                    target_i = 0.0
+            target_i = family.target_current(state, ctx, params)
+            step_ceiling = family.cv_ceiling(params, v_ceiling_global, ctx)
 
             next_state, v_traj, t_traj, ceiling_hit = self.sim.single_step(
-                state, target_i, n_steps=self.decision_interval, v_ceiling=v_ceiling
+                state, target_i, n_steps=self.decision_interval, v_ceiling=step_ceiling,
             )
             profile = np.full(v_traj.size, target_i, dtype=np.float64)
             delta_soc = float(np.sum(-profile)) / q_as
@@ -164,13 +181,8 @@ class ProfileSimulator:
             next_state = dict(next_state)
             next_state["soc"] = float(np.clip(state["soc"] + delta_soc, 0.0, 1.0))
 
-            if in_rest:
-                rest_elapsed += v_traj.size
-                if rest_elapsed >= pulse_rest_s:
-                    in_rest = False
-                    charge_elapsed = 0.0
-            elif target_i != 0.0:
-                charge_elapsed += v_traj.size
+            if target_i != 0.0 and not ctx.in_rest:
+                ctx.charge_elapsed += v_traj.size
 
             violated = bool(np.any(t_traj + self.t_margin > self.t_max))
             decisions.append({
@@ -184,15 +196,22 @@ class ProfileSimulator:
                 "delta_soc_pct": delta_soc * 100.0,
                 "sei_penalty": sei,
                 "ceiling_hit": bool(ceiling_hit),
+                "phase": ctx.phase,
             })
             i_all.extend(profile.tolist())
             v_all.extend(v_traj.tolist())
             t_all.extend(t_traj.tolist())
             state = next_state
 
-            if ceiling_hit and not in_rest and i_level > spec.i_floor + 1e-9:
-                i_level = max(spec.i_floor, i_level - TAPER_STEP_A)
-                charge_elapsed = 0.0
+            ctx, early = family.after_step(
+                state, ctx, params,
+                ceiling_hit=ceiling_hit,
+                v_traj=v_traj,
+                global_ceiling=v_ceiling_global,
+            )
+            if early:
+                end_reason = early
+                break
 
             if violated:
                 end_reason = "temperature violation"
@@ -200,21 +219,22 @@ class ProfileSimulator:
             if state["soc"] >= self.soc_target:
                 end_reason = "SoC target"
                 break
-            # CV phase: at i_floor, hitting the ceiling each step is expected — keep
-            # charging until a step delivers no usable progress (true taper end).
-            if (
-                ceiling_hit
-                and i_level <= spec.i_floor + 1e-9
-                and target_i != 0.0
-                and v_traj.size <= 1
-            ):
-                end_reason = "V ceiling @ min current"
+
+            family_end = family.end_check(
+                state, ctx, params,
+                ceiling_hit=ceiling_hit,
+                step_samples=v_traj.size,
+                target_i=target_i,
+            )
+            if family_end:
+                end_reason = family_end
                 break
 
         i_arr = np.asarray(i_all, dtype=np.float64)
         session = {
             "initial_state": dict(initial_state),
-            "profile_spec": spec.to_dict(),
+            "profile_spec": params.to_dict(),
+            "family_id": params.family_id,
             "time_s": np.arange(i_arr.size, dtype=np.float64),
             "current_a": i_arr,
             "voltage_v": np.asarray(v_all),

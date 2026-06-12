@@ -1,0 +1,1586 @@
+{
+  "initial_state": {
+    "soc": 0.15,
+    "v0": 3.711,
+    "t0": 24.7,
+    "age": 0.0,
+    "prev_i": 0.0
+  },
+  "bdt_checkpoint": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "constraints": {
+    "soc_target": 0.95,
+    "max_duration_min": 105.0
+  },
+  "families": {
+    "pulsed": {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "best_params": {
+        "family_id": "pulsed",
+        "i_charge": 1.5827636010721815,
+        "pulse_on_min": 11.518315183453645,
+        "pulse_rest_min": 5.0,
+        "i_floor": 0.8327636010721815
+      },
+      "best_loss": 73.84622830255307,
+      "best_metrics": {
+        "duration_min": 94.0,
+        "end_reason": "SoC target",
+        "soc_end": 0.9502108894192013,
+        "delta_soc_pct_total": 80.02108894192013,
+        "sei_proxy": 5758.815955813129,
+        "sei_per_pct_soc": 71.96622830255308,
+        "peak_voltage": 4.191422462463379,
+        "peak_temperature": 24.657896041870117,
+        "violated": false,
+        "feasible": true,
+        "loss": 73.84622830255307,
+        "reward": -73.84622830255307,
+        "components": {
+          "infeasible": false,
+          "reason": "ok",
+          "sei_per_pct_soc": 71.96622830255308,
+          "soc_shortfall_pct": 0.0,
+          "time_excess_min": 0.0,
+          "max_duration_min": 105.0,
+          "temp_excess_c": 0.0,
+          "duration_min": 94.0,
+          "temp_penalty": 0.0,
+          "time_penalty": 1.8800000000000001
+        }
+      },
+      "history": [
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.0,
+            "pulse_on_min": 10.0,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 75.11978310913308,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 102.05,
+            "end_reason": "SoC target",
+            "soc_end": 0.9503157531384341,
+            "delta_soc_pct_total": 80.0315753138434,
+            "sei_proxy": 5848.610134242612,
+            "sei_per_pct_soc": 73.07878310913308,
+            "peak_voltage": 4.200089931488037,
+            "peak_temperature": 24.675291061401367,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.11978310913308,
+            "reward": -75.11978310913308,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.07878310913308,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 102.05,
+              "temp_penalty": 0.0,
+              "time_penalty": 2.041
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.5,
+            "pulse_on_min": 15.0,
+            "pulse_rest_min": 10.0,
+            "i_floor": 0.75
+          },
+          "loss": 223.08326092464023,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 113.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9523307390126667,
+            "delta_soc_pct_total": 80.23307390126668,
+            "sei_proxy": 5683.117972286145,
+            "sei_per_pct_soc": 70.83260924640236,
+            "peak_voltage": 4.19463586807251,
+            "peak_temperature": 24.65358543395996,
+            "violated": false,
+            "feasible": false,
+            "loss": 223.08326092464023,
+            "reward": -223.08326092464023,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 8.0,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 70.83260924640236,
+              "temp_excess_c": 0.0,
+              "duration_min": 113.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.5,
+            "pulse_on_min": 20.0,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 75.70882081092023,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 103.86666666666666,
+            "end_reason": "SoC target",
+            "soc_end": 0.9508958248295011,
+            "delta_soc_pct_total": 80.0895824829501,
+            "sei_proxy": 5897.115089678504,
+            "sei_per_pct_soc": 73.6314874775869,
+            "peak_voltage": 4.20017671585083,
+            "peak_temperature": 24.680341720581055,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.70882081092023,
+            "reward": -75.70882081092023,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.6314874775869,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 103.86666666666666,
+              "temp_penalty": 0.0,
+              "time_penalty": 2.0773333333333333
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.0,
+            "pulse_on_min": 15.0,
+            "pulse_rest_min": 10.0,
+            "i_floor": 0.75
+          },
+          "loss": 225.08131892372216,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 113.88333333333334,
+            "end_reason": "SoC target",
+            "soc_end": 0.9524528593686808,
+            "delta_soc_pct_total": 80.24528593686809,
+            "sei_proxy": 5869.663618961751,
+            "sei_per_pct_soc": 73.14652257055488,
+            "peak_voltage": 4.200141429901123,
+            "peak_temperature": 24.675291061401367,
+            "violated": false,
+            "feasible": false,
+            "loss": 225.08131892372216,
+            "reward": -225.08131892372216,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 8.88333333333334,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.14652257055488,
+              "temp_excess_c": 0.0,
+              "duration_min": 113.88333333333334
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.5930859737204663,
+            "pulse_on_min": 8.668695797323277,
+            "pulse_rest_min": 12.796910002727696,
+            "i_floor": 1.4960626974331088
+          },
+          "loss": 338.2912105162288,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 63.9,
+            "end_reason": "V ceiling @ min current",
+            "soc_end": 0.6887690202362394,
+            "delta_soc_pct_total": 53.87690202362394,
+            "sei_proxy": 4135.4404857750105,
+            "sei_per_pct_soc": 76.75720634348468,
+            "peak_voltage": 4.20283317565918,
+            "peak_temperature": 24.678863525390625,
+            "violated": false,
+            "feasible": false,
+            "loss": 338.2912105162288,
+            "reward": -338.2912105162288,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 26.12309797637606,
+              "time_excess_min": 0.0,
+              "sei_per_pct_soc": 76.75720634348468,
+              "temp_excess_c": 0.0,
+              "duration_min": 63.9
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.8916655057071825,
+            "pulse_on_min": 6.999498316360058,
+            "pulse_rest_min": 9.592488919658672,
+            "i_floor": 1.1416655057071825
+          },
+          "loss": 273.30396653614133,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 138.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9539178102576837,
+            "delta_soc_pct_total": 80.39178102576837,
+            "sei_proxy": 5871.788783930136,
+            "sei_per_pct_soc": 73.03966536141328,
+            "peak_voltage": 4.199957847595215,
+            "peak_temperature": 24.672935485839844,
+            "violated": false,
+            "feasible": false,
+            "loss": 273.30396653614133,
+            "reward": -273.30396653614133,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 33.0,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.03966536141328,
+              "temp_excess_c": 0.0,
+              "duration_min": 138.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.2857336358438816,
+            "pulse_on_min": 18.01776945897706,
+            "pulse_rest_min": 5.564115790271003,
+            "i_floor": 0.75
+          },
+          "loss": 214.88307226641342,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 109.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9507726716776438,
+            "delta_soc_pct_total": 80.07726716776438,
+            "sei_proxy": 5511.776168126162,
+            "sei_per_pct_soc": 68.83072266413411,
+            "peak_voltage": 4.095993995666504,
+            "peak_temperature": 24.634977340698242,
+            "violated": false,
+            "feasible": false,
+            "loss": 214.88307226641342,
+            "reward": -214.88307226641342,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 4.0,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 68.83072266413411,
+              "temp_excess_c": 0.0,
+              "duration_min": 109.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.8771054180315008,
+            "pulse_on_min": 5.015575316820287,
+            "pulse_rest_min": 14.922115592912178,
+            "i_floor": 1.5218518870346458
+          },
+          "loss": 301.7264450012246,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 149.91666666666666,
+            "end_reason": "time budget",
+            "soc_end": 0.7613473960131236,
+            "delta_soc_pct_total": 61.13473960131236,
+            "sei_proxy": 4524.058157934962,
+            "sei_per_pct_soc": 74.00143007786436,
+            "peak_voltage": 4.2024922370910645,
+            "peak_temperature": 25.03657341003418,
+            "violated": false,
+            "feasible": false,
+            "loss": 301.7264450012246,
+            "reward": -301.7264450012246,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 18.86526039868764,
+              "time_excess_min": 44.91666666666666,
+              "sei_per_pct_soc": 74.00143007786436,
+              "temp_excess_c": 0.0,
+              "duration_min": 149.91666666666666
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.223306320976562,
+            "pulse_on_min": 5.141326104394349,
+            "pulse_rest_min": 5.230624250414158,
+            "i_floor": 1.4059683253229864
+          },
+          "loss": 250.70557260943232,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 126.73333333333333,
+            "end_reason": "SoC target",
+            "soc_end": 0.9514660437966674,
+            "delta_soc_pct_total": 80.14660437966674,
+            "sei_proxy": 5801.737307364572,
+            "sei_per_pct_soc": 72.38905942765652,
+            "peak_voltage": 4.200069904327393,
+            "peak_temperature": 24.68043327331543,
+            "violated": false,
+            "feasible": false,
+            "loss": 250.70557260943232,
+            "reward": -250.70557260943232,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 21.733333333333334,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 72.38905942765652,
+              "temp_excess_c": 0.0,
+              "duration_min": 126.73333333333333
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7997219434305112,
+            "pulse_on_min": 5.933313264272309,
+            "pulse_rest_min": 14.737555188414595,
+            "i_floor": 1.0409641755378805
+          },
+          "loss": 310.39621993185403,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.743413248036936,
+            "delta_soc_pct_total": 59.341324803693595,
+            "sei_proxy": 4214.921698860096,
+            "sei_per_pct_soc": 71.02843950322028,
+            "peak_voltage": 4.121338844299316,
+            "peak_temperature": 24.668203353881836,
+            "violated": false,
+            "feasible": false,
+            "loss": 310.39621993185403,
+            "reward": -310.39621993185403,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 20.658675196306405,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 71.02843950322028,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0,
+            "pulse_on_min": 25.0,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 255.72881618917955,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 129.5,
+            "end_reason": "SoC target",
+            "soc_end": 0.9523307390126667,
+            "delta_soc_pct_total": 80.23307390126668,
+            "sei_proxy": 5398.736065744839,
+            "sei_per_pct_soc": 67.28816189179568,
+            "peak_voltage": 3.991067886352539,
+            "peak_temperature": 24.620033264160156,
+            "violated": false,
+            "feasible": false,
+            "loss": 255.72881618917955,
+            "reward": -255.72881618917955,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 24.5,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 67.28816189179568,
+              "temp_excess_c": 0.0,
+              "duration_min": 129.5
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.092589517689519,
+            "pulse_on_min": 20.83045103179424,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8609426129328142
+          },
+          "loss": 207.6639057231394,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 105.18333333333334,
+            "end_reason": "SoC target",
+            "soc_end": 0.9520928790683343,
+            "delta_soc_pct_total": 80.20928790683342,
+            "sei_proxy": 5853.063484056113,
+            "sei_per_pct_soc": 72.97239056472738,
+            "peak_voltage": 4.200118064880371,
+            "peak_temperature": 24.67918586730957,
+            "violated": false,
+            "feasible": false,
+            "loss": 207.6639057231394,
+            "reward": -207.6639057231394,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.18333333333333712,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 72.97239056472738,
+              "temp_excess_c": 0.0,
+              "duration_min": 105.18333333333334
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0,
+            "pulse_on_min": 6.11458732261296,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 295.3061530332571,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.7728138156719331,
+            "delta_soc_pct_total": 62.28138156719331,
+            "sei_proxy": 4180.987054799127,
+            "sei_per_pct_soc": 67.13060869223652,
+            "peak_voltage": 3.9038712978363037,
+            "peak_temperature": 24.620033264160156,
+            "violated": false,
+            "feasible": false,
+            "loss": 295.3061530332571,
+            "reward": -295.3061530332571,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 17.718618432806693,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 67.13060869223652,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.637112722297375,
+            "pulse_on_min": 10.246235181024804,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8871127222973749
+          },
+          "loss": 74.30593809929292,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 97.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9536976496983509,
+            "delta_soc_pct_total": 80.36976496983509,
+            "sei_proxy": 5816.033436861806,
+            "sei_per_pct_soc": 72.36593809929292,
+            "peak_voltage": 4.188925743103027,
+            "peak_temperature": 24.659677505493164,
+            "violated": false,
+            "feasible": true,
+            "loss": 74.30593809929292,
+            "reward": -74.30593809929292,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 72.36593809929292,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 97.0,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.94
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.9007730944773282,
+            "pulse_on_min": 19.6503910088707,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.791097673981579
+          },
+          "loss": 235.69739829079734,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 119.16666666666667,
+            "end_reason": "SoC target",
+            "soc_end": 0.9515736993630298,
+            "delta_soc_pct_total": 80.15736993630298,
+            "sei_proxy": 5902.840790304076,
+            "sei_per_pct_soc": 73.64064957464005,
+            "peak_voltage": 4.200196743011475,
+            "peak_temperature": 25.038354873657227,
+            "violated": false,
+            "feasible": false,
+            "loss": 235.69739829079734,
+            "reward": -235.69739829079734,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 14.166666666666671,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.64064957464005,
+              "temp_excess_c": 0.0,
+              "duration_min": 119.16666666666667
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.5348618389939497,
+            "pulse_on_min": 10.124614658889655,
+            "pulse_rest_min": 12.727693129669863,
+            "i_floor": 0.8187194998655212
+          },
+          "loss": 273.339663059577,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 137.95,
+            "end_reason": "SoC target",
+            "soc_end": 0.9529218344200443,
+            "delta_soc_pct_total": 80.29218344200443,
+            "sei_proxy": 5973.467911262637,
+            "sei_per_pct_soc": 74.39663059577042,
+            "peak_voltage": 4.202030181884766,
+            "peak_temperature": 24.679824829101562,
+            "violated": false,
+            "feasible": false,
+            "loss": 273.339663059577,
+            "reward": -273.339663059577,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 32.94999999999999,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 74.39663059577042,
+              "temp_excess_c": 0.0,
+              "duration_min": 137.95
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.71533525890004,
+            "pulse_on_min": 10.12457911302471,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.9653352589000399
+          },
+          "loss": 75.00963462335405,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 94.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9543930336016165,
+            "delta_soc_pct_total": 80.43930336016165,
+            "sei_proxy": 5882.496864085757,
+            "sei_per_pct_soc": 73.12963462335405,
+            "peak_voltage": 4.191286563873291,
+            "peak_temperature": 24.66274642944336,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.00963462335405,
+            "reward": -75.00963462335405,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.12963462335405,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 94.0,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.8800000000000001
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.4191761425167577,
+            "pulse_on_min": 20.166961595303146,
+            "pulse_rest_min": 5.0001188248727795,
+            "i_floor": 1.6461403610573602
+          },
+          "loss": 458.9914291579681,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 20.366666666666667,
+            "end_reason": "V ceiling @ min current",
+            "soc_end": 0.44772456883909995,
+            "delta_soc_pct_total": 29.772456883909992,
+            "sei_proxy": 2338.2434886523565,
+            "sei_per_pct_soc": 78.53713577518084,
+            "peak_voltage": 4.20017671585083,
+            "peak_temperature": 24.68128776550293,
+            "violated": false,
+            "feasible": false,
+            "loss": 458.9914291579681,
+            "reward": -458.9914291579681,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 50.227543116090004,
+              "time_excess_min": 0.0,
+              "sei_per_pct_soc": 78.53713577518084,
+              "temp_excess_c": 0.0,
+              "duration_min": 20.366666666666667
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.9198584725947296,
+            "pulse_on_min": 10.124687128561217,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8568516102712492
+          },
+          "loss": 74.97655613289093,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 104.45,
+            "end_reason": "SoC target",
+            "soc_end": 0.9500114044306011,
+            "delta_soc_pct_total": 80.00114044306011,
+            "sei_proxy": 5831.087614738835,
+            "sei_per_pct_soc": 72.88755613289094,
+            "peak_voltage": 4.200108051300049,
+            "peak_temperature": 24.673564910888672,
+            "violated": false,
+            "feasible": true,
+            "loss": 74.97655613289093,
+            "reward": -74.97655613289093,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 72.88755613289094,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 104.45,
+              "temp_penalty": 0.0,
+              "time_penalty": 2.089
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0,
+            "pulse_on_min": 10.09960492984362,
+            "pulse_rest_min": 6.168781876240457,
+            "i_floor": 0.75
+          },
+          "loss": 260.4930023083819,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.8424224185999727,
+            "delta_soc_pct_total": 69.24224185999726,
+            "sei_proxy": 4642.146416672334,
+            "sei_per_pct_soc": 67.04211608368219,
+            "peak_voltage": 3.9264328479766846,
+            "peak_temperature": 24.620033264160156,
+            "violated": false,
+            "feasible": false,
+            "loss": 260.4930023083819,
+            "reward": -260.4930023083819,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 10.757758140002736,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 67.04211608368219,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.480821641213841,
+            "pulse_on_min": 10.099048315599651,
+            "pulse_rest_min": 5.150364582394561,
+            "i_floor": 0.75
+          },
+          "loss": 222.03373961698838,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 112.5,
+            "end_reason": "SoC target",
+            "soc_end": 0.9529227891218248,
+            "delta_soc_pct_total": 80.29227891218248,
+            "sei_proxy": 5647.549831228987,
+            "sei_per_pct_soc": 70.33739616988382,
+            "peak_voltage": 4.129203796386719,
+            "peak_temperature": 24.652719497680664,
+            "violated": false,
+            "feasible": false,
+            "loss": 222.03373961698838,
+            "reward": -222.03373961698838,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 7.5,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 70.33739616988382,
+              "temp_excess_c": 0.0,
+              "duration_min": 112.5
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.1694966364375248,
+            "pulse_on_min": 9.827979817610338,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 273.78306876479473,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 138.5,
+            "end_reason": "SoC target",
+            "soc_end": 0.9512165288106729,
+            "delta_soc_pct_total": 80.12165288106729,
+            "sei_proxy": 5434.706810412926,
+            "sei_per_pct_soc": 67.83068764794722,
+            "peak_voltage": 4.001920700073242,
+            "peak_temperature": 24.624534606933594,
+            "violated": false,
+            "feasible": false,
+            "loss": 273.78306876479473,
+            "reward": -273.78306876479473,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 33.5,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 67.83068764794722,
+              "temp_excess_c": 0.0,
+              "duration_min": 138.5
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.63884120740895,
+            "pulse_on_min": 10.223225753218571,
+            "pulse_rest_min": 5.0,
+            "i_floor": 1.1246234071373822
+          },
+          "loss": 220.85647692280665,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 111.78333333333333,
+            "end_reason": "SoC target",
+            "soc_end": 0.9521529079310802,
+            "delta_soc_pct_total": 80.21529079310803,
+            "sei_proxy": 5847.5424952284975,
+            "sei_per_pct_soc": 72.8981025613998,
+            "peak_voltage": 4.200788974761963,
+            "peak_temperature": 24.728912353515625,
+            "violated": false,
+            "feasible": false,
+            "loss": 220.85647692280665,
+            "reward": -220.85647692280665,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 6.783333333333331,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 72.8981025613998,
+              "temp_excess_c": 0.0,
+              "duration_min": 111.78333333333333
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7905538045252798,
+            "pulse_on_min": 8.247539210887052,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.7925784236632581
+          },
+          "loss": 75.48585501258891,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 96.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9503068291399605,
+            "delta_soc_pct_total": 80.03068291399605,
+            "sei_proxy": 5887.52561580951,
+            "sei_per_pct_soc": 73.56585501258891,
+            "peak_voltage": 4.182157039642334,
+            "peak_temperature": 24.667387008666992,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.48585501258891,
+            "reward": -75.48585501258891,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.56585501258891,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 96.0,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.92
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.9369322540076745,
+            "pulse_on_min": 5.0,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.77540823053556
+          },
+          "loss": 220.38736057828504,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 111.5,
+            "end_reason": "SoC target",
+            "soc_end": 0.9518667233134047,
+            "delta_soc_pct_total": 80.18667233134047,
+            "sei_proxy": 5923.678620844044,
+            "sei_per_pct_soc": 73.8736057828504,
+            "peak_voltage": 4.17348575592041,
+            "peak_temperature": 24.67381477355957,
+            "violated": false,
+            "feasible": false,
+            "loss": 220.38736057828504,
+            "reward": -220.38736057828504,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 6.5,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.8736057828504,
+              "temp_excess_c": 0.0,
+              "duration_min": 111.5
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7704688721051465,
+            "pulse_on_min": 10.518196738078231,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8161000169859953
+          },
+          "loss": 75.48193690189686,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 92.41666666666667,
+            "end_reason": "SoC target",
+            "soc_end": 0.9531302106290083,
+            "delta_soc_pct_total": 80.31302106290083,
+            "sei_proxy": 5913.737154339333,
+            "sei_per_pct_soc": 73.63360356856353,
+            "peak_voltage": 4.200253009796143,
+            "peak_temperature": 24.665790557861328,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.48193690189686,
+            "reward": -75.48193690189686,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.63360356856353,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 92.41666666666667,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.8483333333333334
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.777698732214947,
+            "pulse_on_min": 9.785339711643044,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8973360215743896
+          },
+          "loss": 75.5296633306902,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 91.5,
+            "end_reason": "SoC target",
+            "soc_end": 0.9510739156158385,
+            "delta_soc_pct_total": 80.10739156158385,
+            "sei_proxy": 5903.887788388503,
+            "sei_per_pct_soc": 73.6996633306902,
+            "peak_voltage": 4.19855260848999,
+            "peak_temperature": 24.666343688964844,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.5296633306902,
+            "reward": -75.5296633306902,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.6996633306902,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 91.5,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.83
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.8707880277365563,
+            "pulse_on_min": 9.761688435041762,
+            "pulse_rest_min": 5.036627829211753,
+            "i_floor": 0.75
+          },
+          "loss": 207.59121150685542,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 105.13333333333334,
+            "end_reason": "SoC target",
+            "soc_end": 0.9519363615862733,
+            "delta_soc_pct_total": 80.19363615862733,
+            "sei_proxy": 5873.81883941647,
+            "sei_per_pct_soc": 73.2454484018874,
+            "peak_voltage": 4.2001214027404785,
+            "peak_temperature": 24.671945571899414,
+            "violated": false,
+            "feasible": false,
+            "loss": 207.59121150685542,
+            "reward": -207.59121150685542,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.13333333333333997,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.2454484018874,
+              "temp_excess_c": 0.0,
+              "duration_min": 105.13333333333334
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.3669026007674083,
+            "pulse_on_min": 16.229459570839456,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 237.23964466395017,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 120.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9500612060306417,
+            "delta_soc_pct_total": 80.00612060306416,
+            "sei_proxy": 5792.15884107327,
+            "sei_per_pct_soc": 72.39644663950168,
+            "peak_voltage": 4.200613021850586,
+            "peak_temperature": 24.68122100830078,
+            "violated": false,
+            "feasible": false,
+            "loss": 237.23964466395017,
+            "reward": -237.23964466395017,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 15.0,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 72.39644663950168,
+              "temp_excess_c": 0.0,
+              "duration_min": 120.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.4950051680221277,
+            "pulse_on_min": 21.684664313822676,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 75.8071216183739,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 104.48333333333333,
+            "end_reason": "SoC target",
+            "soc_end": 0.9533300190031261,
+            "delta_soc_pct_total": 80.33300190031261,
+            "sei_proxy": 5921.944448721706,
+            "sei_per_pct_soc": 73.71745495170723,
+            "peak_voltage": 4.200069427490234,
+            "peak_temperature": 24.6804141998291,
+            "violated": false,
+            "feasible": true,
+            "loss": 75.8071216183739,
+            "reward": -75.8071216183739,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.71745495170723,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 104.48333333333333,
+              "temp_penalty": 0.0,
+              "time_penalty": 2.0896666666666666
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.5986450843050597,
+            "pulse_on_min": 12.901682376521967,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8486450843050597
+          },
+          "loss": 74.05479448414441,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 92.8,
+            "end_reason": "SoC target",
+            "soc_end": 0.9505455504615162,
+            "delta_soc_pct_total": 80.05455504615162,
+            "sei_proxy": 5779.842367296727,
+            "sei_per_pct_soc": 72.19879448414441,
+            "peak_voltage": 4.200085163116455,
+            "peak_temperature": 24.658645629882812,
+            "violated": false,
+            "feasible": true,
+            "loss": 74.05479448414441,
+            "reward": -74.05479448414441,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 72.19879448414441,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 92.8,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.8559999999999999
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.4919118716358133,
+            "pulse_on_min": 21.012347332412627,
+            "pulse_rest_min": 5.042029103027929,
+            "i_floor": 0.75
+          },
+          "loss": 210.42906597230848,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 106.53333333333333,
+            "end_reason": "SoC target",
+            "soc_end": 0.9529178852064609,
+            "delta_soc_pct_total": 80.2917885206461,
+            "sei_proxy": 5911.402080531444,
+            "sei_per_pct_soc": 73.62399305641817,
+            "peak_voltage": 4.2026753425598145,
+            "peak_temperature": 24.680458068847656,
+            "violated": false,
+            "feasible": false,
+            "loss": 210.42906597230848,
+            "reward": -210.42906597230848,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 1.5333333333333314,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 73.62399305641817,
+              "temp_excess_c": 0.0,
+              "duration_min": 106.53333333333333
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.5827636010721815,
+            "pulse_on_min": 11.518315183453645,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.8327636010721815
+          },
+          "loss": 73.84622830255307,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 94.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9502108894192013,
+            "delta_soc_pct_total": 80.02108894192013,
+            "sei_proxy": 5758.815955813129,
+            "sei_per_pct_soc": 71.96622830255308,
+            "peak_voltage": 4.191422462463379,
+            "peak_temperature": 24.657896041870117,
+            "violated": false,
+            "feasible": true,
+            "loss": 73.84622830255307,
+            "reward": -73.84622830255307,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 71.96622830255308,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 94.0,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.8800000000000001
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.978155078461679,
+            "pulse_on_min": 22.165239934992684,
+            "pulse_rest_min": 7.882512684361204,
+            "i_floor": 1.8381025580689068
+          },
+          "loss": 526.277530176694,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 8.516666666666667,
+            "end_reason": "V ceiling @ min current",
+            "soc_end": 0.31372641846418875,
+            "delta_soc_pct_total": 16.372641846418876,
+            "sei_proxy": 1332.8541070511897,
+            "sei_per_pct_soc": 81.40739408788323,
+            "peak_voltage": 4.2028093338012695,
+            "peak_temperature": 25.147905349731445,
+            "violated": false,
+            "feasible": false,
+            "loss": 526.277530176694,
+            "reward": -526.277530176694,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 63.62735815358113,
+              "time_excess_min": 0.0,
+              "sei_per_pct_soc": 81.40739408788323,
+              "temp_excess_c": 0.0,
+              "duration_min": 8.516666666666667
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.3189436936362986,
+            "pulse_on_min": 14.324044584902442,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.75
+          },
+          "loss": 212.89426268316845,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 108.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9521279696785525,
+            "delta_soc_pct_total": 80.21279696785525,
+            "sei_proxy": 5530.080928480529,
+            "sei_per_pct_soc": 68.94262683168463,
+            "peak_voltage": 4.0858025550842285,
+            "peak_temperature": 24.637577056884766,
+            "violated": false,
+            "feasible": false,
+            "loss": 212.89426268316845,
+            "reward": -212.89426268316845,
+            "components": {
+              "infeasible": true,
+              "reason": "time_excess",
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 3.0,
+              "max_duration_min": 105.0,
+              "sei_per_pct_soc": 68.94262683168463,
+              "temp_excess_c": 0.0,
+              "duration_min": 108.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7374754433791924,
+            "pulse_on_min": 8.13915004827713,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.9874754433791924
+          },
+          "loss": 74.96768345762206,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 98.0,
+            "end_reason": "SoC target",
+            "soc_end": 0.9520446325084821,
+            "delta_soc_pct_total": 80.2044632508482,
+            "sei_proxy": 5855.542064906407,
+            "sei_per_pct_soc": 73.00768345762206,
+            "peak_voltage": 4.165103435516357,
+            "peak_temperature": 24.663408279418945,
+            "violated": false,
+            "feasible": true,
+            "loss": 74.96768345762206,
+            "reward": -74.96768345762206,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 73.00768345762206,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 98.0,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.96
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0225284414401867,
+            "pulse_on_min": 22.653832030587694,
+            "pulse_rest_min": 11.3915091014045,
+            "i_floor": 0.75
+          },
+          "loss": 217.13251779114782,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.9291983927720463,
+            "delta_soc_pct_total": 77.91983927720463,
+            "sei_proxy": 5245.340867452412,
+            "sei_per_pct_soc": 67.31714177170961,
+            "peak_voltage": 3.9864888191223145,
+            "peak_temperature": 24.620492935180664,
+            "violated": false,
+            "feasible": false,
+            "loss": 217.13251779114782,
+            "reward": -217.13251779114782,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 2.0801607227953696,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 67.31714177170961,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0748071442112275,
+            "pulse_on_min": 24.95054720204648,
+            "pulse_rest_min": 13.728089857888076,
+            "i_floor": 0.75
+          },
+          "loss": 212.98824653857204,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.9375349865854921,
+            "delta_soc_pct_total": 78.7534986585492,
+            "sei_proxy": 5320.381477432142,
+            "sei_per_pct_soc": 67.55739831318058,
+            "peak_voltage": 4.016519546508789,
+            "peak_temperature": 24.620929718017578,
+            "violated": false,
+            "feasible": false,
+            "loss": 212.98824653857204,
+            "reward": -212.98824653857204,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 1.246501341450795,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 67.55739831318058,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0,
+            "pulse_on_min": 5.0,
+            "pulse_rest_min": 8.710835315779514,
+            "i_floor": 0.75
+          },
+          "loss": 405.2738139515346,
+          "feasible": false,
+          "metrics": {
+            "duration_min": 150.0,
+            "end_reason": "time budget",
+            "soc_end": 0.552997174846545,
+            "delta_soc_pct_total": 40.299717484654494,
+            "sei_proxy": 2729.258620974099,
+            "sei_per_pct_soc": 67.72401374807052,
+            "peak_voltage": 3.8848276138305664,
+            "peak_temperature": 24.620033264160156,
+            "violated": false,
+            "feasible": false,
+            "loss": 405.2738139515346,
+            "reward": -405.2738139515346,
+            "components": {
+              "infeasible": true,
+              "reason": "soc_shortfall",
+              "soc_shortfall_pct": 39.700282515345506,
+              "time_excess_min": 45.0,
+              "sei_per_pct_soc": 67.72401374807052,
+              "temp_excess_c": 0.0,
+              "duration_min": 150.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.7112556157430663,
+            "pulse_on_min": 25.0,
+            "pulse_rest_min": 5.0,
+            "i_floor": 0.9612556157430663
+          },
+          "loss": 74.50485278102767,
+          "feasible": true,
+          "metrics": {
+            "duration_min": 92.33333333333333,
+            "end_reason": "SoC target",
+            "soc_end": 0.9515495035600654,
+            "delta_soc_pct_total": 80.15495035600654,
+            "sei_proxy": 5823.91330095409,
+            "sei_per_pct_soc": 72.658186114361,
+            "peak_voltage": 4.200015068054199,
+            "peak_temperature": 24.662729263305664,
+            "violated": false,
+            "feasible": true,
+            "loss": 74.50485278102767,
+            "reward": -74.50485278102767,
+            "components": {
+              "infeasible": false,
+              "reason": "ok",
+              "sei_per_pct_soc": 72.658186114361,
+              "soc_shortfall_pct": 0.0,
+              "time_excess_min": 0.0,
+              "max_duration_min": 105.0,
+              "temp_excess_c": 0.0,
+              "duration_min": 92.33333333333333,
+              "temp_penalty": 0.0,
+              "time_penalty": 1.8466666666666667
+            }
+          },
+          "end_reason": "SoC target"
+        }
+      ]
+    }
+  },
+  "best_overall_family": "pulsed",
+  "best_overall_params": {
+    "family_id": "pulsed",
+    "i_charge": 1.5827636010721815,
+    "pulse_on_min": 11.518315183453645,
+    "pulse_rest_min": 5.0,
+    "i_floor": 0.8327636010721815
+  },
+  "best_overall_metrics": {
+    "duration_min": 94.0,
+    "end_reason": "SoC target",
+    "soc_end": 0.9502108894192013,
+    "delta_soc_pct_total": 80.02108894192013,
+    "sei_proxy": 5758.815955813129,
+    "sei_per_pct_soc": 71.96622830255308,
+    "peak_voltage": 4.191422462463379,
+    "peak_temperature": 24.657896041870117,
+    "violated": false,
+    "feasible": true,
+    "loss": 73.84622830255307,
+    "reward": -73.84622830255307,
+    "components": {
+      "infeasible": false,
+      "reason": "ok",
+      "sei_per_pct_soc": 71.96622830255308,
+      "soc_shortfall_pct": 0.0,
+      "time_excess_min": 0.0,
+      "max_duration_min": 105.0,
+      "temp_excess_c": 0.0,
+      "duration_min": 94.0,
+      "temp_penalty": 0.0,
+      "time_penalty": 1.8800000000000001
+    }
+  }
+}
