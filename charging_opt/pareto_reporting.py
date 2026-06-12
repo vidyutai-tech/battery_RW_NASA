@@ -21,6 +21,7 @@ from charging_opt.pareto_analysis import (
     ParetoCandidate,
     analyze_results_payload,
     extract_feasible_candidates,
+    pareto_front,
 )
 
 TAG_COLORS = {
@@ -57,7 +58,7 @@ def _scatter_pareto_ax(
     for c in all_feasible:
         ax.scatter(
             getattr(c, x_attr), getattr(c, y_attr),
-            c=[colors[c.family_id]], s=28, alpha=0.35, edgecolors="none",
+            c=[colors[c.family_id]], s=36, alpha=0.5, edgecolors="none",
         )
     if front:
         fx = [getattr(c, x_attr) for c in front]
@@ -159,7 +160,7 @@ def pareto_by_family_plot(
         r, c = divmod(idx, ncols)
         ax = axes[r][c]
         fam_cands = [x for x in all_feasible if x.family_id == fid]
-        fam_front = [x for x in analysis.pareto_front if x.family_id == fid]
+        fam_front = pareto_front(fam_cands)
         _scatter_pareto_ax(
             ax, fam_cands, fam_front,
             x_attr="duration_min", y_attr="sei_per_pct_soc",
