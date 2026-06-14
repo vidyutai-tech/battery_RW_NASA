@@ -1,5 +1,11 @@
 """
 Bayesian optimization over pluggable charging profile families.
+
+ENHANCEMENTS vs original:
+  1. acq_func parameter ("EI", "PI", "LCB") — Paper 3 shows PI outperforms EI
+  2. use_age_conditioning flag — evaluates each candidate at multiple battery ages
+     and returns the weighted mean loss, optimizing for lifetime robustness
+  3. chebyshev_omega support — directed Pareto front via Chebyshev scalarization
 """
 
 from __future__ import annotations
@@ -7,7 +13,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from skopt import gp_minimize
@@ -20,8 +26,18 @@ from charging_opt.charging_profile_family import (
     ProfileParams,
     get_family,
 )
-from charging_opt.lifetime_reward import LifetimeWeights, ObjectiveMode, aggregate_lifetime_reward
+from charging_opt.lifetime_reward import (
+    LifetimeWeights,
+    ObjectiveMode,
+    aggregate_lifetime_reward,
+    chebyshev_loss,          # NEW — added in lifetime_reward.py
+)
 from charging_opt.profile_simulator import ProfileSimulator
+
+# Age checkpoints for age-conditioned evaluation (Enhancement 2).
+# Covers RW9→RW12 lifespan (age 0 to 1).
+DEFAULT_AGE_POINTS = [0.0, 0.25, 0.50, 0.75]
+DEFAULT_AGE_WEIGHTS = [0.15, 0.30, 0.35, 0.20]   # weight later life more
 
 
 @dataclass
@@ -46,8 +62,109 @@ class FamilyOptimizationResult:
         }
 
 
+def _age_conditioned_loss(
+    simulator: ProfileSimulator,
+    params: ProfileParams,
+    base_state: Dict,
+    *,
+    family: ChargingProfileFamily,
+    age_points: List[float],
+    age_weights: List[float],
+    soc_target: float,
+    max_duration_min: Optional[float],
+    weights: LifetimeWeights,
+    objective_mode: ObjectiveMode,
+    v_ref_stress: float,
+    t_comfort_c: float,
+    chebyshev_omega: Optional[float] = None,
+) -> Tuple[float, Dict]:
+    """
+    Evaluate `params` at each age in `age_points`.
+
+    Returns (weighted_mean_loss, summary_metrics).
+
+    A profile that works at age=0 but degrades poorly at age=0.75
+    (because Q is lower so the same current causes more normalized stress)
+    is correctly penalized here. A profile that fails at ANY age gets a
+    soft +50 penalty per failure on top of the aggregate loss.
+
+    This directly addresses the gap identified vs Paper 1 (Padisala et al.),
+    which adapts charging to battery age — here we optimize FOR all ages
+    simultaneously using the multi-age BDT which already takes `age` as input.
+    """
+    w = np.asarray(age_weights, dtype=np.float64)
+    w = w / w.sum()
+
+    per_age: List[Dict] = []
+    losses: List[float] = []
+
+    for age, aw in zip(age_points, w):
+        state = dict(base_state)
+        state["age"] = float(age)
+        state["prev_i"] = 0.0
+
+        session = simulator.simulate_params(state, params, family=family)
+        _, metrics = aggregate_lifetime_reward(
+            session,
+            soc_target=soc_target,
+            max_duration_min=max_duration_min,
+            weights=weights,
+            objective_mode=objective_mode,
+            v_ref_stress=v_ref_stress,
+            t_comfort_c=t_comfort_c,
+        )
+
+        # Apply Chebyshev scalarization on top of feasible metrics if requested
+        if chebyshev_omega is not None and metrics.get("feasible"):
+            loss_val = chebyshev_loss(metrics, omega=chebyshev_omega)
+        else:
+            loss_val = float(metrics.get("loss", 1e6))
+
+        losses.append(loss_val)
+        per_age.append({
+            "age": age,
+            "age_weight": float(aw),
+            "loss": loss_val,
+            "feasible": bool(metrics.get("feasible", False)),
+            "duration_min": metrics.get("duration_min"),
+            "sei_per_pct_soc": metrics.get("sei_per_pct_soc"),
+        })
+
+    aggregate = float(np.dot(w, losses))
+
+    # Soft penalty for infeasible ages (not a hard wall — keeps GP landscape smooth)
+    n_infeasible = sum(1 for r in per_age if not r["feasible"])
+    if n_infeasible:
+        aggregate += 50.0 * n_infeasible
+
+    all_feasible = n_infeasible == 0
+    # Build a representative metrics dict (weighted average of feasible ages)
+    feasible_ages = [r for r in per_age if r["feasible"]]
+    agg_metrics = {
+        "feasible": all_feasible,
+        "loss": aggregate,
+        "age_results": per_age,
+        "sei_per_pct_soc": (
+            float(np.mean([r["sei_per_pct_soc"] for r in feasible_ages]))
+            if feasible_ages else None
+        ),
+        "duration_min": (
+            float(np.mean([r["duration_min"] for r in feasible_ages]))
+            if feasible_ages else None
+        ),
+    }
+    return aggregate, agg_metrics
+
+
 class FamilyBayesianOptimizer:
-    """GP-BO over one :class:`ChargingProfileFamily` search space."""
+    """
+    GP-BO over one :class:`ChargingProfileFamily` search space.
+
+    Key changes vs original:
+      - acq_func: choose "EI", "PI", or "LCB" (Paper 3 recommends PI)
+      - use_age_conditioning: evaluate at multiple ages for lifetime robustness
+      - chebyshev_omega: if set, use Chebyshev scalarization instead of linear
+    """
 
     def __init__(
         self,
@@ -62,6 +179,14 @@ class FamilyBayesianOptimizer:
         v_ref_stress: float = 4.0,
         t_comfort_c: float = 35.0,
         random_state: int = 42,
+        # Enhancement 3: acquisition function choice
+        acq_func: str = "PI",
+        # Enhancement 2: age-conditioned evaluation
+        use_age_conditioning: bool = False,
+        age_points: List[float] = DEFAULT_AGE_POINTS,
+        age_weights: List[float] = DEFAULT_AGE_WEIGHTS,
+        # Enhancement 4: Chebyshev scalarization
+        chebyshev_omega: Optional[float] = None,
     ):
         self.simulator = simulator
         self.family = family
@@ -74,32 +199,72 @@ class FamilyBayesianOptimizer:
         self.v_ref_stress = v_ref_stress
         self.t_comfort_c = t_comfort_c
         self.random_state = random_state
+        self.acq_func = acq_func
+        self.use_age_conditioning = use_age_conditioning
+        self.age_points = list(age_points)
+        self.age_weights = list(age_weights)
+        self.chebyshev_omega = chebyshev_omega
         self.search_space = family.search_space()
         self.history: List[Dict] = []
 
     def _evaluate(self, x: List[float]) -> float:
         params = self.family.from_vector(x)
-        session = self.simulator.simulate_params(
-            self.initial_state, params, family=self.family,
-        )
-        _, metrics = aggregate_lifetime_reward(
-            session,
-            soc_target=self.soc_target,
-            max_duration_min=self.max_duration_min,
-            weights=self.weights,
-            objective_mode=self.objective_mode,
-            v_ref_stress=self.v_ref_stress,
-            t_comfort_c=self.t_comfort_c,
-        )
-        loss = float(metrics.get("loss", 1e6))
-        self.history.append({
-            "family_id": self.family_id,
-            "params": params.to_dict(),
-            "loss": loss,
-            "feasible": bool(metrics.get("feasible", False)),
-            "metrics": metrics,
-            "end_reason": session["end_reason"],
-        })
+
+        if self.use_age_conditioning:
+            # Enhancement 2: evaluate at multiple ages
+            loss, metrics = _age_conditioned_loss(
+                self.simulator, params, self.initial_state,
+                family=self.family,
+                age_points=self.age_points,
+                age_weights=self.age_weights,
+                soc_target=self.soc_target,
+                max_duration_min=self.max_duration_min,
+                weights=self.weights,
+                objective_mode=self.objective_mode,
+                v_ref_stress=self.v_ref_stress,
+                t_comfort_c=self.t_comfort_c,
+                chebyshev_omega=self.chebyshev_omega,
+            )
+            self.history.append({
+                "family_id": self.family_id,
+                "params": params.to_dict(),
+                "loss": loss,
+                "feasible": bool(metrics.get("feasible", False)),
+                "metrics": metrics,
+                "end_reason": "age_conditioned",
+                "age_conditioned": True,
+            })
+        else:
+            # Original single-age evaluation (age from initial_state)
+            session = self.simulator.simulate_params(
+                self.initial_state, params, family=self.family,
+            )
+            _, metrics = aggregate_lifetime_reward(
+                session,
+                soc_target=self.soc_target,
+                max_duration_min=self.max_duration_min,
+                weights=self.weights,
+                objective_mode=self.objective_mode,
+                v_ref_stress=self.v_ref_stress,
+                t_comfort_c=self.t_comfort_c,
+            )
+            # Apply Chebyshev override if requested (Enhancement 4)
+            if self.chebyshev_omega is not None and metrics.get("feasible"):
+                loss = chebyshev_loss(metrics, omega=self.chebyshev_omega)
+                metrics["loss"] = loss
+            else:
+                loss = float(metrics.get("loss", 1e6))
+
+            self.history.append({
+                "family_id": self.family_id,
+                "params": params.to_dict(),
+                "loss": loss,
+                "feasible": bool(metrics.get("feasible", False)),
+                "metrics": metrics,
+                "end_reason": session["end_reason"],
+                "age_conditioned": False,
+            })
+
         return loss
 
     def _best_feasible_entry(self) -> Optional[Dict]:
@@ -118,15 +283,19 @@ class FamilyBayesianOptimizer:
         n_seed = len(seeds)
         n_random = max(0, n_initial_points - n_seed)
 
-        result = gp_minimize(
-            self._evaluate,
-            dimensions=self.search_space,
-            n_calls=max(n_calls, n_seed),
-            n_initial_points=n_random,
-            x0=seeds if seeds else None,
-            random_state=self.random_state,
-            acq_func="EI",
-        )
+        gp_kwargs = {
+            "func": self._evaluate,
+            "dimensions": self.search_space,
+            "n_calls": max(n_calls, n_seed),
+            "n_initial_points": n_random,
+            "x0": seeds if seeds else None,
+            "random_state": self.random_state,
+            "acq_func": self.acq_func,
+        }
+        if self.acq_func == "LCB":
+            gp_kwargs["kappa"] = 4.0
+
+        result = gp_minimize(**gp_kwargs)
 
         entry = self._best_feasible_entry()
         if entry is None:
@@ -137,8 +306,13 @@ class FamilyBayesianOptimizer:
             )
 
         best_params = ProfileParams.from_dict(entry["params"])
+
+        # Re-simulate best params at age=0 for reporting/plotting
+        # (age-conditioned eval uses multiple ages; we want a single reference session)
+        report_state = dict(self.initial_state)
+        report_state["age"] = self.age_points[0] if self.use_age_conditioning else self.initial_state.get("age", 0.0)
         best_session = self.simulator.simulate_params(
-            self.initial_state, best_params, family=self.family,
+            report_state, best_params, family=self.family,
         )
         _, best_metrics = aggregate_lifetime_reward(
             best_session,
@@ -149,6 +323,7 @@ class FamilyBayesianOptimizer:
             v_ref_stress=self.v_ref_stress,
             t_comfort_c=self.t_comfort_c,
         )
+
         opt = FamilyOptimizationResult(
             family_id=self.family_id,
             family_label=self.family.label,
@@ -178,12 +353,25 @@ def optimize_families(
     v_ref_stress: float = 4.0,
     t_comfort_c: float = 35.0,
     random_state: int = 42,
+    # New parameters
+    acq_func: str = "PI",
+    use_age_conditioning: bool = False,
+    age_points: List[float] = DEFAULT_AGE_POINTS,
+    age_weights: List[float] = DEFAULT_AGE_WEIGHTS,
+    chebyshev_omega: Optional[float] = None,
     on_family_done: Optional[Callable[[Dict[str, FamilyOptimizationResult]], None]] = None,
 ) -> Dict[str, FamilyOptimizationResult]:
     results: Dict[str, FamilyOptimizationResult] = {}
     for fid in family_ids:
         family = get_family(fid)
-        print(f"\n{'=' * 60}\n  Optimizing family: {family.label} ({fid})\n{'=' * 60}")
+        print(f"\n{'=' * 60}\n  Optimizing family: {family.label} ({fid})")
+        if use_age_conditioning:
+            print(f"  Age conditioning ON: ages={age_points}, weights={age_weights}")
+        if chebyshev_omega is not None:
+            print(f"  Chebyshev omega={chebyshev_omega:.2f}")
+        print(f"  Acquisition: {acq_func}")
+        print(f"{'=' * 60}")
+
         opt = FamilyBayesianOptimizer(
             simulator,
             family,
@@ -195,6 +383,11 @@ def optimize_families(
             v_ref_stress=v_ref_stress,
             t_comfort_c=t_comfort_c,
             random_state=random_state,
+            acq_func=acq_func,
+            use_age_conditioning=use_age_conditioning,
+            age_points=age_points,
+            age_weights=age_weights,
+            chebyshev_omega=chebyshev_omega,
         )
         results[fid] = opt.optimize(
             n_calls=n_calls, n_initial_points=n_initial_points,

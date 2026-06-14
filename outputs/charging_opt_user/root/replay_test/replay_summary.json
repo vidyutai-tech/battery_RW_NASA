@@ -1,0 +1,29 @@
+{
+  "cell": "RW9",
+  "checkpoint": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "comments": [
+    "charge (random walk)"
+  ],
+  "n_steps": 1,
+  "dt_warn_s": 1.5,
+  "steps": [
+    {
+      "step_index": 473,
+      "comment": "charge (random walk)",
+      "age": 0.004164575574280004,
+      "n_samples": 301,
+      "duration_min": 4.999333333333333,
+      "dt_median_s": 1.0,
+      "i_mean_a": -3.7498970099667774,
+      "v0_v": 3.88,
+      "t0_c": 33.59184,
+      "v_rmse_v": 0.010314703208391805,
+      "v_mape_pct": 0.179974055219711,
+      "v_max_abs_err_v": 0.030424627304077134,
+      "t_rmse_c": 0.1416174887465817,
+      "t_mape_pct": 0.3309169142223389,
+      "dt_caveat": false,
+      "plot_path": "plots/replay_charge_random_walk_step00473_age0.004.png"
+    }
+  ]
+}

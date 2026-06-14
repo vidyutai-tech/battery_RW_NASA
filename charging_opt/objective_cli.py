@@ -10,9 +10,10 @@ from charging_opt.lifetime_reward import LifetimeWeights, ObjectiveMode
 def add_objective_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--objective",
-        choices=("composite", "legacy"),
+        choices=("composite", "legacy", "chebyshev"),
         default="composite",
-        help="composite = Priority-2 multi-term loss; legacy = SEI/ΔSoC + small tie-breakers",
+        help="composite = Priority-2 multi-term loss; legacy = SEI/ΔSoC + tie-breakers; "
+             "chebyshev = use with --chebyshev_omega in 03_optimize_profile_families.py",
     )
     p.add_argument("--w_sei", type=float, default=1.0, help="weight on SEI/ΔSoC term")
     p.add_argument("--w_time", type=float, default=0.02, help="weight on duration (min)")

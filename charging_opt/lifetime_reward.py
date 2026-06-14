@@ -1,16 +1,13 @@
 """
 Stage 2 — lifetime objective for Bayesian optimization.
 
-Feasibility first (SoC target, time limit, no hard T violation), then among
-feasible profiles minimize a **composite degradation objective** (Priority 2):
-
-    Loss = w_sei * SEI/ΔSoC
-         + w_time * duration_min
-         + w_temp * ∫ max(0, T − T_comfort)² dt
-         + w_vstress * ∫ max(0, V − V_ref)² dt
-
-Integrals are computed on the BDT-predicted trajectories (1 Hz samples) and
-reported in ``°C²·min`` and ``V²·min`` for readability.
+ENHANCEMENTS vs original:
+  - chebyshev_loss(): Chebyshev scalarization (Wang & Jiang 2023, Paper 2)
+    enables directed Pareto front construction by sweeping omega values.
+    Unlike linear scalarization, this can recover ALL Pareto points including
+    those on non-convex parts of the frontier (which your plots show exist).
+  - ObjectiveMode now includes "chebyshev" as a valid mode (used when
+    chebyshev_omega is passed to FamilyBayesianOptimizer).
 """
 
 from __future__ import annotations
@@ -34,7 +31,7 @@ V_REF_STRESS = 4.0
 T_COMFORT_C = 35.0
 DT_S = 1.0
 
-ObjectiveMode = Literal["composite", "legacy"]
+ObjectiveMode = Literal["composite", "legacy", "chebyshev"]
 
 
 @dataclass(frozen=True)
@@ -65,7 +62,9 @@ class LifetimeWeights:
         }
 
 
-def compute_voltage_stress(voltage_v: np.ndarray, *, v_ref: float = V_REF_STRESS) -> Dict[str, float]:
+def compute_voltage_stress(
+    voltage_v: np.ndarray, *, v_ref: float = V_REF_STRESS
+) -> Dict[str, float]:
     """Integral of max(0, V − v_ref)² over the session (V²·s and V²·min)."""
     v = np.asarray(voltage_v, dtype=np.float64)
     if v.size == 0:
@@ -175,6 +174,78 @@ def composite_loss(
     return float(loss), components
 
 
+# ---------------------------------------------------------------------------
+# NEW: Chebyshev scalarization (Enhancement 4)
+# ---------------------------------------------------------------------------
+
+# Utopia / nadir values calibrated from your existing Pareto front results:
+#   Fastest: duration=50.5 min, SEI=81.5
+#   Lifetime: duration=104.5 min, SEI=68.0
+_UTOPIA_SEI = 68.0    # best (minimum) SEI on your Pareto front
+_UTOPIA_TIME = 50.5   # fastest duration on your Pareto front (min)
+_NADIR_SEI = 82.0     # worst SEI among feasible profiles
+_NADIR_TIME = 105.0   # slowest allowed duration (your max_duration_min)
+
+
+def chebyshev_loss(
+    metrics: Dict,
+    *,
+    omega: float = 0.5,
+    utopia_sei: float = _UTOPIA_SEI,
+    utopia_time: float = _UTOPIA_TIME,
+    nadir_sei: float = _NADIR_SEI,
+    nadir_time: float = _NADIR_TIME,
+) -> float:
+    """
+    Chebyshev scalarization for directed Pareto front construction.
+
+    Wang & Jiang (2023, J. Power Sources), Eq. 12:
+
+        g = max(omega * |SEI - SEI*| / span_SEI,
+                (1-omega) * |t - t*| / span_t)
+
+    Unlike linear scalarization, Chebyshev can recover ALL Pareto points
+    including those on non-convex parts of the frontier.
+
+    Usage:
+        omega=0.0 → minimize SEI only  (→ Lifetime profile)
+        omega=1.0 → minimize time only (→ Fastest profile)
+        omega=0.5 → balanced           (→ Balanced / knee profile)
+
+    Sweep omegas ∈ {0.0, 0.1, 0.2, ..., 1.0} across BO runs to get
+    uniformly distributed Pareto points, rather than mining a single
+    run's history (which clusters around the single-objective optimum).
+
+    Args:
+        metrics: output of aggregate_lifetime_reward()
+        omega: weight on time vs SEI trade-off [0, 1]
+        utopia_sei, utopia_time: best achievable values (from prior runs)
+        nadir_sei, nadir_time: worst feasible values (defines scale)
+
+    Returns:
+        scalar loss (lower = better). Returns 1e6 for infeasible metrics.
+    """
+    if not metrics.get("feasible", False):
+        return 1e6  # let the constraint penalty structure handle infeasibility
+
+    sei = metrics.get("sei_per_pct_soc")
+    t = metrics.get("duration_min")
+    if sei is None or t is None or not np.isfinite(sei) or not np.isfinite(t):
+        return 1e6
+
+    span_sei = max(nadir_sei - utopia_sei, 1e-6)
+    span_t = max(nadir_time - utopia_time, 1e-6)
+
+    sei_term = abs(sei - utopia_sei) / span_sei
+    t_term = abs(t - utopia_time) / span_t
+
+    return float(max(omega * t_term, (1.0 - omega) * sei_term))
+
+
+# ---------------------------------------------------------------------------
+# Main aggregate function (unchanged logic, chebyshev handled upstream)
+# ---------------------------------------------------------------------------
+
 def aggregate_lifetime_reward(
     session: Dict,
     *,
@@ -189,7 +260,16 @@ def aggregate_lifetime_reward(
 ) -> Tuple[float, Dict]:
     """
     Return (reward, info). BO minimizes ``info['loss']``; reward = -loss.
+
+    Note: when objective_mode="chebyshev", the loss returned here is still
+    the composite loss. The chebyshev override is applied AFTER this function
+    returns, in FamilyBayesianOptimizer._evaluate() via chebyshev_loss().
+    This keeps the metrics dict consistent for downstream reporting.
     """
+    # Use composite mode internally even when chebyshev is requested
+    # (chebyshev is a post-processing override, not a different simulator)
+    internal_mode: ObjectiveMode = "composite" if objective_mode == "chebyshev" else objective_mode
+
     m = session_metrics(
         session, k=k, v_ref_stress=v_ref_stress, t_comfort_c=t_comfort_c,
     )
@@ -265,7 +345,7 @@ def aggregate_lifetime_reward(
         m.update(feasible=False, loss=loss, reward=-loss)
         return -loss, m
 
-    loss, comp = composite_loss(m, weights, objective_mode=objective_mode)
+    loss, comp = composite_loss(m, weights, objective_mode=internal_mode)
     m.update(
         feasible=True,
         loss=float(loss),

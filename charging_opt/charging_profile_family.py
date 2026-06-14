@@ -604,6 +604,86 @@ class PulsedFamily(CcTaperLegacyFamily):
         ]
 
 
+class PolynomialCurrentFamily(ChargingProfileFamily):
+    """
+    Continuous-varied-current profile: I(t) = beta_0 + beta_1*t + beta_2*t^2.
+
+    beta_1=beta_2=0 → constant CC; negative beta_1 → linear taper; beta_2 adds
+  curvature. Superset of CC / taper shapes in one unified BO search space.
+    """
+
+    family_id = "polynomial_current"
+    label = "Polynomial I(t)"
+
+    @classmethod
+    def search_space(cls) -> List[Real]:
+        return [
+            Real(0.75, 2.5, name="beta_0"),
+            Real(-3e-4, 0.0, name="beta_1"),
+            Real(-2e-7, 2e-7, name="beta_2"),
+            Real(4.05, 4.20, name="v_cv"),
+            Real(0.05, 0.40, name="i_cutoff"),
+        ]
+
+    @classmethod
+    def from_vector(cls, x: List[float]) -> ProfileParams:
+        b0, b1, b2, v_cv, i_cutoff = [float(v) for v in x]
+        b0 = float(np.clip(b0, 0.75, 2.5))
+        v_cv = float(np.clip(v_cv, 4.05, 4.20))
+        i_cutoff = float(np.clip(i_cutoff, 0.05, min(0.40, b0 - 0.05)))
+        return cls.params_from_dict({
+            "beta_0": b0,
+            "beta_1": b1,
+            "beta_2": b2,
+            "v_cv": v_cv,
+            "i_cutoff": i_cutoff,
+        })
+
+    @classmethod
+    def seed_points(cls) -> List[List[float]]:
+        return [
+            [1.0, 0.0, 0.0, 4.20, 0.25],
+            [1.5, -1e-4, 0.0, 4.15, 0.25],
+            [2.0, -2e-4, 0.0, 4.10, 0.20],
+            [1.25, -1e-4, -1e-7, 4.20, 0.25],
+            [1.25, 0.0, 0.0, 4.05, 0.25],
+        ]
+
+    def _bulk_current(self, params: ProfileParams) -> float:
+        return params.values["beta_0"]
+
+    def _commanded_i(self, params: ProfileParams, t_s: float) -> float:
+        v = params.values
+        i_t = v["beta_0"] + v["beta_1"] * t_s + v["beta_2"] * t_s ** 2
+        return float(np.clip(i_t, v["i_cutoff"], v["beta_0"] + 0.1))
+
+    def target_current(self, state, ctx, params):
+        if ctx.phase == "cv":
+            return -max(ctx.i_level, params.values["i_cutoff"])
+        return -self._commanded_i(params, float(ctx.charge_elapsed))
+
+    def cv_ceiling(self, params, global_ceiling, ctx):
+        if ctx.phase == "cv":
+            return min(global_ceiling, params.values["v_cv"])
+        return global_ceiling
+
+    def after_step(self, state, ctx, params, *, ceiling_hit, v_traj, global_ceiling):
+        v_cv = params.values["v_cv"]
+        if ctx.phase == "cc":
+            if ceiling_hit or (v_traj.size and float(np.max(v_traj)) >= v_cv - 1e-4):
+                ctx.phase = "cv"
+                ctx.i_level = self._commanded_i(params, float(ctx.charge_elapsed))
+        elif ctx.phase == "cv" and ceiling_hit:
+            ctx.i_level = max(params.values["i_cutoff"], ctx.i_level - CV_STEP_A)
+        return ctx, None
+
+    def end_check(self, state, ctx, params, *, ceiling_hit, step_samples, target_i):
+        if ctx.phase == "cv" and target_i != 0.0:
+            if ctx.i_level <= params.values["i_cutoff"] + 1e-6 and ceiling_hit and step_samples <= 1:
+                return "CV cutoff current"
+        return None
+
+
 FAMILY_REGISTRY: Dict[str, Type[ChargingProfileFamily]] = {
     CCCVFamily.family_id: CCCVFamily,
     ReducedCVCCCVFamily.family_id: ReducedCVCCCVFamily,
@@ -614,6 +694,7 @@ FAMILY_REGISTRY: Dict[str, Type[ChargingProfileFamily]] = {
     CcTaperFamily.family_id: CcTaperFamily,
     MultiStepTaperFamily.family_id: MultiStepTaperFamily,
     PulsedFamily.family_id: PulsedFamily,
+    PolynomialCurrentFamily.family_id: PolynomialCurrentFamily,
 }
 
 DEFAULT_FAMILY_IDS = [

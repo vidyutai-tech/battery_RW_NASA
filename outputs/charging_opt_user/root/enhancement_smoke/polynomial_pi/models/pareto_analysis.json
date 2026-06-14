@@ -1,0 +1,29 @@
+{
+  "objectives": [
+    "duration_min",
+    "sei_per_pct_soc",
+    "voltage_stress_v2_min",
+    "temperature_penalty_c2_min"
+  ],
+  "n_feasible_total": 0,
+  "n_pareto_global": 0,
+  "pareto_front": [],
+  "tagged_global": {
+    "fastest": null,
+    "lifetime": null,
+    "balanced": null
+  },
+  "per_family": {
+    "polynomial_current": {
+      "family_label": "Polynomial I(t)",
+      "n_feasible": 0,
+      "n_pareto": 0,
+      "pareto_front": [],
+      "tagged": {
+        "fastest": null,
+        "lifetime": null,
+        "balanced": null
+      }
+    }
+  }
+}
