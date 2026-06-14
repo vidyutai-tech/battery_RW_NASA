@@ -182,6 +182,26 @@ def main() -> None:
         ),
     )
 
+    # ── Thermal management (Level 1) ───────────────────────────────────────
+    p.add_argument(
+        "--thermal_derating",
+        action="store_true",
+        help="Apply BDT temperature-aware current derating in simulator",
+    )
+    p.add_argument(
+        "--thermal_derate_comfort_c",
+        type=float,
+        default=33.0,
+        help="Start derating current above this BDT-predicted T (°C)",
+    )
+    p.add_argument(
+        "--thermal_loss",
+        action="store_true",
+        help="Add extra temperature_loss on top of composite objective",
+    )
+    p.add_argument("--thermal_w_comfort", type=float, default=0.5)
+    p.add_argument("--thermal_w_hard", type=float, default=5.0)
+
     args = p.parse_args()
 
     weights, objective_mode, refs = objective_from_args(args)
@@ -198,6 +218,10 @@ def main() -> None:
     }
     if args.chebyshev_omega is not None:
         objective_config["chebyshev_omega"] = args.chebyshev_omega
+    if args.thermal_derating or args.thermal_loss:
+        objective_config["thermal_derating"] = args.thermal_derating
+        objective_config["thermal_loss"] = args.thermal_loss
+        objective_config["thermal_derate_comfort_c"] = args.thermal_derate_comfort_c
 
     age_points = _parse_float_list(args.age_points)
     age_weights = _parse_float_list(args.age_weights)
@@ -259,7 +283,18 @@ def main() -> None:
     if args.chebyshev_omega is not None:
         print(f"  Chebyshev omega : {args.chebyshev_omega:.2f}  "
               f"({'lifetime' if args.chebyshev_omega < 0.2 else 'fastest' if args.chebyshev_omega > 0.8 else 'balanced'})")
+    if args.thermal_derating or args.thermal_loss:
+        print(f"  Thermal derating: {args.thermal_derating}  "
+              f"comfort={args.thermal_derate_comfort_c:.1f}°C  extra_loss={args.thermal_loss}")
     print(f"{'=' * 72}\n")
+
+    from charging_opt.thermal_management import ThermalDeratingController
+
+    thermal_controller = None
+    if args.thermal_derating or args.thermal_loss:
+        thermal_controller = ThermalDeratingController(
+            t_comfort_c=args.thermal_derate_comfort_c,
+        )
 
     sim = ProfileSimulator(
         bdt_path=bdt_path,
@@ -267,6 +302,7 @@ def main() -> None:
         margins_path=ROOT / args.margins,
         max_minutes=args.max_minutes,
         soc_target=args.soc_target,
+        thermal_controller=thermal_controller if args.thermal_derating else None,
     )
 
     def _save_partial(partial: dict) -> None:
@@ -299,6 +335,9 @@ def main() -> None:
         age_points=age_points,
         age_weights=age_weights,
         chebyshev_omega=args.chebyshev_omega,
+        thermal_controller=thermal_controller if args.thermal_loss else None,
+        thermal_w_comfort=args.thermal_w_comfort,
+        thermal_w_hard=args.thermal_w_hard,
         on_family_done=_save_partial,
     )
 

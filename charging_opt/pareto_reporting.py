@@ -36,6 +36,13 @@ TAG_MARKERS = {
 }
 
 
+def _degradation_value(c: ParetoCandidate, key: str) -> float:
+    val = getattr(c, key, None)
+    if val is None or (isinstance(val, float) and val != val):
+        return float(c.sei_per_pct_soc)
+    return float(val)
+
+
 def _family_colors(family_ids: Iterable[str]) -> Dict[str, str]:
     ids = sorted(set(family_ids))
     cmap = plt.get_cmap("tab10")
@@ -56,13 +63,17 @@ def _scatter_pareto_ax(
 ) -> None:
     colors = _family_colors(c.family_id for c in all_feasible)
     for c in all_feasible:
+        y_val = _degradation_value(c, y_attr) if y_attr in ("sei_per_pct_soc", "capacity_fade_pct") else getattr(c, y_attr)
         ax.scatter(
-            getattr(c, x_attr), getattr(c, y_attr),
+            getattr(c, x_attr), y_val,
             c=[colors[c.family_id]], s=36, alpha=0.5, edgecolors="none",
         )
     if front:
         fx = [getattr(c, x_attr) for c in front]
-        fy = [getattr(c, y_attr) for c in front]
+        fy = [
+            _degradation_value(c, y_attr) if y_attr in ("sei_per_pct_soc", "capacity_fade_pct") else getattr(c, y_attr)
+            for c in front
+        ]
         order = np.argsort(fx)
         ax.plot(
             np.asarray(fx)[order], np.asarray(fy)[order],
@@ -74,8 +85,13 @@ def _scatter_pareto_ax(
         for tag, cand in tagged.items():
             if cand is None:
                 continue
+            y_val = (
+                _degradation_value(cand, y_attr)
+                if y_attr in ("sei_per_pct_soc", "capacity_fade_pct")
+                else getattr(cand, y_attr)
+            )
             ax.scatter(
-                getattr(cand, x_attr), getattr(cand, y_attr),
+                getattr(cand, x_attr), y_val,
                 c=TAG_COLORS.get(tag, "black"),
                 marker=TAG_MARKERS.get(tag, "o"),
                 s=120, edgecolors="white", linewidths=0.8,
@@ -105,11 +121,13 @@ def pareto_scatter_grid(
         "balanced": analysis.tagged_global.balanced,
     }
     fig, axes = plt.subplots(1, 3, figsize=(16, 5.2))
+    y_key = analysis.degradation_key
+    y_label = analysis.degradation_label
 
     _scatter_pareto_ax(
         axes[0], all_feasible, analysis.pareto_front,
-        x_attr="duration_min", y_attr="sei_per_pct_soc",
-        xlabel="Charge duration (min)", ylabel="SEI / ΔSoC",
+        x_attr="duration_min", y_attr=y_key,
+        xlabel="Charge duration (min)", ylabel=y_label,
         title="Charge time vs degradation",
         tagged=tagged,
     )
@@ -147,8 +165,11 @@ def pareto_by_family_plot(
     all_feasible: List[ParetoCandidate],
     out_path: Path,
 ) -> Path:
-    """Per-family duration vs SEI with global tagged profiles."""
+    """Per-family duration vs degradation metric with global tagged profiles."""
     plt.rcParams.update(PLOT_RC)
+    y_key = analysis.degradation_key
+    y_label = analysis.degradation_label
+    obj_list = analysis.objectives
     family_ids = sorted({c.family_id for c in all_feasible})
     n = len(family_ids)
     ncols = min(4, n)
@@ -160,11 +181,13 @@ def pareto_by_family_plot(
         r, c = divmod(idx, ncols)
         ax = axes[r][c]
         fam_cands = [x for x in all_feasible if x.family_id == fid]
-        fam_front = pareto_front(fam_cands)
+        fam_front = pareto_front(
+            fam_cands, obj_list, degradation_key=y_key,
+        )
         _scatter_pareto_ax(
             ax, fam_cands, fam_front,
-            x_attr="duration_min", y_attr="sei_per_pct_soc",
-            xlabel="Duration (min)", ylabel="SEI / ΔSoC",
+            x_attr="duration_min", y_attr=y_key,
+            xlabel="Duration (min)", ylabel=y_label,
             title=FAMILY_LABELS.get(fid, fid),
         )
         for tag, cand in (
@@ -174,7 +197,7 @@ def pareto_by_family_plot(
         ):
             if cand is not None and cand.family_id == fid:
                 ax.scatter(
-                    cand.duration_min, cand.sei_per_pct_soc,
+                    cand.duration_min, _degradation_value(cand, y_key),
                     c=TAG_COLORS[tag], marker=TAG_MARKERS[tag],
                     s=90, edgecolors="white", linewidths=0.6, zorder=5,
                 )
@@ -183,7 +206,10 @@ def pareto_by_family_plot(
         r, c = divmod(idx, ncols)
         axes[r][c].axis("off")
 
-    fig.suptitle("Per-family feasible sets (duration vs SEI)", fontsize=14, y=1.01)
+    fig.suptitle(
+        f"Per-family feasible sets (duration vs {y_label})",
+        fontsize=14, y=1.01,
+    )
     fig.tight_layout()
     out_path = resolve_writable_path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -195,6 +221,7 @@ def pareto_by_family_plot(
 
 def tagged_profiles_table_png(analysis: ParetoAnalysisResult, out_path: Path) -> Path:
     plt.rcParams.update(PLOT_RC)
+    deg_label = analysis.degradation_label
     rows = []
     for tag in ("fastest", "lifetime", "balanced"):
         cand = getattr(analysis.tagged_global, tag)
@@ -206,14 +233,14 @@ def tagged_profiles_table_png(analysis: ParetoAnalysisResult, out_path: Path) ->
             cand.family_label,
             _param_str(cand.params)[:42],
             f"{cand.duration_min:.1f}",
-            f"{cand.sei_per_pct_soc:.1f}",
+            f"{_degradation_value(cand, analysis.degradation_key):.3f}",
             f"{cand.voltage_stress_v2_min:.2f}",
-            f"{cand.loss:.1f}",
+            f"{cand.loss:.2f}",
         ])
 
     fig, ax = plt.subplots(figsize=(13, 2.8))
     ax.axis("off")
-    headers = ["Profile", "Family", "Parameters", "Duration", "SEI/%SoC", "V²·min", "Loss"]
+    headers = ["Profile", "Family", "Parameters", "Duration", deg_label, "V²·min", "Loss"]
     table = ax.table(cellText=rows, colLabels=headers, loc="center", cellLoc="center")
     table.auto_set_font_size(False)
     table.set_fontsize(10)
@@ -311,7 +338,10 @@ def export_pareto_artifacts(
     models_dir = Path(models_dir) if models_dir else pareto_plots_dir.parent.parent / "models"
 
     analysis = analyze_results_payload(data)
-    all_feasible = extract_feasible_candidates(data.get("families") or {})
+    all_feasible = extract_feasible_candidates(
+        data.get("families") or {},
+        degradation_key=analysis.degradation_key,
+    )
 
     written: dict[str, Path] = {}
     written["pareto_json"] = save_pareto_json(

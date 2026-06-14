@@ -38,6 +38,7 @@ CANONICAL = {
     # Stage 1 — SoC / capacity
     "ocv_curve": f"{P.STAGE1_MODELS}/ocv_soc_curve.npz",
     "capacity_fade": f"{P.STAGE1_MODELS}/capacity_fade.npz",
+    "degradation_model": f"{P.STAGE1_MODELS}/degradation_model.npz",
     "stage1_registry": f"{P.STAGE1_MODELS}/registry.json",
     # Stage 1 — drift (stored under models/stage1_drift for binary artifacts)
     "conformal_margins": f"{P.STAGE1_DRIFT_MODELS}/conformal_margins.npz",

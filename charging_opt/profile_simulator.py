@@ -31,6 +31,7 @@ from charging_opt.reward import (
 )
 from charging_opt.artifacts import CANONICAL
 from charging_opt.soc_utils import load_capacity_curve
+from charging_opt.thermal_management import ThermalDeratingController
 
 TAPER_STEP_A = 0.75
 MIN_REST_MIN = 5.0  # rests shorter than this are treated as continuous CC
@@ -113,6 +114,7 @@ class ProfileSimulator:
         v_max: float = DEFAULT_V_MAX,
         t_max: float = DEFAULT_T_MAX,
         k_arrhenius: float = DEFAULT_K_ARRHENIUS,
+        thermal_controller: Optional[ThermalDeratingController] = None,
     ):
         self.sim = FrozenBDTSimulator(bdt_path, device=device)
         self.q_of_age = load_capacity_curve(capacity_path)
@@ -122,6 +124,7 @@ class ProfileSimulator:
         self.v_max = v_max
         self.t_max = t_max
         self.k = k_arrhenius
+        self.thermal_controller = thermal_controller
 
         self.v_margin, self.t_margin = 0.0, 0.0
         if margins_path is not None and Path(margins_path).exists():
@@ -170,6 +173,8 @@ class ProfileSimulator:
 
         for _ in range(int(n_decisions)):
             target_i = family.target_current(state, ctx, params)
+            if self.thermal_controller is not None:
+                target_i = self.thermal_controller.derate(target_i, float(state["t0"]))
             step_ceiling = family.cv_ceiling(params, v_ceiling_global, ctx)
 
             next_state, v_traj, t_traj, ceiling_hit = self.sim.single_step(

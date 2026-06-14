@@ -61,8 +61,11 @@ def main() -> None:
 
     analysis = analyze_results_payload(data)
     tg = analysis.tagged_global
+    deg_key = analysis.degradation_key
+    deg_label = analysis.degradation_label
 
     print(f"Pareto analysis from {result_path}")
+    print(f"  Degradation axis: {deg_label} ({deg_key})")
     print(f"  Feasible evals : {analysis.n_feasible_total}")
     print(f"  Pareto front   : {analysis.n_pareto_global} non-dominated")
     print()
@@ -71,10 +74,13 @@ def main() -> None:
         if cand is None:
             print(f"  {tag:10s}: —")
             continue
+        deg_val = getattr(cand, deg_key, None)
+        if deg_val is None:
+            deg_val = cand.sei_per_pct_soc
         print(
             f"  {tag:10s}: {cand.family_label:28s}  "
-            f"dur={cand.duration_min:.1f} min  SEI={cand.sei_per_pct_soc:.1f}  "
-            f"V²·min={cand.voltage_stress_v2_min:.2f}  loss={cand.loss:.1f}"
+            f"dur={cand.duration_min:.1f} min  {deg_key}={deg_val:.4f}  "
+            f"V²·min={cand.voltage_stress_v2_min:.2f}  loss={cand.loss:.2f}"
         )
     print()
     for key, path in sorted(written.items()):

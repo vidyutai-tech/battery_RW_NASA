@@ -1,0 +1,17 @@
+{
+  "baseline_run": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/stage3_physics_thermal",
+  "ambient_run": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/stage3_physics_thermal/ambient_sensitivity",
+  "settings": {
+    "objective": "physics",
+    "thermal_derating": true,
+    "thermal_loss": true,
+    "thermal_derate_comfort_c": 33.0,
+    "acq_func": "PI",
+    "start_state": {
+      "soc": 0.15,
+      "v0": 3.711,
+      "t0": 24.7,
+      "age": 0.0
+    }
+  }
+}

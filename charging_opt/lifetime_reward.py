@@ -31,7 +31,7 @@ V_REF_STRESS = 4.0
 T_COMFORT_C = 35.0
 DT_S = 1.0
 
-ObjectiveMode = Literal["composite", "legacy", "chebyshev"]
+ObjectiveMode = Literal["composite", "legacy", "chebyshev", "physics"]
 
 
 @dataclass(frozen=True)
@@ -156,6 +156,8 @@ def composite_loss(
             "temperature_term": weights.temperature * temp_excess_peak,
             "voltage_stress_term": 0.0,
         }
+    elif objective_mode == "physics":
+        raise ValueError("physics loss is built in aggregate_lifetime_reward()")
     else:
         loss = (
             weights.sei * sei_term
@@ -195,6 +197,9 @@ def chebyshev_loss(
     utopia_time: float = _UTOPIA_TIME,
     nadir_sei: float = _NADIR_SEI,
     nadir_time: float = _NADIR_TIME,
+    degradation_key: str = "sei_per_pct_soc",
+    utopia_degradation: Optional[float] = None,
+    nadir_degradation: Optional[float] = None,
 ) -> float:
     """
     Chebyshev scalarization for directed Pareto front construction.
@@ -228,18 +233,22 @@ def chebyshev_loss(
     if not metrics.get("feasible", False):
         return 1e6  # let the constraint penalty structure handle infeasibility
 
-    sei = metrics.get("sei_per_pct_soc")
+    deg = metrics.get(degradation_key)
+    if deg is None and degradation_key != "sei_per_pct_soc":
+        deg = metrics.get("sei_per_pct_soc")
     t = metrics.get("duration_min")
-    if sei is None or t is None or not np.isfinite(sei) or not np.isfinite(t):
+    if deg is None or t is None or not np.isfinite(deg) or not np.isfinite(t):
         return 1e6
 
-    span_sei = max(nadir_sei - utopia_sei, 1e-6)
+    utopia_deg = utopia_degradation if utopia_degradation is not None else utopia_sei
+    nadir_deg = nadir_degradation if nadir_degradation is not None else nadir_sei
+    span_deg = max(nadir_deg - utopia_deg, 1e-6)
     span_t = max(nadir_time - utopia_time, 1e-6)
 
-    sei_term = abs(sei - utopia_sei) / span_sei
+    deg_term = abs(deg - utopia_deg) / span_deg
     t_term = abs(t - utopia_time) / span_t
 
-    return float(max(omega * t_term, (1.0 - omega) * sei_term))
+    return float(max(omega * t_term, (1.0 - omega) * deg_term))
 
 
 # ---------------------------------------------------------------------------
@@ -266,9 +275,13 @@ def aggregate_lifetime_reward(
     returns, in FamilyBayesianOptimizer._evaluate() via chebyshev_loss().
     This keeps the metrics dict consistent for downstream reporting.
     """
-    # Use composite mode internally even when chebyshev is requested
-    # (chebyshev is a post-processing override, not a different simulator)
-    internal_mode: ObjectiveMode = "composite" if objective_mode == "chebyshev" else objective_mode
+    # Chebyshev is a post-processing override; physics uses its own loss builder.
+    if objective_mode == "chebyshev":
+        internal_mode: ObjectiveMode = "composite"
+    elif objective_mode == "physics":
+        internal_mode = "composite"
+    else:
+        internal_mode = objective_mode
 
     m = session_metrics(
         session, k=k, v_ref_stress=v_ref_stress, t_comfort_c=t_comfort_c,
@@ -345,7 +358,43 @@ def aggregate_lifetime_reward(
         m.update(feasible=False, loss=loss, reward=-loss)
         return -loss, m
 
-    loss, comp = composite_loss(m, weights, objective_mode=internal_mode)
+    from charging_opt.physics_degradation import (
+        compute_physics_degradation,
+        physics_aware_loss,
+    )
+
+    age = float(session.get("initial_state", {}).get("age", 0.0))
+    phys = compute_physics_degradation(
+        session,
+        q0_as=session.get("q_as"),
+        use_paper1_sei=True,
+        current_q_loss_pct=max(age * 40.0, 0.0),
+    )
+    m.update(
+        capacity_fade_pct=phys["capacity_fade_pct"],
+        capacity_fade_frac=phys["capacity_fade_frac"],
+        equiv_cycles_to_eol=phys["equiv_cycles_to_eol"],
+        ah_throughput=phys["ah_throughput"],
+        nominal_c_rate=phys["nominal_c_rate"],
+        physics_model_source=phys["model_source"],
+        physics_degradation=phys,
+    )
+    if "sei_fade_pct_per_cycle_paper1" in phys:
+        m["sei_fade_pct_per_cycle_paper1"] = phys["sei_fade_pct_per_cycle_paper1"]
+
+    if objective_mode == "physics":
+        loss, comp = physics_aware_loss(
+            phys,
+            duration_min=time_term,
+            w_time=weights.time,
+            w_vstress=weights.voltage_stress,
+            w_temp=weights.temperature,
+            voltage_stress_v2_min=float(m.get("voltage_stress_v2_min", 0.0)),
+            temperature_penalty_c2_min=float(m.get("temperature_penalty_c2_min", 0.0)),
+        )
+    else:
+        loss, comp = composite_loss(m, weights, objective_mode=internal_mode)
+
     m.update(
         feasible=True,
         loss=float(loss),
@@ -364,6 +413,8 @@ def aggregate_lifetime_reward(
             "duration_min": time_term,
             "temperature_penalty_c2_min": m.get("temperature_penalty_c2_min"),
             "voltage_stress_v2_min": m.get("voltage_stress_v2_min"),
+            "capacity_fade_pct": phys["capacity_fade_pct"],
+            "equiv_cycles_to_eol": phys["equiv_cycles_to_eol"],
             **comp,
         },
     )

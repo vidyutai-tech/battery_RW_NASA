@@ -273,3 +273,202 @@ Re-run with `--objective legacy` to reproduce SEI-only ranking (CC-taper tended 
 | `charging_opt/io_utils.py` | User-writable output paths |
 
 Twin training: `rw_transfer/`, configs in `configs/default.yaml`.
+
+---
+
+## Stage 3 (enhanced): physics degradation, thermal awareness, and figures
+
+This section documents the **updated Stage 3 pipeline** beyond the original SEI-proxy composite benchmark. It adds:
+
+- **Physics-grounded degradation** — Wang et al. (2011) capacity-fade model, calibrated from RW9 measured capacity fade
+- **Temperature-aware optimization** — BDT-predicted current derating + optional temperature penalty in the BO objective
+- **Ambient sensitivity** — repeat BO at T₀ = 15 / 25 / 35 °C to see how optimal profiles shift with environment
+- **Publication figures** — automated plots under `outputs/visualization/`
+
+All commands assume you have already run **§3 prerequisites** (`01_fit_ocv_curve.py`, `00_diagnose_drift.py`) and set `BDT_CKPT`.
+
+### Step 0 — Calibrate the Wang degradation model (one time)
+
+Run after `01_fit_ocv_curve.py` has produced `capacity_fade.npz`:
+
+```bash
+venv/bin/python scripts/calibrate_degradation_model.py
+```
+
+Writes `outputs/charging_opt/models/stage1_state_estimation/degradation_model.npz`.  
+Every feasible BO evaluation now also reports `capacity_fade_pct` and `equiv_cycles_to_eol` in the metrics JSON, even when the objective is still `composite`.
+
+### Step 1 — Baseline enhanced BO (SEI proxy + PI acquisition)
+
+Same 8-family benchmark as §3, but with **Probability of Improvement (PI)** acquisition (recommended over EI):
+
+```bash
+venv/bin/python scripts/03_optimize_profile_families.py \
+  --bdt_ckpt $BDT_CKPT \
+  --acq_func PI \
+  --out_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
+  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
+  --n_calls 40 --n_initial 10 \
+  --max_duration_min 105 --max_minutes 150
+```
+
+Optional flags (can be combined):
+
+| Flag | Effect |
+|------|--------|
+| `--objective physics` | Minimize Wang capacity-fade loss instead of SEI/ΔSoC |
+| `--thermal_derating` | Reduce current in the simulator when BDT T > comfort threshold |
+| `--thermal_loss` | Add temperature penalty on top of the BO loss |
+| `--thermal_derate_comfort_c 33` | Start derating above this °C (default 33) |
+| `--age_conditioning` | Evaluate each candidate at ages 0 / 0.25 / 0.5 / 0.75 |
+| `--chebyshev_omega 0.5` | Directed Pareto scalarization (0=lifetime, 1=fastest) |
+
+Chebyshev sweep across ω (directed Pareto front):
+
+```bash
+venv/bin/python scripts/run_chebyshev_pareto_sweep.py \
+  --bdt_ckpt $BDT_CKPT \
+  --families pulsed cccv adaptive_two_step \
+  --n_calls 30 --n_initial 8 \
+  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
+  --max_duration_min 105 --acq_func PI \
+  --out_dir outputs/charging_opt_user/$USER/chebyshev_sweep
+```
+
+### Step 2 — Physics + thermal combined (recommended “full” single run)
+
+Combines `--objective physics` with thermal derating and thermal loss in **one** BO job:
+
+```bash
+venv/bin/python scripts/03_optimize_profile_families.py \
+  --objective physics \
+  --acq_func PI \
+  --thermal_derating \
+  --thermal_loss \
+  --thermal_derate_comfort_c 33 \
+  --bdt_ckpt $BDT_CKPT \
+  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal \
+  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
+  --n_calls 40 --n_initial 10 \
+  --max_duration_min 105 --max_minutes 150
+```
+
+Or use the suite script (calibration + baseline BO + ambient sweep):
+
+```bash
+venv/bin/python scripts/run_physics_thermal_suite.py \
+  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
+  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal
+```
+
+Use `--skip_ambient` for baseline only, or `--skip_calibration` if `degradation_model.npz` already exists.
+
+### Step 3 — Ambient temperature sensitivity (Level 2)
+
+Runs BO separately at **T₀ = 15, 25, 35 °C** (3× the work of a single temperature). Use a subset of families for speed:
+
+```bash
+venv/bin/python scripts/run_ambient_sensitivity.py \
+  --objective physics \
+  --thermal_derating --thermal_loss --thermal_derate_comfort_c 33 \
+  --bdt_ckpt $BDT_CKPT \
+  --families cccv,pulsed,adaptive_two_step \
+  --ambient_temps 15,25,35 \
+  --n_calls 20 --n_initial 6 \
+  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
+  --max_duration_min 105 \
+  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal/ambient_sensitivity
+```
+
+Outputs:
+
+```
+ambient_sensitivity/
+  ambient_sensitivity_summary.json       # best family per T0
+  ambient_sensitivity_comparison.png     # cross-T comparison plot
+  T15/models/ …  T15/plots/profile_families/best_*.png
+  T25/ …
+  T35/ …
+```
+
+Regenerate plots from saved JSON (no BO re-run):
+
+```bash
+venv/bin/python scripts/run_ambient_sensitivity.py --plots_only \
+  --objective physics --thermal_derating --thermal_loss \
+  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal/ambient_sensitivity \
+  --families cccv,pulsed,adaptive_two_step
+```
+
+### Step 4 — Degradation model validation & publication figures
+
+Compare SEI proxy rankings against the calibrated Wang model (requires GPU for BDT re-scoring):
+
+```bash
+venv/bin/python scripts/compare_degradation_models.py \
+  --enhanced_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
+  --chebyshev_json outputs/charging_opt_user/$USER/chebyshev_sweep/chebyshev_sweep_results.json \
+  --out_dir outputs/visualization
+```
+
+Generate all meeting figures (fig1–fig5 from enhanced + chebyshev results; add `--with_physics` for fig6):
+
+```bash
+venv/bin/python scripts/gen_all_figs.py \
+  --out_dir outputs/visualization \
+  --enhanced_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
+  --chebyshev_json outputs/charging_opt_user/$USER/chebyshev_sweep/chebyshev_sweep_results.json
+
+# optional: also build fig6 (physics degradation panel)
+venv/bin/python scripts/gen_all_figs.py --with_physics --out_dir outputs/visualization
+```
+
+Figure index:
+
+| File | Content |
+|------|---------|
+| `fig1_pareto_front.png` | Chebyshev pulsed sweep + SEI cost vs CCCV |
+| `fig2_all_families.png` | 8 families × I / V / SoC |
+| `fig3_family_ranking.png` | SEI, duration, composite loss bars |
+| `fig4_reference_profiles.png` | Fast / balanced / lifetime reference profiles |
+| `fig5_methodology_summary.png` | Family optima + EI vs PI convergence |
+| `fig6_physics_degradation.png` | SEI proxy vs Wang model validation |
+
+### Enhanced Stage 3 output layout
+
+```
+outputs/charging_opt_user/<USER>/
+  stage3_enhanced_20260614/          # PI + composite objective (8 families)
+  stage3_physics/                    # physics objective only (optional)
+  stage3_physics_thermal/            # physics + thermal baseline
+    models/ … plots/pareto/ … plots/profile_families/
+    ambient_sensitivity/
+      T15/ T25/ T35/
+  chebyshev_sweep/
+outputs/visualization/               # publication figures + degradation comparison JSON
+outputs/charging_opt/models/stage1_state_estimation/
+  degradation_model.npz              # calibrated Wang model
+```
+
+### New scripts & modules
+
+| Script | Purpose |
+|--------|---------|
+| `calibrate_degradation_model.py` | Fit Wang model → `degradation_model.npz` |
+| `run_chebyshev_pareto_sweep.py` | Directed Pareto via ω sweep |
+| `run_physics_thermal_suite.py` | Calibration + physics/thermal BO + ambient sweep |
+| `run_ambient_sensitivity.py` | BO at multiple T₀ values |
+| `compare_degradation_models.py` | SEI vs Wang validation + fig6 |
+| `gen_all_figs.py` | Publication figure bundle |
+
+| Module | Role |
+|--------|------|
+| `charging_opt/physics_degradation.py` | Wang capacity fade + Paper 1 SEI; `physics_aware_loss()` |
+| `charging_opt/thermal_management.py` | Derating controller, ambient states, lumped thermal (standalone) |
+
+### Notes
+
+- **Physics vs SEI:** `--objective physics` changes what BO minimizes; SEI/ΔSoC is still computed for reporting. Spearman rank correlation between SEI proxy and Wang `equiv_cycles_to_eol` is typically strong (see `outputs/visualization/degradation_model_comparison.json`).
+- **Thermal derating vs thermal loss:** Derating changes the simulated current profile inside the BDT loop; thermal loss adds a penalty term to the scalar BO objective. Use both for temperature-aware optimization.
+- **Lumped thermal model** (`LumpedThermalModel` in `thermal_management.py`) is for **standalone** “what-if cooling” analysis only — do not substitute its temperature into the BDT optimization loop.
+- **Runtime:** Full 8-family × 40 evals ≈ 3–4 h GPU; adding ambient sweep (3 temps × 3 families × 20 evals) adds ≈ 1–2 h.

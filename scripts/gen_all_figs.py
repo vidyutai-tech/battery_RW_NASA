@@ -7,10 +7,11 @@ Fig 2 — All 8 profile families (I, V, SoC panels)
 Fig 3 — Family ranking (3 metrics)
 Fig 4 — Three reference profiles (fast / balanced / lifetime)
 Fig 5 — Methodology summary (family optima + BO convergence)
+Fig 6 — Physics-grounded degradation (use --with_physics)
 
 Run:
   python scripts/gen_all_figs.py
-  python scripts/gen_all_figs.py --out_dir outputs/visualization
+  python scripts/gen_all_figs.py --with_physics
 """
 
 from __future__ import annotations
@@ -778,6 +779,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--enhanced_dir", type=Path, default=DEFAULT_ENHANCED)
     p.add_argument("--ei_dir", type=Path, default=DEFAULT_EI)
     p.add_argument("--chebyshev_json", type=Path, default=DEFAULT_CHEBYSHEV)
+    p.add_argument(
+        "--with_physics",
+        action="store_true",
+        help="Also run compare_degradation_models.py for fig6 (needs GPU, ~2 min)",
+    )
     return p.parse_args()
 
 
@@ -816,7 +822,22 @@ def main() -> None:
     print("  fig4_reference_profiles.png")
     build_fig5(out, meta, pulsed_sweep, loss_ei, loss_pi, best_pi)
     print("  fig5_methodology_summary.png")
-    print(f"\nAll 5 figures saved to {out}/")
+
+    if args.with_physics:
+        import subprocess
+        cmd = [
+            sys.executable,
+            str(ROOT / "scripts/compare_degradation_models.py"),
+            "--enhanced_dir", str(args.enhanced_dir),
+            "--chebyshev_json", str(args.chebyshev_json),
+            "--out_dir", str(out),
+        ]
+        print("  Running physics degradation comparison (fig6)...")
+        subprocess.run(cmd, check=True, cwd=str(ROOT))
+        print("  fig6_physics_degradation.png")
+
+    n_figs = 6 if args.with_physics else 5
+    print(f"\nAll {n_figs} figures saved to {out}/")
 
 
 if __name__ == "__main__":

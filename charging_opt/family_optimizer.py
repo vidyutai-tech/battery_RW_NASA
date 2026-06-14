@@ -33,6 +33,7 @@ from charging_opt.lifetime_reward import (
     chebyshev_loss,          # NEW — added in lifetime_reward.py
 )
 from charging_opt.profile_simulator import ProfileSimulator
+from charging_opt.thermal_management import ThermalDeratingController
 
 # Age checkpoints for age-conditioned evaluation (Enhancement 2).
 # Covers RW9→RW12 lifespan (age 0 to 1).
@@ -77,6 +78,9 @@ def _age_conditioned_loss(
     v_ref_stress: float,
     t_comfort_c: float,
     chebyshev_omega: Optional[float] = None,
+    thermal_controller: Optional[ThermalDeratingController] = None,
+    thermal_w_comfort: float = 0.5,
+    thermal_w_hard: float = 5.0,
 ) -> Tuple[float, Dict]:
     """
     Evaluate `params` at each age in `age_points`.
@@ -119,6 +123,17 @@ def _age_conditioned_loss(
             loss_val = chebyshev_loss(metrics, omega=chebyshev_omega)
         else:
             loss_val = float(metrics.get("loss", 1e6))
+
+        if thermal_controller is not None and metrics.get("feasible"):
+            t_loss = thermal_controller.temperature_loss(
+                session["temperature_c"],
+                w_comfort=thermal_w_comfort,
+                w_hard=thermal_w_hard,
+            )
+            loss_val += t_loss
+            metrics["temperature_derating_loss"] = t_loss
+            metrics.update(thermal_controller.feasibility_check(session["temperature_c"]))
+            metrics["loss"] = loss_val
 
         losses.append(loss_val)
         per_age.append({
@@ -187,6 +202,9 @@ class FamilyBayesianOptimizer:
         age_weights: List[float] = DEFAULT_AGE_WEIGHTS,
         # Enhancement 4: Chebyshev scalarization
         chebyshev_omega: Optional[float] = None,
+        thermal_controller: Optional[ThermalDeratingController] = None,
+        thermal_w_comfort: float = 0.5,
+        thermal_w_hard: float = 5.0,
     ):
         self.simulator = simulator
         self.family = family
@@ -204,8 +222,26 @@ class FamilyBayesianOptimizer:
         self.age_points = list(age_points)
         self.age_weights = list(age_weights)
         self.chebyshev_omega = chebyshev_omega
+        self.thermal_controller = thermal_controller
+        self.thermal_w_comfort = thermal_w_comfort
+        self.thermal_w_hard = thermal_w_hard
         self.search_space = family.search_space()
         self.history: List[Dict] = []
+
+    def _apply_thermal_loss(self, session: Dict, metrics: Dict) -> float:
+        loss = float(metrics.get("loss", 1e6))
+        if self.thermal_controller is None or not metrics.get("feasible"):
+            return loss
+        t_loss = self.thermal_controller.temperature_loss(
+            session["temperature_c"],
+            w_comfort=self.thermal_w_comfort,
+            w_hard=self.thermal_w_hard,
+        )
+        loss += t_loss
+        metrics["temperature_derating_loss"] = t_loss
+        metrics.update(self.thermal_controller.feasibility_check(session["temperature_c"]))
+        metrics["loss"] = loss
+        return loss
 
     def _evaluate(self, x: List[float]) -> float:
         params = self.family.from_vector(x)
@@ -224,6 +260,9 @@ class FamilyBayesianOptimizer:
                 v_ref_stress=self.v_ref_stress,
                 t_comfort_c=self.t_comfort_c,
                 chebyshev_omega=self.chebyshev_omega,
+                thermal_controller=self.thermal_controller,
+                thermal_w_comfort=self.thermal_w_comfort,
+                thermal_w_hard=self.thermal_w_hard,
             )
             self.history.append({
                 "family_id": self.family_id,
@@ -248,12 +287,12 @@ class FamilyBayesianOptimizer:
                 v_ref_stress=self.v_ref_stress,
                 t_comfort_c=self.t_comfort_c,
             )
-            # Apply Chebyshev override if requested (Enhancement 4)
             if self.chebyshev_omega is not None and metrics.get("feasible"):
                 loss = chebyshev_loss(metrics, omega=self.chebyshev_omega)
                 metrics["loss"] = loss
             else:
                 loss = float(metrics.get("loss", 1e6))
+            loss = self._apply_thermal_loss(session, metrics)
 
             self.history.append({
                 "family_id": self.family_id,
@@ -359,6 +398,9 @@ def optimize_families(
     age_points: List[float] = DEFAULT_AGE_POINTS,
     age_weights: List[float] = DEFAULT_AGE_WEIGHTS,
     chebyshev_omega: Optional[float] = None,
+    thermal_controller: Optional[ThermalDeratingController] = None,
+    thermal_w_comfort: float = 0.5,
+    thermal_w_hard: float = 5.0,
     on_family_done: Optional[Callable[[Dict[str, FamilyOptimizationResult]], None]] = None,
 ) -> Dict[str, FamilyOptimizationResult]:
     results: Dict[str, FamilyOptimizationResult] = {}
@@ -369,6 +411,8 @@ def optimize_families(
             print(f"  Age conditioning ON: ages={age_points}, weights={age_weights}")
         if chebyshev_omega is not None:
             print(f"  Chebyshev omega={chebyshev_omega:.2f}")
+        if thermal_controller is not None:
+            print(f"  Thermal loss: ON (comfort={thermal_controller.t_comfort_c:.1f}°C)")
         print(f"  Acquisition: {acq_func}")
         print(f"{'=' * 60}")
 
@@ -388,6 +432,9 @@ def optimize_families(
             age_points=age_points,
             age_weights=age_weights,
             chebyshev_omega=chebyshev_omega,
+            thermal_controller=thermal_controller,
+            thermal_w_comfort=thermal_w_comfort,
+            thermal_w_hard=thermal_w_hard,
         )
         results[fid] = opt.optimize(
             n_calls=n_calls, n_initial_points=n_initial_points,
