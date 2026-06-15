@@ -142,7 +142,10 @@ def main() -> None:
                 family_ids=family_ids,
             )
             export_family_artifacts(
-                results, plots_dir, csv_path=models_dir / "comparison_table.csv",
+                results,
+                plots_dir,
+                csv_path=models_dir / "comparison_table.csv",
+                constraints=data.get("constraints", {}),
             )
             print(f"T{t_amb:.0f}: plots -> {plots_dir}/")
             results_by_temp[t_amb] = results
@@ -170,12 +173,24 @@ def main() -> None:
                 initial_state=state,
                 bdt_path=str(bdt_path),
                 max_duration_min=args.max_duration_min,
+                objective_config={
+                    "objective_mode": objective_mode,
+                    "thermal_derating": args.thermal_derating,
+                    "thermal_loss": args.thermal_loss,
+                    "thermal_derate_comfort_c": args.thermal_derate_comfort_c,
+                },
                 repo_root=ROOT,
             )
             export_family_artifacts(
                 results,
                 plots_dir,
                 csv_path=models_dir / "comparison_table.csv",
+                constraints={
+                    "objective_mode": objective_mode,
+                    "thermal_derating": args.thermal_derating,
+                    "thermal_loss": args.thermal_loss,
+                    "thermal_derate_comfort_c": args.thermal_derate_comfort_c,
+                },
             )
             print(f"  Plots -> {plots_dir}/")
             results_by_temp[t_amb] = results

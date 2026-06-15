@@ -2,15 +2,16 @@
 """
 Publication figure generation for RW9 charging optimization.
 
-Fig 1 — Chebyshev Pareto front
+Fig 1 — Pareto / trade-off front (Chebyshev SEI sweep or physics ΔQ/Q₀)
 Fig 2 — All 8 profile families (I, V, SoC panels)
-Fig 3 — Family ranking (3 metrics)
+Fig 3 — Family ranking (degradation, duration, loss)
 Fig 4 — Three reference profiles (fast / balanced / lifetime)
 Fig 5 — Methodology summary (family optima + BO convergence)
-Fig 6 — Physics-grounded degradation (use --with_physics)
+Fig 6 — Physics-grounded degradation validation (--with_physics)
+Fig 7 — Ambient temperature sensitivity (physics+thermal runs only)
 
 Run:
-  python scripts/gen_all_figs.py
+  python scripts/gen_all_figs.py --run_dir outputs/charging_opt_user/hima/stage3_physics_thermal
   python scripts/gen_all_figs.py --with_physics
 """
 
@@ -21,8 +22,9 @@ import csv
 import json
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import matplotlib
 
@@ -37,8 +39,12 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("MPLCONFIGDIR", f"/tmp/mplconfig_{os.getenv('USER', 'default')}")
 
 DEFAULT_ENHANCED = ROOT / "outputs/charging_opt_user/hima/stage3_enhanced_20260614"
+DEFAULT_PHYSICS = ROOT / "outputs/charging_opt_user/hima/stage3_physics_thermal"
 DEFAULT_EI = ROOT / "outputs/charging_opt_user/hima/stage3_optimization"
 DEFAULT_CHEBYSHEV = ROOT / "outputs/charging_opt_user/hima/chebyshev_sweep/chebyshev_sweep_results.json"
+
+from charging_opt.pareto_analysis import resolve_pareto_config
+from charging_opt.io_utils import resolve_visualization_dir
 
 C = {
     "cccv": "#1b7837",
@@ -328,7 +334,28 @@ def profile_from_params(
     raise KeyError(f"Unknown family_id: {family_id}")
 
 
-def load_comparison_table(path: Path) -> Dict[str, Dict[str, Any]]:
+@dataclass
+class RunContext:
+    run_dir: Path
+    objective_mode: str
+    deg_key: str
+    deg_label: str
+    meta: Dict[str, Dict[str, Any]]
+    best_params: Dict[str, Dict[str, Any]]
+    constraints: Dict[str, Any]
+    pareto: Optional[Dict[str, Any]]
+    thermal: bool
+
+
+def _deg_value(row: Dict[str, str], deg_key: str) -> float:
+    if row.get("degradation_value") not in (None, "", "nan"):
+        return float(row["degradation_value"])
+    if deg_key == "capacity_fade_pct" and row.get("capacity_fade_pct"):
+        return float(row["capacity_fade_pct"])
+    return float(row["sei_per_pct_soc"])
+
+
+def load_comparison_table(path: Path, *, deg_key: str = "sei_per_pct_soc") -> Dict[str, Dict[str, Any]]:
     meta: Dict[str, Dict[str, Any]] = {}
     with path.open(newline="") as f:
         for row in csv.DictReader(f):
@@ -336,11 +363,53 @@ def load_comparison_table(path: Path) -> Dict[str, Dict[str, Any]]:
             meta[fid] = {
                 "loss": float(row["loss"]),
                 "sei": float(row["sei_per_pct_soc"]),
+                "fade": float(row["capacity_fade_pct"]) if row.get("capacity_fade_pct") else float("nan"),
+                "deg": _deg_value(row, deg_key),
                 "dur": float(row["duration_min"]),
                 "feasible": row["feasible"].lower() == "true",
                 "params": row["parameters"],
+                "peak_t": float(row["peak_temperature"]) if row.get("peak_temperature") else float("nan"),
             }
     return meta
+
+
+def load_run_context(run_dir: Path) -> RunContext:
+    run_dir = Path(run_dir)
+    results_json = run_dir / "models/family_optimization_results.json"
+    comparison_csv = run_dir / "models/comparison_table.csv"
+    pareto_json = run_dir / "models/pareto_analysis.json"
+    payload = json.loads(results_json.read_text())
+    constraints = payload.get("constraints", {})
+    objective_mode = constraints.get("objective_mode", "composite")
+    _, deg_key, deg_label = resolve_pareto_config(constraints)
+    meta = load_comparison_table(comparison_csv, deg_key=deg_key)
+    pareto = json.loads(pareto_json.read_text()) if pareto_json.is_file() else None
+    return RunContext(
+        run_dir=run_dir,
+        objective_mode=objective_mode,
+        deg_key=deg_key,
+        deg_label=deg_label,
+        meta=meta,
+        best_params=load_best_params(results_json),
+        constraints=constraints,
+        pareto=pareto,
+        thermal=bool(constraints.get("thermal_derating") or constraints.get("thermal_loss")),
+    )
+
+
+def _family_caption(m: Dict[str, Any], ctx: RunContext) -> str:
+    if ctx.deg_key == "capacity_fade_pct":
+        return f"{m['dur']:.0f} min  ·  {ctx.deg_label}={m['deg']:.3f}"
+    return f"{m['dur']:.0f} min  ·  {ctx.deg_label}={m['deg']:.1f}"
+
+
+def _run_subtitle(ctx: RunContext) -> str:
+    parts = ["Start SoC=15%", "target 95%", "PI-BO, 40 evals/family"]
+    if ctx.objective_mode == "physics":
+        parts.insert(0, "Wang ΔQ/Q₀ objective")
+    if ctx.thermal:
+        parts.append("thermal derating + loss")
+    return "  ·  ".join(parts)
 
 
 def load_best_params(results_json: Path) -> Dict[str, Dict[str, Any]]:
@@ -403,12 +472,23 @@ def hbar(ax, vals, names, cols, xlabel, title, xlim, ref_line=None, val_fmt="{:.
     ax.grid(axis="x", alpha=0.35)
 
 
-def build_fig2(out: Path, meta: Dict[str, Dict[str, Any]], profiles: Dict[str, Tuple]) -> None:
+def build_fig2(out: Path, ctx: RunContext, profiles: Dict[str, Tuple]) -> None:
+    meta = ctx.meta
     n_fam = len(ORDER)
-    fig2 = plt.figure(figsize=(22, 13))
+    # Larger typography for slide / print readability
+    FS_TITLE = 14
+    FS_AXIS = 16
+    FS_TICK = 14
+    FS_ANNOT = 13
+    FS_ROW = 15
+    FS_SUPTITLE = 18
+    FS_LEGEND = 15
+    FS_PARAMS =12
+
+    fig2 = plt.figure(figsize=(24, 14))
     fig2.patch.set_facecolor("white")
     gs = gridspec.GridSpec(
-        3, n_fam, figure=fig2, hspace=0.18, wspace=0.28, left=0.04, right=0.98, top=0.91, bottom=0.07
+        3, n_fam, figure=fig2, hspace=0.22, wspace=0.30, left=0.05, right=0.98, top=0.90, bottom=0.10
     )
 
     for col, fid in enumerate(ORDER):
@@ -425,17 +505,16 @@ def build_fig2(out: Path, meta: Dict[str, Dict[str, Any]], profiles: Dict[str, T
         ax_i.plot(t, i_arr, color=color, lw=1.6, alpha=alpha)
         ax_i.set_ylim(-0.1, max(float(i_arr.max()) * 1.20, 0.5))
         ax_i.set_xlim(0, t[-1])
-        status = "FEASIBLE" if feasible else "INFEASIBLE"
+        status = "" if feasible else "  [infeasible]"
         ax_i.set_title(
-            f"{LABELS[fid]}\nloss={m['loss']:.1f}  SEI/ΔSoC={m['sei']:.1f}\n"
-            f"{m['dur']:.0f} min  [{status}]",
-            fontsize=7.5,
+            f"{LABELS[fid]}\n{_family_caption(m, ctx)}{status}",
+            fontsize=FS_TITLE,
             color=color,
-            pad=3,
+            pad=4,
         )
-        ax_i.tick_params(labelbottom=False, labelsize=7)
+        ax_i.tick_params(labelbottom=False, labelsize=FS_TICK)
         if col == 0:
-            ax_i.set_ylabel("I (A)", fontsize=8)
+            ax_i.set_ylabel("I (A)", fontsize=FS_AXIS)
         ax_i.grid(True)
         if not feasible:
             ax_i.text(
@@ -444,7 +523,7 @@ def build_fig2(out: Path, meta: Dict[str, Dict[str, Any]], profiles: Dict[str, T
                 "✗ Over time limit",
                 transform=ax_i.transAxes,
                 ha="center",
-                fontsize=7,
+                fontsize=FS_ANNOT,
                 color="#cc0000",
                 bbox=dict(fc="white", ec="#cc0000", lw=0.6, pad=1.5),
             )
@@ -453,35 +532,34 @@ def build_fig2(out: Path, meta: Dict[str, Dict[str, Any]], profiles: Dict[str, T
         ax_v.axhline(4.20, color="#888", ls="--", lw=0.7, alpha=0.6)
         ax_v.set_ylim(max(3.70, float(v_arr.min()) - 0.03), min(4.25, float(v_arr.max()) + 0.04))
         ax_v.set_xlim(0, t[-1])
-        ax_v.tick_params(labelbottom=False, labelsize=7)
+        ax_v.tick_params(labelbottom=False, labelsize=FS_TICK)
         if col == 0:
-            ax_v.set_ylabel("V (V)", fontsize=8)
+            ax_v.set_ylabel("V (V)", fontsize=FS_AXIS)
         ax_v.grid(True)
-        ax_v.text(0.97, 0.94, "4.2 V", transform=ax_v.transAxes, fontsize=6.5, color="#888", ha="right", va="top")
+        ax_v.text(0.97, 0.94, "4.2 V", transform=ax_v.transAxes, fontsize=FS_ANNOT, color="#888", ha="right", va="top")
 
         ax_s.plot(t, soc_arr * 100, color="#333333", lw=1.6, alpha=alpha)
         ax_s.axhline(95, color="#888", ls=":", lw=0.9)
         ax_s.set_ylim(10, 102)
         ax_s.set_xlim(0, t[-1])
-        ax_s.set_xlabel("Time (min)", fontsize=8)
-        ax_s.tick_params(labelsize=7)
+        ax_s.set_xlabel("Time (min)", fontsize=FS_AXIS)
+        ax_s.tick_params(labelsize=FS_TICK)
         if col == 0:
-            ax_s.set_ylabel("SoC (%)", fontsize=8)
+            ax_s.set_ylabel("SoC (%)", fontsize=FS_AXIS)
         ax_s.grid(True)
-        ax_s.text(0.97, 0.12, "95% target", transform=ax_s.transAxes, fontsize=6.5, color="#888", ha="right")
+        ax_s.text(0.97, 0.12, "95% target", transform=ax_s.transAxes, fontsize=FS_ANNOT, color="#888", ha="right")
 
     for col, fid in enumerate(ORDER):
         ax_s = fig2.axes[col + 2 * n_fam]
-        ax_s.text(0.5, -0.38, meta[fid]["params"], transform=ax_s.transAxes, ha="center", fontsize=6.5, color="#555", style="italic")
+        ax_s.text(0.5, -0.42, meta[fid]["params"], transform=ax_s.transAxes, ha="center", fontsize=FS_PARAMS, color="#555", style="italic")
 
     for row_idx, row_label in enumerate(["Charging\ncurrent", "Cell\nvoltage", "State of\ncharge"]):
-        fig2.text(0.005, 0.88 - row_idx * 0.295, row_label, ha="left", va="center", fontsize=8.5, rotation=90, color="#555")
+        fig2.text(0.005, 0.88 - row_idx * 0.295, row_label, ha="left", va="center", fontsize=FS_ROW, rotation=90, color="#555")
 
     fig2.suptitle(
-        "All Charging Profile Families — Best BO Result per Family (RW9 Cell)\n"
-        "Start: SoC=15%, V=3.711 V, T=24.7 °C  |  Target: SoC≥95%  |  PI Acquisition, 40 evals/family",
-        fontsize=11,
-        y=0.975,
+        f"Best BO profile per family (RW9 BDT)\n{_run_subtitle(ctx)}",
+        fontsize=FS_SUPTITLE,
+        y=0.978,
     )
     legend_handles = [
         Line2D(
@@ -493,9 +571,77 @@ def build_fig2(out: Path, meta: Dict[str, Dict[str, Any]], profiles: Dict[str, T
         )
         for fid in ORDER
     ]
-    fig2.legend(handles=legend_handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.02), fontsize=8, framealpha=0.95, edgecolor="#ddd")
+    fig2.legend(
+        handles=legend_handles,
+        loc="lower center",
+        ncol=4,
+        bbox_to_anchor=(0.5, -0.04),
+        fontsize=FS_LEGEND,
+        framealpha=0.95,
+        edgecolor="#ddd",
+    )
     fig2.savefig(out / "fig2_all_families.png", dpi=180, bbox_inches="tight")
     plt.close(fig2)
+
+
+def build_fig1_physics(out: Path, ctx: RunContext) -> None:
+    """Duration vs ΔQ/Q₀ Pareto front from physics+thermal BO."""
+    if not ctx.pareto:
+        return
+    front = ctx.pareto.get("pareto_front", [])
+    tagged = ctx.pareto.get("tagged_global", {})
+    fig1, axes1 = plt.subplots(1, 2, figsize=(13, 5.5), gridspec_kw={"wspace": 0.38})
+
+    ax = axes1[0]
+    by_fam: Dict[str, List[Dict]] = {}
+    for pt in front:
+        by_fam.setdefault(pt["family_id"], []).append(pt)
+    for fid, pts in by_fam.items():
+        pts = sorted(pts, key=lambda p: p["duration_min"])
+        durs = [p["duration_min"] for p in pts]
+        fades = [p["capacity_fade_pct"] for p in pts]
+        ax.plot(durs, fades, "o-", color=C.get(fid, "#888"), lw=1.5, ms=5, label=LABELS.get(fid, fid))
+
+    cccv = ctx.meta.get("cccv")
+    if cccv and cccv["feasible"]:
+        ax.scatter([cccv["dur"]], [cccv["deg"]], c=C["cccv"], s=140, marker="s", zorder=6, edgecolors="white")
+        ax.annotate("CCCV\n(lowest ΔQ/Q₀)", (cccv["dur"], cccv["deg"]), xytext=(-45, 10),
+                    textcoords="offset points", fontsize=8, color=C["cccv"])
+
+    fastest = tagged.get("fastest")
+    if fastest:
+        ax.scatter([fastest["duration_min"]], [fastest["capacity_fade_pct"]],
+                   c=C["pulsed"], s=120, marker="*", zorder=7, edgecolors="white")
+        ax.annotate("Fastest", (fastest["duration_min"], fastest["capacity_fade_pct"]),
+                    xytext=(6, 6), textcoords="offset points", fontsize=8, color=C["pulsed"])
+
+    ax.set_xlabel("Charge duration (min)")
+    ax.set_ylabel(f"{ctx.deg_label}  (lower = better)")
+    ax.set_title("Physics Pareto front\n(non-dominated feasible BO points)", fontsize=11)
+    ax.legend(fontsize=7.5, loc="upper right")
+    ax.grid(True)
+
+    ax2 = axes1[1]
+    fam_order = [f for f in ORDER if ctx.meta.get(f, {}).get("feasible")]
+    names = [LABELS[f] for f in fam_order]
+    durs = [ctx.meta[f]["dur"] for f in fam_order]
+    fades = [ctx.meta[f]["deg"] for f in fam_order]
+    cols = [C[f] for f in fam_order]
+    ax2.scatter(durs, fades, c=cols, s=90, edgecolors="white", lw=0.8, zorder=4)
+    for f, d, fade in zip(fam_order, durs, fades):
+        ax2.annotate(LABELS[f].split("(")[0].strip(), (d, fade), xytext=(4, 3),
+                     textcoords="offset points", fontsize=7, color=C[f])
+    ax2.set_xlabel("Charge duration (min)")
+    ax2.set_ylabel(ctx.deg_label)
+    ax2.set_title("Family optima\n(physics + thermal BO)", fontsize=11)
+    ax2.grid(True)
+
+    fig1.suptitle(
+        f"Charging speed vs. Wang capacity fade — RW9 BDT\n{_run_subtitle(ctx)}",
+        fontsize=12, y=1.01,
+    )
+    fig1.savefig(out / "fig1_pareto_front.png", dpi=200, bbox_inches="tight")
+    plt.close(fig1)
 
 
 def build_fig1(
@@ -589,20 +735,26 @@ def build_fig1(
     plt.close(fig1)
 
 
-def build_fig3(out: Path, meta: Dict[str, Dict[str, Any]]) -> None:
+def build_fig3(out: Path, ctx: RunContext) -> None:
+    meta = ctx.meta
     fam_order_rank = [f for f in ORDER if meta[f]["feasible"]]
     names = [LABELS[f] for f in fam_order_rank]
-    seis_r = [meta[f]["sei"] for f in fam_order_rank]
+    deg_r = [meta[f]["deg"] for f in fam_order_rank]
     durs_r = [meta[f]["dur"] for f in fam_order_rank]
     loss_r = [meta[f]["loss"] for f in fam_order_rank]
     cols_r = [C[f] for f in fam_order_rank]
+    deg_fmt = "{:.3f}" if ctx.deg_key == "capacity_fade_pct" else "{:.1f}"
+    best_deg = min(deg_r) if deg_r else 0.0
 
     fig3, axes3 = plt.subplots(1, 3, figsize=(14, 5.2), gridspec_kw={"wspace": 0.45})
-    hbar(axes3[0], seis_r, names, cols_r, "SEI / ΔSoC  (lower = better)", "① Degradation Proxy", (65, 74.5), ref_line=68.0)
-    axes3[0].text(68.15, -0.6, "CCCV\nbest", fontsize=6.5, color="#555", va="top")
-    hbar(axes3[1], durs_r, names, cols_r, "Charge duration (min)", "② Charging Speed", (85, 111), ref_line=105, val_fmt="{:.1f}")
-    axes3[1].text(105.2, -0.6, "105 min\nlimit", fontsize=6.5, color="#555", va="top")
-    hbar(axes3[2], loss_r, names, cols_r, "Composite loss (lower = better)", "③ Overall Score", (69, 76))
+    hbar(axes3[0], deg_r, names, cols_r, f"{ctx.deg_label}  (lower = better)",
+         f"① Degradation ({'Wang' if ctx.objective_mode == 'physics' else 'proxy'})",
+         (min(deg_r) - 0.01, max(deg_r) + 0.02) if ctx.deg_key == "capacity_fade_pct" else (65, 74.5),
+         ref_line=best_deg, val_fmt=deg_fmt)
+    hbar(axes3[1], durs_r, names, cols_r, "Charge duration (min)", "② Charging Speed", (45, 111), ref_line=105, val_fmt="{:.1f}")
+    loss_lo = min(loss_r) - 0.2
+    loss_hi = max(loss_r) + 0.3
+    hbar(axes3[2], loss_r, names, cols_r, "BO loss (lower = better)", "③ Overall Score", (loss_lo, loss_hi), val_fmt="{:.2f}")
 
     infeas = [f for f in ORDER if not meta[f]["feasible"]]
     if infeas:
@@ -616,55 +768,62 @@ def build_fig3(out: Path, meta: Dict[str, Dict[str, Any]]) -> None:
 
     legend_handles = [Line2D([0], [0], color=C[f], lw=0, marker="s", ms=10, label=LABELS[f]) for f in fam_order_rank]
     fig3.legend(handles=legend_handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.09), fontsize=8, framealpha=0.95, edgecolor="#ddd")
-    fig3.suptitle("Multi-Family Optimization Results — RW9 Cell  (PI Acquisition, 40 evals/family)", fontsize=12, y=1.02)
+    fig3.suptitle(f"Multi-family results — RW9  ({_run_subtitle(ctx)})", fontsize=12, y=1.02)
     fig3.savefig(out / "fig3_family_ranking.png", dpi=200, bbox_inches="tight")
     plt.close(fig3)
 
 
 def build_fig4(
     out: Path,
+    ctx: RunContext,
     profiles: Dict[str, Tuple],
-    meta: Dict[str, Dict[str, Any]],
     chebyshev_json: Path,
     pulsed_sweep: Sequence[Tuple[float, float, float]],
 ) -> None:
-    fast = pulsed_sweep[-1]
-    bal = pulsed_sweep[5]
-    fast_params = load_pulsed_params_at_omega(chebyshev_json, 1.0)
-    bal_params = load_pulsed_params_at_omega(chebyshev_json, 0.5)
-    t_pfast, i_pfast, v_pfast, s_pfast = profile_from_params("pulsed", fast_params, fast[1])
-    t_pbal, i_pbal, v_pbal, s_pbal = profile_from_params("pulsed", bal_params, bal[1])
-    t_cccv, i_cccv, v_cccv, s_cccv = profiles["cccv"]
-
-    ref_profiles = [
-        (
-            "Fastest\n(Pulsed, ω=1.0)",
-            t_pfast,
-            i_pfast,
-            v_pfast,
-            s_pfast,
-            C["pulsed"],
-            f"{fast[1]:.1f} min  |  SEI/ΔSoC={fast[2]:.1f}  |  I_peak={i_pfast.max():.2f} A",
-        ),
-        (
-            "Balanced\n(Pulsed, ω=0.5)",
-            t_pbal,
-            i_pbal,
-            v_pbal,
-            s_pbal,
-            C["adaptive_two_step"],
-            f"{bal[1]:.1f} min  |  SEI/ΔSoC={bal[2]:.1f}  |  I_peak={i_pbal.max():.2f} A",
-        ),
-        (
-            "Lifetime\n(CCCV, ω=0.0)",
-            t_cccv,
-            i_cccv,
-            v_cccv,
-            s_cccv,
-            C["cccv"],
-            f"{meta['cccv']['dur']:.1f} min  |  SEI/ΔSoC={meta['cccv']['sei']:.1f}  |  I_peak={i_cccv.max():.2f} A",
-        ),
-    ]
+    if ctx.objective_mode == "physics" and ctx.pareto:
+        tagged = ctx.pareto.get("tagged_global", {})
+        ref_profiles = []
+        for tag, label in (("fastest", "Fastest"), ("balanced", "Balanced"), ("lifetime", "Lifetime")):
+            cand = tagged.get(tag)
+            if not cand:
+                continue
+            fid = cand["family_id"]
+            params = cand["params"]
+            dur = float(cand["duration_min"])
+            deg = float(cand.get("capacity_fade_pct", ctx.meta[fid]["deg"]))
+            t, i_a, v_a, soc_a = profile_from_params(fid, params, dur)
+            ref_profiles.append((
+                f"{label}\n({LABELS.get(fid, fid)})",
+                t, i_a, v_a, soc_a,
+                C.get(fid, "#333"),
+                f"{dur:.1f} min  ·  {ctx.deg_label}={deg:.3f}",
+            ))
+    else:
+        fast = pulsed_sweep[-1]
+        bal = pulsed_sweep[5]
+        fast_params = load_pulsed_params_at_omega(chebyshev_json, 1.0)
+        bal_params = load_pulsed_params_at_omega(chebyshev_json, 0.5)
+        t_pfast, i_pfast, v_pfast, s_pfast = profile_from_params("pulsed", fast_params, fast[1])
+        t_pbal, i_pbal, v_pbal, s_pbal = profile_from_params("pulsed", bal_params, bal[1])
+        t_cccv, i_cccv, v_cccv, s_cccv = profiles["cccv"]
+        meta = ctx.meta
+        ref_profiles = [
+            (
+                "Fastest\n(Pulsed, ω=1.0)",
+                t_pfast, i_pfast, v_pfast, s_pfast, C["pulsed"],
+                f"{fast[1]:.1f} min  ·  SEI/ΔSoC={fast[2]:.1f}  ·  I_peak={i_pfast.max():.2f} A",
+            ),
+            (
+                "Balanced\n(Pulsed, ω=0.5)",
+                t_pbal, i_pbal, v_pbal, s_pbal, C["adaptive_two_step"],
+                f"{bal[1]:.1f} min  ·  SEI/ΔSoC={bal[2]:.1f}  ·  I_peak={i_pbal.max():.2f} A",
+            ),
+            (
+                "Lifetime\n(CCCV, ω=0.0)",
+                t_cccv, i_cccv, v_cccv, s_cccv, C["cccv"],
+                f"{meta['cccv']['dur']:.1f} min  ·  SEI/ΔSoC={meta['cccv']['sei']:.1f}  ·  I_peak={i_cccv.max():.2f} A",
+            ),
+        ]
 
     fig4, axes4 = plt.subplots(
         3,
@@ -699,7 +858,7 @@ def build_fig4(
                 ax.set_ylabel(row_labels[row], fontsize=9)
 
     fig4.suptitle(
-        "Three Reference Charging Profiles — RW9 Cell\nStart: SoC=15%, V=3.711 V, T=24.7°C  |  Target: SoC≥95%",
+        f"Reference charging profiles — RW9 BDT\n{_run_subtitle(ctx)}",
         fontsize=12,
         y=0.94,
     )
@@ -709,73 +868,131 @@ def build_fig4(
 
 def build_fig5(
     out: Path,
-    meta: Dict[str, Dict[str, Any]],
+    ctx: RunContext,
     pulsed_sweep: Sequence[Tuple[float, float, float]],
     loss_ei: np.ndarray,
     loss_pi: np.ndarray,
     best_pi: float,
 ) -> None:
+    meta = ctx.meta
     fig5, axes5 = plt.subplots(1, 2, figsize=(13, 5.0), gridspec_kw={"wspace": 0.40})
+    y_key = "deg"
+    y_label = ctx.deg_label
 
     ax = axes5[0]
     for fid in ORDER:
+        if fid not in meta:
+            continue
         m = meta[fid]
         mk = "s" if not m["feasible"] else "o"
         ms = 90 if not m["feasible"] else 110
         al = 0.4 if not m["feasible"] else 0.92
-        ax.scatter(m["dur"], m["sei"], color=C[fid], s=ms, marker=mk, alpha=al, edgecolors="white", lw=1.0, zorder=4)
+        ax.scatter(m["dur"], m[y_key], color=C[fid], s=ms, marker=mk, alpha=al, edgecolors="white", lw=1.0, zorder=4)
         ax.annotate(
             LABELS[fid].split("(")[0].strip(),
-            (m["dur"], m["sei"]),
+            (m["dur"], m[y_key]),
             xytext=(5, 4),
             textcoords="offset points",
             fontsize=7,
             color=C[fid],
         )
 
-    for o, d, s in pulsed_sweep:
-        ax.scatter(d, s, c=[[matplotlib.cm.RdYlGn_r(o)]], s=45, marker="^", zorder=3, edgecolors="none", alpha=0.7)
-    ax.plot([p[1] for p in pulsed_sweep], [p[2] for p in pulsed_sweep], "--", color="#888", lw=1.1, alpha=0.5, label="Chebyshev sweep (pulsed)")
-    ax.scatter([], [], c="gray", marker="^", s=45, label="Sweep points (ω=0→1)")
+    if ctx.objective_mode != "physics":
+        for o, d, s in pulsed_sweep:
+            ax.scatter(d, s, c=[[matplotlib.cm.RdYlGn_r(o)]], s=45, marker="^", zorder=3, edgecolors="none", alpha=0.7)
+        ax.plot([p[1] for p in pulsed_sweep], [p[2] for p in pulsed_sweep], "--", color="#888", lw=1.1, alpha=0.5, label="Chebyshev sweep (pulsed)")
+        ax.scatter([], [], c="gray", marker="^", s=45, label="Sweep points (ω=0→1)")
+
     ax.set_xlabel("Charge duration (min)")
-    ax.set_ylabel("SEI / ΔSoC")
-    ax.set_title("All Results: Family Optima + Chebyshev Sweep\nRW9 Cell  (PI acquisition, 40 evals/family)", fontsize=10.5)
-    ax.legend(fontsize=7.5, loc="upper left")
+    ax.set_ylabel(y_label)
+    title_right = "physics + thermal BO" if ctx.objective_mode == "physics" else "PI acquisition, 40 evals/family"
+    ax.set_title(f"Family optima\nRW9 BDT ({title_right})", fontsize=10.5)
+    if ctx.objective_mode != "physics":
+        ax.legend(fontsize=7.5, loc="upper left")
     ax.grid(True)
 
+    conv_family = "pulsed" if ctx.objective_mode == "physics" else "cccv"
     ax2 = axes5[1]
     n_evals = np.arange(1, len(loss_pi) + 1)
-    ax2.plot(n_evals, loss_ei, "o-", color="#d6604d", lw=1.8, ms=4, markeredgecolor="white", label="EI acquisition (original)")
-    ax2.plot(n_evals, loss_pi, "s-", color="#2166ac", lw=1.8, ms=4, markeredgecolor="white", label="PI acquisition (enhanced)")
-    ax2.axhline(best_pi, color="#1b7837", ls="--", lw=1.2, label=f"Best result (CCCV, PI={best_pi:.2f})")
-    mask = np.isfinite(loss_ei) & np.isfinite(loss_pi)
-    if mask.any():
-        ax2.fill_between(n_evals[mask], loss_pi[mask], loss_ei[mask], alpha=0.12, color="#2166ac")
-    ax2.text(
-        25,
-        np.nanmin(loss_pi) + 0.5,
-        "PI converges faster\n(Paper 3, Jiang et al. 2022)",
-        fontsize=8,
-        color="#2166ac",
-        bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#ccc", lw=0.6),
-    )
+    if ctx.objective_mode == "physics":
+        ax2.plot(n_evals, loss_pi, "s-", color=C["pulsed"], lw=1.8, ms=4, markeredgecolor="white",
+                 label=f"PI-BO ({LABELS.get(conv_family, conv_family)})")
+        ax2.axhline(best_pi, color="#1b7837", ls="--", lw=1.2, label=f"Best loss={best_pi:.2f}")
+        ax2.set_ylabel("Best physics loss (running minimum)")
+        ax2.set_title(f"BO convergence\n{LABELS.get(conv_family, conv_family)} family", fontsize=10.5)
+    else:
+        ax2.plot(n_evals, loss_ei, "o-", color="#d6604d", lw=1.8, ms=4, markeredgecolor="white", label="EI acquisition (original)")
+        ax2.plot(n_evals, loss_pi, "s-", color="#2166ac", lw=1.8, ms=4, markeredgecolor="white", label="PI acquisition (enhanced)")
+        ax2.axhline(best_pi, color="#1b7837", ls="--", lw=1.2, label=f"Best result (CCCV, PI={best_pi:.2f})")
+        mask = np.isfinite(loss_ei) & np.isfinite(loss_pi)
+        if mask.any():
+            ax2.fill_between(n_evals[mask], loss_pi[mask], loss_ei[mask], alpha=0.12, color="#2166ac")
+        ax2.set_ylabel("Best composite loss (running minimum)")
+        ax2.set_title("Acquisition Function Comparison\nEI vs PI — CCCV Family", fontsize=10.5)
     ax2.set_xlabel("BO evaluations")
-    ax2.set_ylabel("Best composite loss (running minimum)")
-    ax2.set_title("Acquisition Function Comparison\nEI vs PI — CCCV Family", fontsize=10.5)
     ax2.legend(fontsize=8, loc="upper right")
     ax2.grid(True)
     ax2.set_xlim(1, len(loss_pi))
-    y_vals = np.concatenate([loss_ei[np.isfinite(loss_ei)], loss_pi[np.isfinite(loss_pi)]])
+    y_vals = loss_pi[np.isfinite(loss_pi)]
+    if ctx.objective_mode != "physics":
+        y_vals = np.concatenate([loss_ei[np.isfinite(loss_ei)], y_vals])
     ax2.set_ylim(float(np.min(y_vals)) - 0.8, float(np.max(y_vals)) + 1.0)
 
-    fig5.suptitle("Methodology Summary — Battery Charging Optimization Pipeline  (RW9 NASA Dataset)", fontsize=12, y=1.02)
+    fig5.suptitle(f"Methodology summary — RW9 NASA dataset\n{_run_subtitle(ctx)}", fontsize=12, y=1.02)
     fig5.savefig(out / "fig5_methodology_summary.png", dpi=200, bbox_inches="tight")
     plt.close(fig5)
+
+
+def build_fig7_ambient(out: Path, run_dir: Path) -> bool:
+    summary_path = run_dir / "ambient_sensitivity" / "ambient_sensitivity_summary.json"
+    if not summary_path.is_file():
+        return False
+    summary = json.loads(summary_path.read_text())
+    temps = sorted(float(k) for k in summary)
+    durs = [summary[str(t)]["duration_min"] for t in temps]
+    peaks = [summary[str(t)]["peak_temperature"] for t in temps]
+    losses = [summary[str(t)]["best_loss"] for t in temps]
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), gridspec_kw={"wspace": 0.35})
+    ax = axes[0]
+    ax.plot(temps, durs, "o-", color=C["pulsed"], lw=2, ms=8)
+    ax.set_xlabel("Ambient T₀ (°C)")
+    ax.set_ylabel("Best charge duration (min)")
+    ax.set_title("Pulsed optimum vs. ambient temperature")
+    ax.grid(True)
+
+    ax2 = axes[1]
+    ax.plot(temps, peaks, "s-", color="#b2182b", lw=2, ms=8, label="Peak T")
+    ax.axhline(33, color="#888", ls="--", lw=1, label="Derating threshold (33°C)")
+    ax.set_xlabel("Ambient T₀ (°C)")
+    ax.set_ylabel("Peak temperature (°C)")
+    ax.set_title("Thermal headroom during optimized charge")
+    ax2_twin = ax2.twinx()
+    ax2_twin.plot(temps, losses, "^--", color="#555", lw=1.5, ms=7, alpha=0.8, label="Best loss")
+    ax2_twin.set_ylabel("Physics BO loss", color="#555")
+    h1, l1 = ax2.get_legend_handles_labels()
+    h2, l2 = ax2_twin.get_legend_handles_labels()
+    ax2.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=8)
+    ax2.grid(True)
+
+    fig.suptitle("Ambient sensitivity — physics + thermal BO (pulsed family wins at all T₀)", fontsize=12, y=1.02)
+    fig.savefig(out / "fig7_ambient_sensitivity.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    return True
+
+
+    return True
 
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out_dir", type=Path, default=ROOT / "outputs/visualization")
+    p.add_argument(
+        "--run_dir",
+        type=Path,
+        default=None,
+        help="Primary BO results (default: stage3_physics_thermal if present, else enhanced)",
+    )
     p.add_argument("--enhanced_dir", type=Path, default=DEFAULT_ENHANCED)
     p.add_argument("--ei_dir", type=Path, default=DEFAULT_EI)
     p.add_argument("--chebyshev_json", type=Path, default=DEFAULT_CHEBYSHEV)
@@ -787,41 +1004,67 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def _default_run_dir(explicit: Optional[Path]) -> Path:
+    if explicit is not None:
+        return explicit
+    if DEFAULT_PHYSICS.is_dir() and (DEFAULT_PHYSICS / "models/family_optimization_results.json").is_file():
+        return DEFAULT_PHYSICS
+    return DEFAULT_ENHANCED
+
+
 def main() -> None:
     args = parse_args()
-    out = args.out_dir
-    out.mkdir(parents=True, exist_ok=True)
+    out = resolve_visualization_dir(ROOT, args.out_dir)
 
-    comparison_csv = args.enhanced_dir / "models/comparison_table.csv"
-    results_json = args.enhanced_dir / "models/family_optimization_results.json"
+    run_dir = _default_run_dir(args.run_dir)
+    ctx = load_run_context(run_dir)
     ei_json = args.ei_dir / "models/family_optimization_results.json"
+    results_json = run_dir / "models/family_optimization_results.json"
 
-    meta = load_comparison_table(comparison_csv)
-    best_params = load_best_params(results_json)
     profiles = {
-        fid: profile_from_params(fid, best_params[fid], meta[fid]["dur"])
+        fid: profile_from_params(fid, ctx.best_params[fid], ctx.meta[fid]["dur"])
         for fid in ORDER
-        if fid in best_params and fid in meta
+        if fid in ctx.best_params and fid in ctx.meta
     }
-    pulsed_sweep = load_pulsed_chebyshev_sweep(args.chebyshev_json)
-    ref_time, ref_sei = load_cccv_chebyshev_baseline(args.chebyshev_json)
-    loss_pi = load_convergence_curve(results_json, "cccv")
-    loss_ei = load_convergence_curve(ei_json, "cccv")
-    best_pi = float(meta["cccv"]["loss"])
+    pulsed_sweep = (
+        load_pulsed_chebyshev_sweep(args.chebyshev_json)
+        if args.chebyshev_json.is_file() else []
+    )
+    ref_time, ref_sei = (
+        load_cccv_chebyshev_baseline(args.chebyshev_json)
+        if args.chebyshev_json.is_file() else (104.0, 68.0)
+    )
+    conv_family = "pulsed" if ctx.objective_mode == "physics" else "cccv"
+    loss_pi = load_convergence_curve(results_json, conv_family)
+    loss_ei = load_convergence_curve(ei_json, "cccv") if ei_json.is_file() else loss_pi
+    best_family = min(
+        (f for f in ORDER if ctx.meta.get(f, {}).get("feasible")),
+        key=lambda f: ctx.meta[f]["loss"],
+        default=conv_family,
+    )
+    best_pi = float(ctx.meta[best_family]["loss"])
 
-    print(f"Loading data from {args.enhanced_dir}")
+    print(f"Loading data from {run_dir}  (objective={ctx.objective_mode}, thermal={ctx.thermal})")
     print(f"Writing figures to {out}")
 
-    build_fig1(out, pulsed_sweep, ref_time, ref_sei)
+    if ctx.objective_mode == "physics":
+        build_fig1_physics(out, ctx)
+    else:
+        build_fig1(out, pulsed_sweep, ref_time, ref_sei)
     print("  fig1_pareto_front.png")
-    build_fig2(out, meta, profiles)
+    build_fig2(out, ctx, profiles)
     print("  fig2_all_families.png")
-    build_fig3(out, meta)
+    build_fig3(out, ctx)
     print("  fig3_family_ranking.png")
-    build_fig4(out, profiles, meta, args.chebyshev_json, pulsed_sweep)
+    build_fig4(out, ctx, profiles, args.chebyshev_json, pulsed_sweep)
     print("  fig4_reference_profiles.png")
-    build_fig5(out, meta, pulsed_sweep, loss_ei, loss_pi, best_pi)
+    build_fig5(out, ctx, pulsed_sweep, loss_ei, loss_pi, best_pi)
     print("  fig5_methodology_summary.png")
+
+    n_figs = 5
+    if build_fig7_ambient(out, run_dir):
+        print("  fig7_ambient_sensitivity.png")
+        n_figs += 1
 
     if args.with_physics:
         import subprocess
@@ -835,8 +1078,8 @@ def main() -> None:
         print("  Running physics degradation comparison (fig6)...")
         subprocess.run(cmd, check=True, cwd=str(ROOT))
         print("  fig6_physics_degradation.png")
+        n_figs += 1
 
-    n_figs = 6 if args.with_physics else 5
     print(f"\nAll {n_figs} figures saved to {out}/")
 
 

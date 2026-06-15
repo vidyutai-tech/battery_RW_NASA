@@ -188,6 +188,31 @@ _UTOPIA_TIME = 50.5   # fastest duration on your Pareto front (min)
 _NADIR_SEI = 82.0     # worst SEI among feasible profiles
 _NADIR_TIME = 105.0   # slowest allowed duration (your max_duration_min)
 
+# Physics Chebyshev scales (RW9 physics+thermal BO, pulsed family)
+_UTOPIA_FADE_PCT = 1.007
+_NADIR_FADE_PCT = 1.08
+
+
+def chebyshev_degradation_config(
+    objective_mode: str = "composite",
+) -> tuple[str, float, float, float, float]:
+    """Return (degradation_key, utopia_time, utopia_deg, nadir_time, nadir_deg)."""
+    if objective_mode == "physics":
+        return (
+            "capacity_fade_pct",
+            _UTOPIA_TIME,
+            _UTOPIA_FADE_PCT,
+            _NADIR_TIME,
+            _NADIR_FADE_PCT,
+        )
+    return (
+        "sei_per_pct_soc",
+        _UTOPIA_TIME,
+        _UTOPIA_SEI,
+        _NADIR_TIME,
+        _NADIR_SEI,
+    )
+
 
 def chebyshev_loss(
     metrics: Dict,

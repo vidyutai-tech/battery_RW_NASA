@@ -26,11 +26,13 @@ from charging_opt.charging_profile_family import (
     ProfileParams,
     get_family,
 )
+from charging_opt.pareto_analysis import degradation_summary
 from charging_opt.lifetime_reward import (
     LifetimeWeights,
     ObjectiveMode,
     aggregate_lifetime_reward,
-    chebyshev_loss,          # NEW — added in lifetime_reward.py
+    chebyshev_degradation_config,
+    chebyshev_loss,
 )
 from charging_opt.profile_simulator import ProfileSimulator
 from charging_opt.thermal_management import ThermalDeratingController
@@ -120,7 +122,18 @@ def _age_conditioned_loss(
 
         # Apply Chebyshev scalarization on top of feasible metrics if requested
         if chebyshev_omega is not None and metrics.get("feasible"):
-            loss_val = chebyshev_loss(metrics, omega=chebyshev_omega)
+            deg_key, ut_t, ut_d, nad_t, nad_d = chebyshev_degradation_config(
+                "physics" if objective_mode == "physics" else "composite",
+            )
+            loss_val = chebyshev_loss(
+                metrics,
+                omega=chebyshev_omega,
+                degradation_key=deg_key,
+                utopia_time=ut_t,
+                utopia_degradation=ut_d,
+                nadir_time=nad_t,
+                nadir_degradation=nad_d,
+            )
         else:
             loss_val = float(metrics.get("loss", 1e6))
 
@@ -288,7 +301,18 @@ class FamilyBayesianOptimizer:
                 t_comfort_c=self.t_comfort_c,
             )
             if self.chebyshev_omega is not None and metrics.get("feasible"):
-                loss = chebyshev_loss(metrics, omega=self.chebyshev_omega)
+                deg_key, ut_t, ut_d, nad_t, nad_d = chebyshev_degradation_config(
+                    "physics" if self.objective_mode == "physics" else "composite",
+                )
+                loss = chebyshev_loss(
+                    metrics,
+                    omega=self.chebyshev_omega,
+                    degradation_key=deg_key,
+                    utopia_time=ut_t,
+                    utopia_degradation=ut_d,
+                    nadir_time=nad_t,
+                    nadir_degradation=nad_d,
+                )
                 metrics["loss"] = loss
             else:
                 loss = float(metrics.get("loss", 1e6))
@@ -444,7 +468,7 @@ def optimize_families(
             f"  Best loss={results[fid].best_loss:.2f}  "
             f"feasible={m.get('feasible')}  "
             f"dur={m.get('duration_min', float('nan')):.1f} min  "
-            f"SEI/%SoC={m.get('sei_per_pct_soc', float('nan')):.1f}  "
+            f"{degradation_summary(m, {'objective_mode': objective_mode})}  "
             f"V²·min={m.get('voltage_stress_v2_min', float('nan')):.2f}"
         )
         if on_family_done is not None:

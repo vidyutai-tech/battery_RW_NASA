@@ -20,7 +20,9 @@ from charging_opt.pareto_analysis import (
     ParetoAnalysisResult,
     ParetoCandidate,
     analyze_results_payload,
+    degradation_value,
     extract_feasible_candidates,
+    format_degradation_value,
     pareto_front,
 )
 
@@ -261,7 +263,10 @@ PARETO_CSV_HEADERS = [
     "family_id",
     "family_label",
     "duration_min",
+    "degradation_key",
+    "degradation_value",
     "sei_per_pct_soc",
+    "capacity_fade_pct",
     "voltage_stress_v2_min",
     "temperature_penalty_c2_min",
     "loss",
@@ -269,6 +274,33 @@ PARETO_CSV_HEADERS = [
     "peak_temperature",
     "parameters",
 ]
+
+
+def _pareto_csv_row(cand: ParetoCandidate, analysis: ParetoAnalysisResult, *, scope: str, tag: str = "") -> Dict:
+    deg_key = analysis.degradation_key
+    metrics = {
+        "sei_per_pct_soc": cand.sei_per_pct_soc,
+        "capacity_fade_pct": cand.capacity_fade_pct,
+    }
+    deg_val = degradation_value(metrics, deg_key)
+    fade = cand.capacity_fade_pct
+    return {
+        "scope": scope,
+        "tag": tag,
+        "family_id": cand.family_id,
+        "family_label": cand.family_label,
+        "duration_min": f"{cand.duration_min:.2f}",
+        "degradation_key": deg_key,
+        "degradation_value": format_degradation_value(deg_val, deg_key),
+        "sei_per_pct_soc": f"{cand.sei_per_pct_soc:.4f}",
+        "capacity_fade_pct": "" if fade is None else f"{fade:.4f}",
+        "voltage_stress_v2_min": f"{cand.voltage_stress_v2_min:.4f}",
+        "temperature_penalty_c2_min": f"{cand.temperature_penalty_c2_min:.4f}",
+        "loss": f"{cand.loss:.4f}",
+        "peak_voltage": f"{cand.peak_voltage:.4f}",
+        "peak_temperature": f"{cand.peak_temperature:.2f}",
+        "parameters": _param_str(cand.params),
+    }
 
 
 def pareto_csv(analysis: ParetoAnalysisResult, out_path: Path) -> Path:
@@ -280,36 +312,10 @@ def pareto_csv(analysis: ParetoAnalysisResult, out_path: Path) -> Path:
         cand = getattr(analysis.tagged_global, tag)
         if cand is None:
             continue
-        rows.append({
-            "scope": "global",
-            "tag": tag,
-            "family_id": cand.family_id,
-            "family_label": cand.family_label,
-            "duration_min": f"{cand.duration_min:.2f}",
-            "sei_per_pct_soc": f"{cand.sei_per_pct_soc:.4f}",
-            "voltage_stress_v2_min": f"{cand.voltage_stress_v2_min:.4f}",
-            "temperature_penalty_c2_min": f"{cand.temperature_penalty_c2_min:.4f}",
-            "loss": f"{cand.loss:.4f}",
-            "peak_voltage": f"{cand.peak_voltage:.4f}",
-            "peak_temperature": f"{cand.peak_temperature:.2f}",
-            "parameters": _param_str(cand.params),
-        })
+        rows.append(_pareto_csv_row(cand, analysis, scope="global", tag=tag))
 
     for c in analysis.pareto_front:
-        rows.append({
-            "scope": "pareto_front",
-            "tag": "",
-            "family_id": c.family_id,
-            "family_label": c.family_label,
-            "duration_min": f"{c.duration_min:.2f}",
-            "sei_per_pct_soc": f"{c.sei_per_pct_soc:.4f}",
-            "voltage_stress_v2_min": f"{c.voltage_stress_v2_min:.4f}",
-            "temperature_penalty_c2_min": f"{c.temperature_penalty_c2_min:.4f}",
-            "loss": f"{c.loss:.4f}",
-            "peak_voltage": f"{c.peak_voltage:.4f}",
-            "peak_temperature": f"{c.peak_temperature:.2f}",
-            "parameters": _param_str(c.params),
-        })
+        rows.append(_pareto_csv_row(c, analysis, scope="pareto_front"))
 
     with out_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=PARETO_CSV_HEADERS)

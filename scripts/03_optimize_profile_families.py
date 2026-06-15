@@ -78,7 +78,11 @@ from charging_opt.io_utils import (
     resolve_stage3_pareto_dirs,
     user_stage3_root,
 )
-from charging_opt.pareto_analysis import analyze_family_results
+from charging_opt.pareto_analysis import (
+    analyze_family_results,
+    degradation_summary,
+    resolve_pareto_config,
+)
 from charging_opt.pareto_reporting import export_pareto_artifacts
 from charging_opt.profile_simulator import ProfileSimulator
 from charging_opt.soc_utils import load_ocv_curve
@@ -356,6 +360,11 @@ def main() -> None:
         results,
         plots_dir,
         csv_path=models_dir / "comparison_table.csv",
+        constraints={
+            "soc_target": args.soc_target,
+            "max_duration_min": max_duration,
+            **objective_config,
+        },
     )
 
     _, pareto_plots_dir = resolve_stage3_pareto_dirs(ROOT, out_dir=out_base)
@@ -377,6 +386,11 @@ def main() -> None:
     print(f"  RESULTS  (objective={objective_mode}, acq={args.acq_func}, "
           f"age_cond={args.age_conditioning})")
     print(f"{'=' * 72}")
+    summary_constraints = {
+        "soc_target": args.soc_target,
+        "max_duration_min": max_duration,
+        **objective_config,
+    }
     feasible = [r for r in results.values() if r.best_metrics.get("feasible")]
     best_fid = min(feasible, key=lambda r: r.best_loss).family_id if feasible else None
     for fid, r in sorted(results.items(), key=lambda kv: kv[1].best_loss):
@@ -385,7 +399,7 @@ def main() -> None:
         print(
             f"  {FAMILY_LABELS.get(fid, fid):28s}  loss={r.best_loss:.1f}  "
             f"dur={m.get('duration_min', float('nan')):.1f} min  "
-            f"SEI/%SoC={m.get('sei_per_pct_soc', float('nan')):.1f}  "
+            f"{degradation_summary(m, summary_constraints)}  "
             f"V²·min={m.get('voltage_stress_v2_min', float('nan')):.2f}  "
             f"feasible={m.get('feasible')}{mark}"
         )
@@ -393,15 +407,21 @@ def main() -> None:
         best = min(feasible, key=lambda r: r.best_loss)
         print(f"\n  Best overall: {best.family_label} (loss={best.best_loss:.2f})")
 
-    pareto = analyze_family_results(families_payload)
+    pareto = analyze_family_results(families_payload, constraints=summary_constraints)
     pt = pareto.tagged_global
+    _, deg_key, deg_label = resolve_pareto_config(summary_constraints)
     print(f"\n  Pareto reference profiles ({pareto.n_pareto_global} on front):")
     for tag in ("fastest", "lifetime", "balanced"):
         c = getattr(pt, tag)
         if c:
+            deg_val = getattr(c, deg_key, c.sei_per_pct_soc)
+            if deg_key == "capacity_fade_pct":
+                deg_str = f"{deg_val:.3f}"
+            else:
+                deg_str = f"{deg_val:.1f}"
             print(
                 f"    {tag:10s} {c.family_label:26s}  "
-                f"dur={c.duration_min:.1f} min  SEI={c.sei_per_pct_soc:.1f}"
+                f"dur={c.duration_min:.1f} min  {deg_label}={deg_str}"
             )
 
     print(f"\n  JSON   -> {json_path}")

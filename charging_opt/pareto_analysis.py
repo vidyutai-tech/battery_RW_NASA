@@ -50,6 +50,40 @@ def resolve_pareto_config(constraints: Optional[Mapping] = None) -> tuple[tuple[
     return PARETO_OBJECTIVES, "sei_per_pct_soc", DEGRADATION_LABELS["sei_per_pct_soc"]
 
 
+def degradation_value(metrics: Mapping, key: str) -> float:
+    if key == "capacity_fade_pct":
+        val = metrics.get("capacity_fade_pct")
+        if val is not None:
+            return float(val)
+    return float(metrics.get("sei_per_pct_soc", float("nan")))
+
+
+def format_degradation_value(value: float, key: str) -> str:
+    import math
+
+    if not math.isfinite(value):
+        return "nan"
+    if key == "capacity_fade_pct":
+        return f"{value:.3f}"
+    return f"{value:.1f}"
+
+
+def degradation_summary(
+    metrics: Mapping,
+    constraints: Optional[Mapping] = None,
+) -> str:
+    """Objective-aware degradation string for logs and comparison tables."""
+    if constraints is None:
+        comp = metrics.get("components") or {}
+        if comp.get("objective_mode") == "physics_degradation":
+            constraints = {"objective_mode": "physics"}
+        else:
+            constraints = {"objective_mode": "composite"}
+    _, key, label = resolve_pareto_config(constraints)
+    val = degradation_value(metrics, key)
+    return f"{label}={format_degradation_value(val, key)}"
+
+
 @dataclass
 class ParetoCandidate:
     family_id: str

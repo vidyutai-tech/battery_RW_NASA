@@ -180,3 +180,41 @@ def resolve_stage3_pareto_dirs(
     pareto_plots = models.parent / "plots" / "pareto"
     pareto_plots.mkdir(parents=True, exist_ok=True)
     return models, pareto_plots
+
+
+def resolve_visualization_dir(
+    repo_root: Path,
+    out_dir: Path | None = None,
+) -> Path:
+    """
+    Writable directory for publication figures (``outputs/visualization``).
+
+    Falls back to ``outputs/charging_opt_user/<USER>/visualization`` when the
+    shared tree is root-owned or existing PNGs cannot be overwritten.
+    """
+    import os
+
+    repo_root = Path(repo_root)
+    requested = Path(out_dir) if out_dir is not None else repo_root / "outputs" / "visualization"
+    requested.mkdir(parents=True, exist_ok=True)
+
+    user = current_user()
+    fallback = repo_root / "outputs" / "charging_opt_user" / user / "visualization"
+
+    def _redirect(reason: str) -> Path:
+        fallback.mkdir(parents=True, exist_ok=True)
+        print(
+            f"NOTE: {reason}\n"
+            f"      Writing figures to {fallback}/ instead.\n"
+            f"      Or run: sudo bash scripts/fix_output_permissions.sh {user}"
+        )
+        return fallback
+
+    if not dir_is_writable(requested):
+        return _redirect(f"{requested} is not writable")
+
+    for png in requested.glob("fig*.png"):
+        if not os.access(png, os.W_OK):
+            return _redirect(f"cannot overwrite {png} (owned by another user)")
+
+    return requested

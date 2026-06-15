@@ -78,6 +78,7 @@ def main() -> None:
         results,
         plots_dir,
         csv_path=models_dir / "comparison_table.csv",
+        constraints=constraints,
     )
 
     print(f"Regenerated {len(results)} families from {result_path}")

@@ -17,6 +17,12 @@ from charging_opt.charging_profile_family import FAMILY_LABELS, ProfileParams, g
 from charging_opt.family_optimizer import FamilyOptimizationResult
 from charging_opt.io_utils import resolve_writable_path
 from charging_opt.lifetime_reward import aggregate_lifetime_reward
+from charging_opt.pareto_analysis import (
+    degradation_summary,
+    degradation_value,
+    format_degradation_value,
+    resolve_pareto_config,
+)
 from charging_opt.profile_simulator import ProfileSimulator
 
 # Readable defaults for publication-style figures
@@ -36,11 +42,15 @@ CSV_HEADERS = [
     "objective_mode",
     "loss",
     "sei_term",
+    "fade_term",
     "time_term",
     "temperature_term",
     "voltage_stress_term",
     "duration_min",
+    "degradation_key",
+    "degradation_value",
     "sei_per_pct_soc",
+    "capacity_fade_pct",
     "sei_proxy",
     "voltage_stress_v2_min",
     "temperature_penalty_c2_min",
@@ -59,14 +69,53 @@ def _param_str(values: Mapping[str, float]) -> str:
     )
 
 
+def _infer_constraints_from_results(
+    results: Dict[str, FamilyOptimizationResult],
+) -> dict:
+    for r in results.values():
+        comp = r.best_metrics.get("components") or {}
+        mode = comp.get("objective_mode")
+        if mode == "physics_degradation":
+            return {"objective_mode": "physics"}
+        if mode == "legacy":
+            return {"objective_mode": "legacy"}
+    return {"objective_mode": "composite"}
+
+
+def _degradation_config(constraints: Optional[dict]) -> tuple[str, str]:
+    _, key, label = resolve_pareto_config(constraints)
+    return key, label
+
+
+def _degradation_value(metrics: dict, key: str) -> float:
+    return degradation_value(metrics, key)
+
+
+def _format_degradation(value: float, key: str) -> str:
+    return format_degradation_value(value, key)
+
+
 def _loss_subtitle(metrics: dict) -> str:
     comp = metrics.get("components") or {}
     mode = comp.get("objective_mode", "composite")
-    if mode == "composite" and comp.get("infeasible") is False:
+    if comp.get("infeasible") is not False:
+        return ""
+    common = (
+        f"  |  V²·min={metrics.get('voltage_stress_v2_min', float('nan')):.2f}  "
+        f"°C²·min={metrics.get('temperature_penalty_c2_min', float('nan')):.2f}\n"
+    )
+    if mode == "physics_degradation":
         return (
-            f"  |  V²·min={metrics.get('voltage_stress_v2_min', float('nan')):.2f}  "
-            f"°C²·min={metrics.get('temperature_penalty_c2_min', float('nan')):.2f}\n"
-            f"  loss terms: SEI={comp.get('sei_term', float('nan')):.1f}  "
+            common
+            + f"  loss terms: fade={comp.get('fade_term', float('nan')):.3f}  "
+            f"time={comp.get('time_term', float('nan')):.2f}  "
+            f"temp={comp.get('temperature_term', float('nan')):.2f}  "
+            f"V={comp.get('voltage_stress_term', float('nan')):.2f}"
+        )
+    if mode == "composite":
+        return (
+            common
+            + f"  loss terms: SEI={comp.get('sei_term', float('nan')):.1f}  "
             f"time={comp.get('time_term', float('nan')):.2f}  "
             f"temp={comp.get('temperature_term', float('nan')):.2f}  "
             f"V={comp.get('voltage_stress_term', float('nan')):.2f}"
@@ -108,7 +157,14 @@ def _format_spec_summary(session: dict) -> str:
     return "  |  ".join(parts[:6])
 
 
-def family_plot(session: dict, metrics: dict, title: str, out_path: Path) -> Path:
+def family_plot(
+    session: dict,
+    metrics: dict,
+    title: str,
+    out_path: Path,
+    *,
+    constraints: Optional[dict] = None,
+) -> Path:
     """
     Practical I / V / SoC figure with separate y-scales (not shared I+V axis).
 
@@ -155,18 +211,22 @@ def family_plot(session: dict, metrics: dict, title: str, out_path: Path) -> Pat
 
     feasible = metrics.get("feasible", False)
     loss = metrics.get("loss", float("nan"))
-    subtitle = (
-        f"{'FEASIBLE' if feasible else 'INFEASIBLE'}  |  loss={loss:.2f}  |  "
-        f"duration={metrics['duration_min']:.1f} min  |  "
-        f"SEI/ΔSoC={metrics.get('sei_per_pct_soc', float('nan')):.1f}\n"
-        f"Start: SoC={s0['soc']:.0%}  V={s0['v0']:.3f} V  T={s0['t0']:.1f} °C  |  "
-        f"End: SoC={metrics.get('soc_end', soc_pct[-1]/100):.1%}  "
-        f"V={v[-1]:.3f} V  I_peak={i_a.max():.2f} A\n"
-        f"{_format_spec_summary(session)}"
-        f"{_loss_subtitle(metrics)}"
+    if constraints is None:
+        constraints = {}
+        comp = metrics.get("components") or {}
+        if comp.get("objective_mode") == "physics_degradation":
+            constraints = {"objective_mode": "physics"}
+    deg_key, deg_label = _degradation_config(constraints)
+    deg_val = _degradation_value(metrics, deg_key)
+    summary = (
+        f"{metrics['duration_min']:.1f} min  ·  "
+        f"{deg_label}={_format_degradation(deg_val, deg_key)}  ·  "
+        f"loss={loss:.2f}"
     )
-    fig.suptitle(f"{title}\n{subtitle}", fontsize=13, y=0.98)
-    fig.subplots_adjust(top=0.90, bottom=0.07, left=0.09, right=0.97)
+    if not feasible:
+        summary += "  ·  infeasible"
+    fig.suptitle(f"{title}\n{summary}", fontsize=14, y=0.97)
+    fig.subplots_adjust(top=0.90, bottom=0.08, left=0.09, right=0.97)
     out_path = resolve_writable_path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
@@ -175,16 +235,25 @@ def family_plot(session: dict, metrics: dict, title: str, out_path: Path) -> Pat
     return out_path
 
 
-def comparison_table_png(results: Dict[str, FamilyOptimizationResult], out_path: Path) -> Path:
+def comparison_table_png(
+    results: Dict[str, FamilyOptimizationResult],
+    out_path: Path,
+    *,
+    constraints: Optional[dict] = None,
+) -> Path:
     plt.rcParams.update(PLOT_RC)
+    if constraints is None:
+        constraints = _infer_constraints_from_results(results)
+    deg_key, deg_label = _degradation_config(constraints)
     rows = []
     for fid, r in sorted(results.items(), key=lambda kv: kv[1].best_loss):
         m = r.best_metrics
+        deg_val = _degradation_value(m, deg_key)
         rows.append([
             r.family_label,
             _param_str(r.best_params.values)[:40],
             f"{m.get('duration_min', float('nan')):.1f}",
-            f"{m.get('sei_per_pct_soc', float('nan')):.1f}",
+            _format_degradation(deg_val, deg_key),
             f"{m.get('voltage_stress_v2_min', float('nan')):.1f}",
             f"{r.best_loss:.1f}",
             "yes" if m.get("feasible") else "no",
@@ -192,7 +261,7 @@ def comparison_table_png(results: Dict[str, FamilyOptimizationResult], out_path:
 
     fig, ax = plt.subplots(figsize=(12, max(4.0, 0.55 * len(rows) + 1.5)))
     ax.axis("off")
-    headers = ["Family", "Parameters", "Duration", "SEI/%SoC", "V²·min", "Loss", "OK"]
+    headers = ["Family", "Parameters", "Duration", deg_label, "V²·min", "Loss", "OK"]
     table = ax.table(cellText=rows, colLabels=headers, loc="center", cellLoc="center")
     table.auto_set_font_size(False)
     table.set_fontsize(10)
@@ -207,9 +276,17 @@ def comparison_table_png(results: Dict[str, FamilyOptimizationResult], out_path:
     return out_path
 
 
-def comparison_table_csv(results: Dict[str, FamilyOptimizationResult], out_path: Path) -> Path:
+def comparison_table_csv(
+    results: Dict[str, FamilyOptimizationResult],
+    out_path: Path,
+    *,
+    constraints: Optional[dict] = None,
+) -> Path:
     out_path = resolve_writable_path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    if constraints is None:
+        constraints = _infer_constraints_from_results(results)
+    deg_key, _ = _degradation_config(constraints)
     rows = sorted(results.values(), key=lambda r: r.best_loss)
     with out_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=CSV_HEADERS)
@@ -217,6 +294,7 @@ def comparison_table_csv(results: Dict[str, FamilyOptimizationResult], out_path:
         for r in rows:
             m = r.best_metrics
             comp = m.get("components") or {}
+            deg_val = _degradation_value(m, deg_key)
             w.writerow({
                 "family_id": r.family_id,
                 "family_label": r.family_label,
@@ -224,11 +302,15 @@ def comparison_table_csv(results: Dict[str, FamilyOptimizationResult], out_path:
                 "objective_mode": comp.get("objective_mode", ""),
                 "loss": f"{r.best_loss:.4f}",
                 "sei_term": f"{comp.get('sei_term', float('nan')):.4f}",
+                "fade_term": f"{comp.get('fade_term', float('nan')):.4f}",
                 "time_term": f"{comp.get('time_term', float('nan')):.4f}",
                 "temperature_term": f"{comp.get('temperature_term', float('nan')):.4f}",
                 "voltage_stress_term": f"{comp.get('voltage_stress_term', float('nan')):.4f}",
                 "duration_min": f"{m.get('duration_min', float('nan')):.2f}",
+                "degradation_key": deg_key,
+                "degradation_value": _format_degradation(deg_val, deg_key),
                 "sei_per_pct_soc": f"{m.get('sei_per_pct_soc', float('nan')):.4f}",
+                "capacity_fade_pct": f"{m.get('capacity_fade_pct', float('nan')):.4f}",
                 "sei_proxy": f"{m.get('sei_proxy', float('nan')):.2f}",
                 "voltage_stress_v2_min": f"{m.get('voltage_stress_v2_min', float('nan')):.4f}",
                 "temperature_penalty_c2_min": f"{m.get('temperature_penalty_c2_min', float('nan')):.4f}",
@@ -246,10 +328,13 @@ def export_family_artifacts(
     plots_dir: Path,
     *,
     csv_path: Optional[Path] = None,
+    constraints: Optional[dict] = None,
 ) -> dict[str, Path]:
     """Write per-family PNGs, comparison table PNG, and optional CSV."""
     plots_dir = Path(plots_dir)
     plots_dir.mkdir(parents=True, exist_ok=True)
+    if constraints is None:
+        constraints = _infer_constraints_from_results(results)
     written: dict[str, Path] = {}
 
     for fid, r in results.items():
@@ -258,14 +343,19 @@ def export_family_artifacts(
             r.best_metrics,
             r.family_label,
             plots_dir / f"best_{fid}.png",
+            constraints=constraints,
         )
         written[f"plot_{fid}"] = p
 
     written["comparison_png"] = comparison_table_png(
-        results, plots_dir / "profile_family_comparison.png",
+        results,
+        plots_dir / "profile_family_comparison.png",
+        constraints=constraints,
     )
     if csv_path is not None:
-        written["comparison_csv"] = comparison_table_csv(results, csv_path)
+        written["comparison_csv"] = comparison_table_csv(
+            results, csv_path, constraints=constraints,
+        )
     return written
 
 
