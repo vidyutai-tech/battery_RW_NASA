@@ -26,7 +26,7 @@ transfer:
   eval_tail_frac: 0.20
 
 twin:
-  # author | rw_windows  — author matches Paarth's data_loading + training.py
+  # author | rw_windows
   pipeline: author
   chunk_size: 150
   d_model: 150

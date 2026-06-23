@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Two-Stage Fine-Tuning — Battery Digital Twin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0f1419;
+      color: #e8edf2;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .slide {
+      width: 1280px;
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(145deg, #141c24 0%, #1a2633 100%);
+      border: 1px solid #2a3a4a;
+      border-radius: 12px;
+      padding: 2.5rem 3rem;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 1.5rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    }
+    .header { border-bottom: 2px solid #3d8bfd; padding-bottom: .75rem; }
+    h1 { font-size: 1.85rem; font-weight: 700; letter-spacing: -.02em; }
+    .subtitle { color: #8ba3b8; font-size: .95rem; margin-top: .35rem; }
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .problem {
+      background: rgba(255, 107, 107, .08);
+      border-left: 4px solid #ff6b6b;
+      padding: 1rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: .88rem;
+      line-height: 1.5;
+      color: #c8d6e0;
+    }
+    .problem strong { color: #ff8787; }
+    .stages { display: flex; flex-direction: column; gap: 1rem; }
+    .stage {
+      background: rgba(61, 139, 253, .07);
+      border: 1px solid #2a4a6a;
+      border-radius: 10px;
+      padding: 1rem 1.15rem;
+    }
+    .stage.s2 { background: rgba(81, 207, 102, .07); border-color: #2a5a3a; }
+    .stage-head {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .55rem;
+    }
+    .badge {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: .2rem .55rem;
+      border-radius: 4px;
+      background: #3d8bfd;
+      color: #fff;
+    }
+    .stage.s2 .badge { background: #51cf66; color: #0f1419; }
+    .stage h2 { font-size: 1rem; font-weight: 600; }
+    .stage ul { list-style: none; font-size: .82rem; line-height: 1.55; color: #b0c4d4; }
+    .stage li::before { content: "▸ "; color: #3d8bfd; }
+    .stage.s2 li::before { color: #51cf66; }
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: .5rem;
+      flex-wrap: wrap;
+    }
+    .box {
+      background: #1e2d3d;
+      border: 1px solid #3a5068;
+      border-radius: 8px;
+      padding: .55rem .85rem;
+      font-size: .78rem;
+      text-align: center;
+      min-width: 5.5rem;
+    }
+    .box.src { border-color: #ffd43b; color: #ffd43b; }
+    .box.tgt { border-color: #51cf66; color: #51cf66; }
+    .arrow { color: #5c7a94; font-size: 1.1rem; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .75rem;
+      color: #6b8499;
+      border-top: 1px solid #243040;
+      padding-top: .75rem;
+    }
+    .metric { color: #3d8bfd; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="header">
+      <h1>Two-Stage Fine-Tuning for Cross-Cell Transfer</h1>
+      <p class="subtitle">RW9 source twin → RW10 / RW11 / RW12 &nbsp;|&nbsp; Limited target data (20–60%)</p>
+    </div>
+
+    <div class="content">
+      <div>
+        <div class="problem">
+          <strong>Problem:</strong> Standard loss is voltage-dominated (100·MSE<sub>V</sub> + 1·MSE<sub>T</sub>).
+          With a tiny fine-tune LR (5×10<sup>−7</sup>), the temperature head barely adapts when transferring to a new cell.
+        </div>
+
+        <div class="flow" style="margin-top: 1.25rem;">
+          <div class="box src">RW9<br><small>pretrained twin</small></div>
+          <span class="arrow">→</span>
+          <div class="box">Stage 1<br><small>head warmup</small></div>
+          <span class="arrow">→</span>
+          <div class="box">Stage 2<br><small>full adapt</small></div>
+          <span class="arrow">→</span>
+          <div class="box tgt">RW10–12<br><small>target twin</small></div>
+        </div>
+
+        <p style="margin-top: 1rem; font-size: .8rem; color: #8ba3b8; line-height: 1.5;">
+          Each stage uses early stopping on validation loss. Checkpoints saved at 20%, 40%, and 60% of target-cell training data.
+        </p>
+      </div>
+
+      <div class="stages">
+        <div class="stage">
+          <div class="stage-head">
+            <span class="badge">Stage 1</span>
+            <h2>Output-Head Warmup (backbone frozen)</h2>
+          </div>
+          <ul>
+            <li>Freeze transformer + embeddings → train only 3 output layers (~3K params)</li>
+            <li>Loss: 1·MSE<sub>V</sub> + <strong>100</strong>·MSE<sub>T</sub> + 5·(1 − Pearson<sub>T</sub>)</li>
+            <li>LR ≈ 5×10<sup>−4</sup> (1000× stage-2 LR) — safe with frozen backbone</li>
+            <li>Up to 150 epochs — re-calibrate temperature scale without breaking voltage physics</li>
+          </ul>
+        </div>
+
+        <div class="stage s2">
+          <div class="stage-head">
+            <span class="badge">Stage 2</span>
+            <h2>Full Fine-Tuning (all layers unfrozen)</h2>
+          </div>
+          <ul>
+            <li>Unfreeze all ~2M parameters</li>
+            <li>Balanced loss: <strong>50</strong>·MSE<sub>V</sub> + <strong>50</strong>·MSE<sub>T</sub> + 5·Pearson<sub>T</sub></li>
+            <li>LR = 5×10<sup>−7</sup> — gentle joint refinement on limited target data</li>
+            <li>Up to 500 epochs — optimize voltage &amp; temperature together</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>NASA RW Battery Digital Twin — Transfer Learning</span>
+      <span>Primary metric: <span class="metric">held-out voltage RMSE</span></span>
+    </div>
+  </div>
+</body>
+</html>

@@ -154,6 +154,12 @@ def main() -> None:
                    help="disable max_duration_min (lifetime-only, may pick 0.75 A / 141 min)")
     p.add_argument("--allow-pulsed", action="store_true",
                    help="search pulsed rest (default: CC-taper only)")
+    p.add_argument(
+        "--acq_func",
+        default="PI",
+        choices=["EI", "PI", "LCB"],
+        help="GP acquisition function (PI recommended)",
+    )
     # Manual start state (overrides dataset pick when any is set)
     p.add_argument("--soc", type=float, default=None)
     p.add_argument("--v0", type=float, default=None)
@@ -168,6 +174,7 @@ def main() -> None:
         "v_ref_stress": refs["v_ref_stress"],
         "t_comfort_c": refs["t_comfort_c"],
         "weights": weights.to_dict(),
+        "acq_func": args.acq_func,
     }
 
     P.ensure_layout(ROOT)
@@ -212,6 +219,7 @@ def main() -> None:
         print(f"Constraints: SoC>={args.soc_target:.0%} (no time limit)")
     print(f"Simulation horizon: {args.max_minutes} min")
     print(f"Objective: {objective_mode}  weights={weights.to_dict()}")
+    print(f"Acquisition: {args.acq_func}")
     print(f"BO: {args.n_calls} evaluations ({args.n_initial} random initial)\n")
 
     sim = ProfileSimulator(
@@ -229,6 +237,7 @@ def main() -> None:
         v_ref_stress=refs["v_ref_stress"],
         t_comfort_c=refs["t_comfort_c"],
         allow_pulsed=args.allow_pulsed,
+        acq_func=args.acq_func,
         random_state=42,
     )
     result = optimizer.optimize(n_calls=args.n_calls, n_initial_points=args.n_initial)

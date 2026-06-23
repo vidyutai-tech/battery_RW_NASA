@@ -83,6 +83,12 @@ def main() -> None:
         help="output base (default: outputs/charging_opt_user/<USER>/stage3_optimization)",
     )
     add_objective_args(p)
+    p.add_argument(
+        "--acq_func",
+        default="PI",
+        choices=["EI", "PI", "LCB"],
+        help="GP acquisition function (PI recommended)",
+    )
     args = p.parse_args()
 
     weights, objective_mode, refs = objective_from_args(args)
@@ -131,6 +137,7 @@ def main() -> None:
     print(f"BDT: {bdt_display}")
     print(f"Families ({len(family_ids)}): {family_ids}")
     print(f"Objective: {objective_mode}  weights={weights.to_dict()}")
+    print(f"Acquisition: {args.acq_func}")
     print(f"BO: {args.n_calls} evals/family ({args.n_initial} random initial)\n")
 
     sim = ProfileSimulator(
@@ -165,6 +172,7 @@ def main() -> None:
         objective_mode=objective_mode,
         v_ref_stress=refs["v_ref_stress"],
         t_comfort_c=refs["t_comfort_c"],
+        acq_func=args.acq_func,
         on_family_done=_save_partial,
     )
 

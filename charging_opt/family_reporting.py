@@ -59,6 +59,11 @@ CSV_HEADERS = [
     "soc_end",
     "end_reason",
     "parameters",
+    "bdt_peak_temp_c",
+    "lumped_peak_temp_c",
+    "thermal_delta_c",
+    "thermal_suspect",
+    "bdt_accuracy_caveat",
 ]
 
 
@@ -287,6 +292,10 @@ def comparison_table_csv(
     if constraints is None:
         constraints = _infer_constraints_from_results(results)
     deg_key, _ = _degradation_config(constraints)
+    bdt_caveat = (
+        "BDT trained on random-walk data; CC-like profile accuracy "
+        "is ~4x lower than reported RMSE."
+    )
     rows = sorted(results.values(), key=lambda r: r.best_loss)
     with out_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=CSV_HEADERS)
@@ -295,6 +304,7 @@ def comparison_table_csv(
             m = r.best_metrics
             comp = m.get("components") or {}
             deg_val = _degradation_value(m, deg_key)
+            thermal = r.thermal_sanity or {}
             w.writerow({
                 "family_id": r.family_id,
                 "family_label": r.family_label,
@@ -319,6 +329,11 @@ def comparison_table_csv(
                 "soc_end": f"{m.get('soc_end', float('nan')):.4f}",
                 "end_reason": m.get("end_reason", ""),
                 "parameters": _param_str(r.best_params.values),
+                "bdt_peak_temp_c": f"{thermal.get('bdt_peak_temp_c', float('nan')):.2f}",
+                "lumped_peak_temp_c": f"{thermal.get('lumped_peak_temp_c', float('nan')):.2f}",
+                "thermal_delta_c": f"{thermal.get('delta_peak_c', float('nan')):.2f}",
+                "thermal_suspect": thermal.get("suspect", False),
+                "bdt_accuracy_caveat": bdt_caveat,
             })
     return out_path
 
@@ -329,6 +344,7 @@ def export_family_artifacts(
     *,
     csv_path: Optional[Path] = None,
     constraints: Optional[dict] = None,
+    simulator: Optional[ProfileSimulator] = None,
 ) -> dict[str, Path]:
     """Write per-family PNGs, comparison table PNG, and optional CSV."""
     plots_dir = Path(plots_dir)
@@ -338,6 +354,11 @@ def export_family_artifacts(
     written: dict[str, Path] = {}
 
     for fid, r in results.items():
+        if simulator is not None:
+            t0_c = float(r.best_session.get("initial_state", {}).get("t0", 24.7))
+            r.thermal_sanity = simulator.thermal_sanity_check(
+                r.best_session, t0_c=t0_c,
+            )
         p = family_plot(
             r.best_session,
             r.best_metrics,

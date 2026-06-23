@@ -53,6 +53,7 @@ class FamilyOptimizationResult:
     best_loss: float
     history: List[Dict]
     skopt_result: object
+    thermal_sanity: Optional[dict] = None
 
     def to_dict(self) -> Dict:
         return {

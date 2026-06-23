@@ -244,7 +244,10 @@ class ProfileSimulator:
             "current_a": i_arr,
             "voltage_v": np.asarray(v_all),
             "temperature_c": np.asarray(t_all),
-            "soc": initial_state["soc"] + np.cumsum(-i_arr) / q_as,
+            "soc": np.clip(
+                initial_state["soc"] + np.cumsum(-i_arr) / q_as,
+                0.0, 1.0
+            ),
             "decisions": decisions,
             "end_reason": end_reason,
             "q_as": q_as,
@@ -261,3 +264,45 @@ class ProfileSimulator:
             else:
                 segs.append({"current_a": d["action_a"], "duration_s": d["duration_s"]})
         return segs
+
+    def thermal_sanity_check(
+        self,
+        session: dict,
+        *,
+        t0_c: float = 24.7,
+        q0_ah: float = 2.1,
+    ) -> dict:
+        """
+        Cross-validate BDT temperature predictions against the
+        lumped thermal model.
+
+        Returns a dict with:
+          - bdt_peak_temp_c: peak T from BDT rollout
+          - lumped_peak_temp_c: peak T from LumpedThermalModel
+          - delta_peak_c: difference (positive = BDT under-predicts)
+          - suspect: True if delta > 5 degC (BDT likely unreliable
+            for this profile type)
+        """
+        from charging_opt.thermal_management import LumpedThermalModel
+
+        i_arr = np.asarray(session["current_a"], dtype=np.float64)
+        t_bdt = np.asarray(session["temperature_c"], dtype=np.float64)
+
+        lm = LumpedThermalModel(t_ambient_c=t0_c)
+        t_lumped = lm.simulate(np.abs(i_arr), t0_c=t0_c)
+
+        bdt_peak = float(t_bdt.max())
+        lumped_peak = float(t_lumped.max())
+        delta = lumped_peak - bdt_peak
+
+        return {
+            "bdt_peak_temp_c": bdt_peak,
+            "lumped_peak_temp_c": lumped_peak,
+            "delta_peak_c": delta,
+            "suspect": bool(delta > 5.0),
+            "note": (
+                "Large delta suggests BDT under-predicts temperature "
+                "for this profile type (distribution shift from "
+                "random-walk training data)."
+            ) if delta > 5.0 else "BDT and lumped model agree.",
+        }

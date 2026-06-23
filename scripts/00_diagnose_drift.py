@@ -215,13 +215,26 @@ def main() -> None:
     p.add_argument("--n_segments", type=int, default=150)
     p.add_argument("--max_per_action", type=int, default=100)
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument(
+        "--artifact_root",
+        default=None,
+        help="Per-cell drift output root (e.g. outputs/charging_opt/cells/RW10). "
+             "Writes stage1_drift/ and plots/stage1_drift/.",
+    )
     args = p.parse_args()
 
     cfg = load_config(args.config)
     matlab_dir = cfg["data"]["matlab_dir"]
     P.ensure_layout(ROOT)
-    models_dir = ROOT / P.STAGE1_DRIFT_MODELS
-    plots_dir = ROOT / P.STAGE1_DRIFT_PLOTS
+    if args.artifact_root:
+        art = Path(args.artifact_root)
+        if not art.is_absolute():
+            art = ROOT / art
+        models_dir = art / "stage1_drift"
+        plots_dir = art / "plots" / "stage1_drift"
+    else:
+        models_dir = ROOT / P.STAGE1_DRIFT_MODELS
+        plots_dir = ROOT / P.STAGE1_DRIFT_PLOTS
     models_dir.mkdir(parents=True, exist_ok=True)
     plots_dir.mkdir(parents=True, exist_ok=True)
 
@@ -274,6 +287,32 @@ def main() -> None:
         print(f"  {len(ref_rows)} sessions | V RMSE median={np.median(rv):.4f} "
               f"p95={np.percentile(rv, 95):.4f} | T RMSE median={np.median(rt):.3f}")
 
+    # Distribution shift: reference-charge vs random-walk accuracy gap
+    distribution_shift = None
+    if ref_rows and drift_at:
+        rw_v_q50_150 = drift_at.get("150", {}).get("v_q50", float("nan"))
+        ref_v_rmse_median = float(np.median([r["v_rmse"] for r in ref_rows]))
+        ratio = ref_v_rmse_median / rw_v_q50_150 if rw_v_q50_150 > 0 else float("nan")
+        print(
+            f"\n  DISTRIBUTION SHIFT WARNING:\n"
+            f"  Random-walk V error (150s median): {rw_v_q50_150:.4f} V\n"
+            f"  Reference-charge V RMSE (median): {ref_v_rmse_median:.4f} V\n"
+            f"  Ratio: {ratio:.1f}x\n"
+            f"  BDT is {ratio:.1f}x less accurate on CC-like profiles "
+            f"than on random-walk segments.\n"
+            f"  BO results for smooth charging profiles should be "
+            f"treated as approximate."
+        )
+        distribution_shift = {
+            "rw_v_rmse_q50_at_150s": rw_v_q50_150,
+            "ref_charge_v_rmse_median": ref_v_rmse_median,
+            "accuracy_ratio": ratio,
+            "warning": (
+                f"BDT is {ratio:.1f}x less accurate on CC-like profiles. "
+                "Treat BO optimization results as approximate."
+            ),
+        }
+
     # ── Plots ──────────────────────────────────────────────────────────────────
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
     for ax, q50, q95, label, unit in (
@@ -319,13 +358,23 @@ def main() -> None:
         "per_action": {str(k): v for k, v in per_action.items()},
         "reference_charge_sessions": ref_rows,
         "artifacts": {
-            "conformal_margins": CANONICAL["conformal_margins"],
+            "conformal_margins": str(models_dir / "conformal_margins.npz"),
         },
     }
-    write_stage_registry(P.STAGE1_DRIFT, summary, root=ROOT)
-    update_master_registry(root=ROOT)
-    print(f"Registry -> {CANONICAL['drift_registry']}")
-    print(f"Margins  -> {CANONICAL['conformal_margins']}")
+    if distribution_shift is not None:
+        summary["distribution_shift"] = distribution_shift
+    if args.artifact_root:
+        reg_path = models_dir / "registry.json"
+        reg_path.parent.mkdir(parents=True, exist_ok=True)
+        with reg_path.open("w") as f:
+            json.dump(summary, f, indent=2, default=float)
+        print(f"Cell drift registry -> {reg_path}")
+        print(f"Margins  -> {models_dir / 'conformal_margins.npz'}")
+    else:
+        write_stage_registry(P.STAGE1_DRIFT, summary, root=ROOT)
+        update_master_registry(root=ROOT)
+        print(f"Registry -> {CANONICAL['drift_registry']}")
+        print(f"Margins  -> {CANONICAL['conformal_margins']}")
 
 
 if __name__ == "__main__":

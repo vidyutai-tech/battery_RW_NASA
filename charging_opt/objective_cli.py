@@ -26,7 +26,7 @@ def add_objective_args(p: argparse.ArgumentParser) -> None:
         help="weight on ∫max(0,V−4.0)² dt (V²·min)",
     )
     p.add_argument("--v_ref_stress", type=float, default=4.0, help="V reference for stress integral")
-    p.add_argument("--t_comfort_c", type=float, default=35.0, help="T comfort for penalty integral")
+    p.add_argument("--t_comfort_c", type=float, default=33.0, help="T comfort for penalty integral")
 
 
 def objective_from_args(args) -> tuple[LifetimeWeights, ObjectiveMode, dict]:

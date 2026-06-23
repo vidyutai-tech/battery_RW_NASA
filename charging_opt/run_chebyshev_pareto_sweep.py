@@ -119,24 +119,38 @@ def plot_chebyshev_pareto(
         ]
         if not feasible:
             continue
-        best = min(feasible, key=lambda r: r["duration_min"])
+        best = min(feasible, key=lambda r: r.get("loss", 1e6))
         y = _run_y_value(best, degradation_key)
         if y is not None:
-            pareto_points.append((best["duration_min"], y, omega))
+            pareto_points.append((best["duration_min"], y, omega, best["family_id"]))
 
     if pareto_points:
         pareto_points.sort(key=lambda x: x[0])
         xs = [p[0] for p in pareto_points]
         ys = [p[1] for p in pareto_points]
-        ax.plot(xs, ys, "k--", lw=1.8, alpha=0.65, label="Chebyshev front (best/family)")
-        for x, y, omega in pareto_points:
+        ax.plot(xs, ys, "k--", lw=1.8, alpha=0.65, label="Chebyshev front (min loss/ω)")
+
+        # Group duplicate (duration, degradation) points — common when BO collapses.
+        groups: Dict[tuple, list] = {}
+        for x, y, omega, fid in pareto_points:
+            key = (round(x, 2), round(y, 4))
+            groups.setdefault(key, []).append((omega, fid))
+
+        for (x, y), members in groups.items():
+            omegas_g = sorted(m[0] for m in members)
+            if len(omegas_g) == 1:
+                label = f"ω={omegas_g[0]:.1f}"
+            elif omegas_g[-1] - omegas_g[0] >= 0.09:
+                label = f"ω={omegas_g[0]:.1f}–{omegas_g[-1]:.1f}"
+            else:
+                label = ", ".join(f"ω={o:.1f}" for o in omegas_g)
             ax.annotate(
-                f"ω={omega:.1f}",
+                label,
                 (x, y),
                 xytext=(5, 4),
                 textcoords="offset points",
-                fontsize=9,
-                alpha=0.8,
+                fontsize=8,
+                alpha=0.85,
             )
 
     sm = plt.cm.ScalarMappable(cmap=plt.get_cmap("RdYlGn_r"), norm=plt.Normalize(0, 1))
@@ -426,6 +440,32 @@ def main() -> None:
         objective_mode=objective_mode,
         thermal=args.thermal_derating or args.thermal_loss,
     )
+
+    # Monotonicity check on the directed Pareto front (best per omega)
+    pareto_front_runs: List[dict] = []
+    for omega in omegas:
+        feasible = [
+            r for r in results_by_omega[omega]
+            if r.get("feasible") and _run_y_value(r, deg_key) is not None
+        ]
+        if feasible:
+            pareto_front_runs.append(min(feasible, key=lambda r: r.get("loss", 1e6)))
+
+    if len(pareto_front_runs) >= 2:
+        durations = [r["duration_min"] for r in pareto_front_runs]
+        degradations = [_run_y_value(r, deg_key) for r in pareto_front_runs]
+        sorted_pairs = sorted(zip(durations, degradations))
+        is_monotone = all(
+            sorted_pairs[i][1] <= sorted_pairs[i + 1][1] + 1e-4
+            for i in range(len(sorted_pairs) - 1)
+        )
+        if not is_monotone:
+            print(
+                "WARNING: Chebyshev Pareto front is non-monotone. "
+                "Some ω values may not have converged. "
+                "Consider increasing --n_calls_per_omega or narrowing "
+                "the family search space."
+            )
 
     feasible_runs = [r for r in all_runs if r["feasible"]]
     print(f"\n{'=' * 60}\n  CHEBYSHEV SWEEP COMPLETE\n{'=' * 60}")

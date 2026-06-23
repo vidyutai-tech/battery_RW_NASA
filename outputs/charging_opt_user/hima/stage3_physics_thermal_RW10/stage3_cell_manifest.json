@@ -1,0 +1,20 @@
+{
+  "cell": "RW10",
+  "bdt_ckpt": "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.40.pt",
+  "artifact_root": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10",
+  "stage3_out_dir": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/stage3_physics_thermal_RW10",
+  "chebyshev_dir": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/chebyshev_sweep_RW10",
+  "visualization_dir": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/visualization_RW10",
+  "paths": {
+    "ocv_curve": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_state_estimation/ocv_soc_curve.npz",
+    "capacity_fade": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_state_estimation/capacity_fade.npz",
+    "degradation_model": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_state_estimation/degradation_model.npz",
+    "conformal_margins": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_drift/conformal_margins.npz"
+  },
+  "start_state": {
+    "soc": 0.15,
+    "v0": 3.711,
+    "t0": 24.7,
+    "age": 0.0
+  }
+}

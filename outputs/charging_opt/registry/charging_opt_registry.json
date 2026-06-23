@@ -1,5 +1,5 @@
 {
-  "updated_at_utc": "2026-06-12T06:25:49.589593+00:00",
+  "updated_at_utc": "2026-06-16T10:26:08.317004+00:00",
   "layout": {
     "models": "outputs/charging_opt/models",
     "plots": "outputs/charging_opt/plots",
@@ -7,34 +7,32 @@
   },
   "stages": {
     "stage1_state_estimation": {
-      "updated_at_utc": "2026-06-11T11:10:08.302248+00:00",
+      "updated_at_utc": "2026-06-16T10:26:08.316610+00:00",
       "stage_dir": "outputs/charging_opt/models/stage1_state_estimation",
       "metrics": {
         "cell": "RW9",
-        "source": "soc_mlp",
-        "checkpoint": "outputs/soc_model/soc_model.pt",
+        "low_current_step_indices": [
+          37626,
+          92433
+        ],
         "ocv_checks": {
-          "soc_at_v_min": 0.007272751536220312,
-          "soc_at_v_max": 0.9856480360031128,
+          "soc_at_v_min": 5.8649473774532784e-06,
+          "soc_at_v_max": 1.0,
           "monotone": true
         },
         "heldout_soc_inversion": {
           "n": 12722,
-          "rmse": 0.017570464307581933,
-          "mae": 0.015580845608169901,
-          "r2": 0.9962962613095517,
+          "rmse": 0.012517521192589164,
+          "mae": 0.010373919712151748,
+          "r2": 0.9981202048148067,
           "step_age": 0.8138355476901133
         },
-        "capacity_fade": {
-          "rebuilt": false,
-          "n_reference_discharges": 80,
-          "q_age0_ah": 2.2746230591212435,
-          "q_age1_ah": 0.8536740288411857
-        },
-        "note": "OCV from notebook VoltageSOCMLP; charging rollout still uses coulomb counting.",
+        "n_reference_discharges": 80,
+        "q_age0_ah": 2.2156432722235775,
+        "q_age1_ah": 0.8483537452376938,
         "artifacts": {
-          "ocv_curve": "outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
-          "capacity_fade": "outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz"
+          "ocv_curve": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
+          "capacity_fade": "/data/battery_RW_NASA/outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz"
         }
       }
     },
@@ -56,6 +54,7 @@
   "artifacts": {
     "ocv_curve": "outputs/charging_opt/models/stage1_state_estimation/ocv_soc_curve.npz",
     "capacity_fade": "outputs/charging_opt/models/stage1_state_estimation/capacity_fade.npz",
+    "degradation_model": "outputs/charging_opt/models/stage1_state_estimation/degradation_model.npz",
     "stage1_registry": "outputs/charging_opt/models/stage1_state_estimation/registry.json",
     "conformal_margins": "outputs/charging_opt/models/stage1_drift/conformal_margins.npz",
     "drift_registry": "outputs/charging_opt/models/stage1_drift/registry.json",

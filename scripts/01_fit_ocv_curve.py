@@ -66,11 +66,25 @@ def main() -> None:
     p = argparse.ArgumentParser(description="Fit OCV-SoC + Q(age) curves.")
     p.add_argument("--cell", default="RW9")
     p.add_argument("--config", default=None)
+    p.add_argument(
+        "--artifact_root",
+        default=None,
+        help="Per-cell output root (e.g. outputs/charging_opt/cells/RW10). "
+             "Writes stage1_state_estimation/ and plots/stage1_state_estimation/. "
+             "Default: canonical outputs/charging_opt/models|plots/stage1_state_estimation.",
+    )
     args = p.parse_args()
 
     P.ensure_layout(ROOT)
-    models_dir = ROOT / P.STAGE1_MODELS
-    plots_dir = ROOT / P.STAGE1_PLOTS
+    if args.artifact_root:
+        art = Path(args.artifact_root)
+        if not art.is_absolute():
+            art = ROOT / art
+        models_dir = art / "stage1_state_estimation"
+        plots_dir = art / "plots" / "stage1_state_estimation"
+    else:
+        models_dir = ROOT / P.STAGE1_MODELS
+        plots_dir = ROOT / P.STAGE1_PLOTS
     models_dir.mkdir(parents=True, exist_ok=True)
     plots_dir.mkdir(parents=True, exist_ok=True)
 
@@ -171,14 +185,25 @@ def main() -> None:
         "q_age0_ah": q0 / 3600,
         "q_age1_ah": q1 / 3600,
         "artifacts": {
-            "ocv_curve": CANONICAL["ocv_curve"],
-            "capacity_fade": CANONICAL["capacity_fade"],
+            "ocv_curve": str(models_dir / "ocv_soc_curve.npz"),
+            "capacity_fade": str(models_dir / "capacity_fade.npz"),
         },
     }
-    write_stage_registry(P.STAGE1_MODELS, summary, root=ROOT)
-    update_master_registry(root=ROOT)
-    print(f"Registry -> {CANONICAL['stage1_registry']}")
-    print(f"Master   -> {CANONICAL['master_registry']}")
+    if args.artifact_root:
+        from datetime import datetime, timezone
+        reg_path = models_dir / "registry.json"
+        reg_path.parent.mkdir(parents=True, exist_ok=True)
+        with reg_path.open("w") as f:
+            json.dump({
+                "updated_at_utc": datetime.now(timezone.utc).isoformat(),
+                "metrics": summary,
+            }, f, indent=2, default=float)
+        print(f"Cell registry -> {reg_path}")
+    else:
+        write_stage_registry(P.STAGE1_MODELS, summary, root=ROOT)
+        update_master_registry(root=ROOT)
+        print(f"Registry -> {CANONICAL['stage1_registry']}")
+        print(f"Master   -> {CANONICAL['master_registry']}")
 
 
 if __name__ == "__main__":

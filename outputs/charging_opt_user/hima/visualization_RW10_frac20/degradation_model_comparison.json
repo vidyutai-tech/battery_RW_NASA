@@ -1,0 +1,236 @@
+{
+  "n_profiles": 16,
+  "n_feasible": 9,
+  "model_calibration": {
+    "source": "rw9_calibrated",
+    "b1_eff_at_25c": 0.006094400692984879,
+    "gamma": 0.55,
+    "r2": 0.9714728062978224,
+    "n_points": 80.0,
+    "q0_ah": 2.277959230052352
+  },
+  "spearman": {
+    "sei_vs_capacity_fade_pct": {
+      "rho": -0.7241379310344829,
+      "p": 0.02737541115913339
+    },
+    "sei_vs_equiv_cycles_to_eol": {
+      "rho": 0.7241379310344829,
+      "p": 0.02737541115913339
+    },
+    "duration_vs_equiv_cycles": {
+      "rho": -0.9284766908852594,
+      "p": 0.0003002693605247038
+    }
+  },
+  "global_best": {
+    "by_sei": {
+      "label": "Pulsed charge/rest",
+      "sei": 82.64210613171537
+    },
+    "by_capacity_fade": {
+      "label": "Pulsed charge/rest",
+      "fade_pct": 1.025233692758885
+    },
+    "by_equiv_cycles": {
+      "label": "Pulsed charge/rest",
+      "cycles": 19.50774749333527
+    }
+  },
+  "family_best_by_sei": "pulsed",
+  "family_best_by_physics": "pulsed",
+  "profiles": [
+    {
+      "label": "CCCV",
+      "family_id": "cccv",
+      "feasible": false,
+      "loss": 552.0859166373458,
+      "sei_per_pct_soc": 78.61776207494006,
+      "duration_min": 8.633333333333333,
+      "capacity_fade_pct": 0.37791668219690217,
+      "equiv_cycles_to_eol": 52.921717781115575,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Reduced-CV CCCV",
+      "family_id": "reduced_cv_cccv",
+      "feasible": false,
+      "loss": 558.7202345434742,
+      "sei_per_pct_soc": 78.68781901585541,
+      "duration_min": 7.616666666666666,
+      "capacity_fade_pct": 0.3529099249887772,
+      "equiv_cycles_to_eol": 56.67168471001776,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Adaptive 2-step (SoC)",
+      "family_id": "adaptive_two_step",
+      "feasible": false,
+      "loss": 519.7871534863143,
+      "sei_per_pct_soc": 85.97154312331028,
+      "duration_min": 8.383333333333333,
+      "capacity_fade_pct": 0.47486417603061754,
+      "equiv_cycles_to_eol": 42.11730639944184,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Adaptive 3-step (SoC)",
+      "family_id": "adaptive_three_step",
+      "feasible": false,
+      "loss": 521.4444214940662,
+      "sei_per_pct_soc": 83.37864816742108,
+      "duration_min": 9.35,
+      "capacity_fade_pct": 0.4730492669827676,
+      "equiv_cycles_to_eol": 42.27889438993374,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Exponential taper I(SoC)",
+      "family_id": "exponential_taper",
+      "feasible": false,
+      "loss": 541.3439761054141,
+      "sei_per_pct_soc": 76.97564835323968,
+      "duration_min": 14.666666666666666,
+      "capacity_fade_pct": 0.4277840456367945,
+      "equiv_cycles_to_eol": 46.75256172826228,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "CC-taper (2-level)",
+      "family_id": "cc_taper",
+      "feasible": false,
+      "loss": 551.5184369840874,
+      "sei_per_pct_soc": 80.02729491854058,
+      "duration_min": 7.166666666666667,
+      "capacity_fade_pct": 0.3729621988837898,
+      "equiv_cycles_to_eol": 53.62473746630752,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Multi-step taper (voltage)",
+      "family_id": "multi_step_taper",
+      "feasible": false,
+      "loss": 554.1063863107389,
+      "sei_per_pct_soc": 80.66921831668033,
+      "duration_min": 6.183333333333334,
+      "capacity_fade_pct": 0.3582004838331124,
+      "equiv_cycles_to_eol": 55.83465378376795,
+      "physics_loss": null,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed charge/rest",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 83.63639998437263,
+      "sei_per_pct_soc": 82.64210613171537,
+      "duration_min": 48.5,
+      "capacity_fade_pct": 1.025233692758885,
+      "equiv_cycles_to_eol": 19.50774749333527,
+      "physics_loss": 1.506910699036705,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.0",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 83.45869641425804,
+      "sei_per_pct_soc": 82.45414432767653,
+      "duration_min": 49.0,
+      "capacity_fade_pct": 1.0305431287131486,
+      "equiv_cycles_to_eol": 19.407242106377673,
+      "physics_loss": 1.5198236509380856,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.1",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 82.9133619541185,
+      "sei_per_pct_soc": 81.87811265835315,
+      "duration_min": 50.5,
+      "capacity_fade_pct": 1.038369553779483,
+      "equiv_cycles_to_eol": 19.260965354004753,
+      "physics_loss": 1.5544340726550876,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.2",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 83.11834292065014,
+      "sei_per_pct_soc": 82.08301127833602,
+      "duration_min": 50.5,
+      "capacity_fade_pct": 1.0409319228051839,
+      "equiv_cycles_to_eol": 19.213552358066273,
+      "physics_loss": 1.5557976037167003,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.3",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 82.9133619541185,
+      "sei_per_pct_soc": 81.87811265835315,
+      "duration_min": 50.5,
+      "capacity_fade_pct": 1.038369553779483,
+      "equiv_cycles_to_eol": 19.260965354004753,
+      "physics_loss": 1.5544340726550876,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.5",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 82.9133619541185,
+      "sei_per_pct_soc": 81.87811265835315,
+      "duration_min": 50.5,
+      "capacity_fade_pct": 1.038369553779483,
+      "equiv_cycles_to_eol": 19.260965354004753,
+      "physics_loss": 1.5544340726550876,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.7",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 83.13929362074998,
+      "sei_per_pct_soc": 82.10395775782096,
+      "duration_min": 50.5,
+      "capacity_fade_pct": 1.0411907173952548,
+      "equiv_cycles_to_eol": 19.20877670714734,
+      "physics_loss": 1.5559312216266417,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=0.9",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 82.6420886535499,
+      "sei_per_pct_soc": 81.58629868404277,
+      "duration_min": 51.5,
+      "capacity_fade_pct": 1.049302454464878,
+      "equiv_cycles_to_eol": 19.060281346811085,
+      "physics_loss": 1.580441196739562,
+      "model_source": "rw9_calibrated"
+    },
+    {
+      "label": "Pulsed \u03c9=1.0",
+      "family_id": "pulsed",
+      "feasible": true,
+      "loss": 82.4042152564645,
+      "sei_per_pct_soc": 81.32879047954806,
+      "duration_min": 52.5,
+      "capacity_fade_pct": 1.0527893232184813,
+      "equiv_cycles_to_eol": 18.9971531425281,
+      "physics_loss": 1.601819438525682,
+      "model_source": "rw9_calibrated"
+    }
+  ]
+}

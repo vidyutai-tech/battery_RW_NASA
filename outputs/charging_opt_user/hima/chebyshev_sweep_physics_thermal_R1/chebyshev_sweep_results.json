@@ -1,0 +1,1242 @@
+{
+  "config": {
+    "omegas": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "families": [
+      "pulsed",
+      "cccv",
+      "adaptive_two_step"
+    ],
+    "n_calls": 30,
+    "acq_func": "PI",
+    "objective_mode": "physics",
+    "thermal_derating": true,
+    "thermal_loss": true,
+    "thermal_derate_comfort_c": 33.0,
+    "degradation_key": "capacity_fade_pct",
+    "degradation_label": "\u0394Q/Q\u2080 [%]",
+    "age_conditioning": false,
+    "age_points": [
+      0.0,
+      0.25,
+      0.5,
+      0.75
+    ],
+    "age_weights": [
+      0.15,
+      0.3,
+      0.35,
+      0.2
+    ],
+    "start_state": {
+      "soc": 0.15,
+      "v0": 3.711,
+      "t0": 24.7,
+      "age": 0.0,
+      "prev_i": 0.0
+    }
+  },
+  "results_by_omega": {
+    "0.0": [
+      {
+        "omega": 0.0,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 94.0,
+        "sei_per_pct_soc": 68.9237568780661,
+        "capacity_fade_pct": 1.0196682801829373,
+        "peak_temperature": 24.634977340698242,
+        "loss": 0.17353808469777246,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 1.2857336358438816,
+          "pulse_on_min": 4.254442364744265,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.09523112633731708,
+          "i_floor": 1.2357336358438815
+        }
+      },
+      {
+        "omega": 0.0,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.17588003842507893,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.0,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 105.0,
+        "sei_per_pct_soc": 68.96832816780314,
+        "capacity_fade_pct": 1.0324182587161823,
+        "peak_temperature": 24.62729835510254,
+        "loss": 0.34819532487921034,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2132277316608056,
+          "i2": 0.75,
+          "soc_switch": 0.7333337185118931
+        }
+      }
+    ],
+    "0.1": [
+      {
+        "omega": 0.1,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 61.0,
+        "sei_per_pct_soc": 78.14025011407014,
+        "capacity_fade_pct": 1.0125518201447845,
+        "peak_temperature": 24.677209854125977,
+        "loss": 0.06844709767542657,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 2.6634983199727262,
+          "pulse_on_min": 1.0,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.08,
+          "i_floor": 0.75
+        }
+      },
+      {
+        "omega": 0.1,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.15829203458257105,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.1,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 105.0,
+        "sei_per_pct_soc": 68.98023252918557,
+        "capacity_fade_pct": 1.03214347328801,
+        "peak_temperature": 24.62754249572754,
+        "loss": 0.3099880268384791,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2155684090470582,
+          "i2": 0.75,
+          "soc_switch": 0.7332443057846307
+        }
+      }
+    ],
+    "0.2": [
+      {
+        "omega": 0.2,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 89.5,
+        "sei_per_pct_soc": 69.14528909674003,
+        "capacity_fade_pct": 1.0201658755040441,
+        "peak_temperature": 24.63836097717285,
+        "loss": 0.14428356716760782,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 1.3269827139486403,
+          "pulse_on_min": 5.406109196909905,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.08,
+          "i_floor": 1.2769827139486403
+        }
+      },
+      {
+        "omega": 0.2,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.1981651376146789,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.2,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 105.0,
+        "sei_per_pct_soc": 68.9658643108274,
+        "capacity_fade_pct": 1.0322181565944273,
+        "peak_temperature": 24.627246856689453,
+        "loss": 0.27636335993892963,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2127294090848906,
+          "i2": 0.75,
+          "soc_switch": 0.7332535941775442
+        }
+      }
+    ],
+    "0.3": [
+      {
+        "omega": 0.3,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 87.5,
+        "sei_per_pct_soc": 70.68729902140383,
+        "capacity_fade_pct": 1.0285501804468091,
+        "peak_temperature": 24.65313148498535,
+        "loss": 0.20664556592830718,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 1.490040617466804,
+          "pulse_on_min": 4.7423152920757525,
+          "pulse_rest_min": 0.9245862797603713,
+          "rest_fraction": 0.19496516423218918,
+          "i_floor": 0.8893046760288654
+        }
+      },
+      {
+        "omega": 0.3,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.29724770642201837,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.3,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 103.5,
+        "sei_per_pct_soc": 69.00831230370736,
+        "capacity_fade_pct": 1.0346382300394865,
+        "peak_temperature": 24.62763023376465,
+        "loss": 0.29174311926605506,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.216405885529869,
+          "i2": 0.7866259766714824,
+          "soc_switch": 0.7332857936713744
+        }
+      }
+    ],
+    "0.4": [
+      {
+        "omega": 0.4,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 54.5,
+        "sei_per_pct_soc": 80.44433245099643,
+        "capacity_fade_pct": 1.0068956974357182,
+        "peak_temperature": 24.819509506225586,
+        "loss": 0.029357798165137616,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 3.0,
+          "pulse_on_min": 1.0,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.08,
+          "i_floor": 2.0
+        }
+      },
+      {
+        "omega": 0.4,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.3963302752293578,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.4,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 104.0,
+        "sei_per_pct_soc": 69.00572672332856,
+        "capacity_fade_pct": 1.0326300506399275,
+        "peak_temperature": 24.627784729003906,
+        "loss": 0.3926605504587156,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2178801448265957,
+          "i2": 0.7652521402631379,
+          "soc_switch": 0.7332455968855369
+        }
+      }
+    ],
+    "0.5": [
+      {
+        "omega": 0.5,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 56.5,
+        "sei_per_pct_soc": 79.7531026197756,
+        "capacity_fade_pct": 1.0126809915577346,
+        "peak_temperature": 24.671415328979492,
+        "loss": 0.05504587155963303,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 2.8992616573423016,
+          "pulse_on_min": 1.0,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.3467110051459997,
+          "i_floor": 1.5508799674234695
+        }
+      },
+      {
+        "omega": 0.5,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.4954128440366973,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.5,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 96.51666666666667,
+        "sei_per_pct_soc": 69.19358630596201,
+        "capacity_fade_pct": 1.0372625544142007,
+        "peak_temperature": 24.627595901489258,
+        "loss": 0.42217125382263,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2160790543516362,
+          "i2": 0.9533427899379023,
+          "soc_switch": 0.7332631849196041
+        }
+      }
+    ],
+    "0.6": [
+      {
+        "omega": 0.6,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 54.5,
+        "sei_per_pct_soc": 80.44433245099643,
+        "capacity_fade_pct": 1.0068956974357182,
+        "peak_temperature": 24.819509506225586,
+        "loss": 0.044036697247706424,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 3.0,
+          "pulse_on_min": 1.0,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.08,
+          "i_floor": 0.7957086055033047
+        }
+      },
+      {
+        "omega": 0.6,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.5944954128440367,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.6,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 104.0,
+        "sei_per_pct_soc": 69.0048695831867,
+        "capacity_fade_pct": 1.0325643728167044,
+        "peak_temperature": 24.62776756286621,
+        "loss": 0.5889908256880734,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.217708882737991,
+          "i2": 0.7652668355169404,
+          "soc_switch": 0.7331986891614843
+        }
+      }
+    ],
+    "0.7": [
+      {
+        "omega": 0.7,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 54.5,
+        "sei_per_pct_soc": 80.44433245099643,
+        "capacity_fade_pct": 1.0068956974357182,
+        "peak_temperature": 24.819509506225586,
+        "loss": 0.05137614678899083,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 3.0,
+          "pulse_on_min": 1.0,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.35,
+          "i_floor": 1.7103058929493762
+        }
+      },
+      {
+        "omega": 0.7,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 103.0,
+        "sei_per_pct_soc": 68.14909365942736,
+        "capacity_fade_pct": 1.0228260675970446,
+        "peak_temperature": 24.62078285217285,
+        "loss": 0.6743119266055045,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.0635570551434832,
+          "v_cv": 4.199926526954783,
+          "i_cutoff": 0.38583420687733316
+        }
+      },
+      {
+        "omega": 0.7,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 102.0,
+        "sei_per_pct_soc": 69.03771086972186,
+        "capacity_fade_pct": 1.034406082593431,
+        "peak_temperature": 24.627750396728516,
+        "loss": 0.6614678899082569,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2175512079152406,
+          "i2": 0.8118865661797158,
+          "soc_switch": 0.7332522192676305
+        }
+      }
+    ],
+    "0.8": [
+      {
+        "omega": 0.8,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 48.5,
+        "sei_per_pct_soc": 82.55268511579989,
+        "capacity_fade_pct": 1.025233692758885,
+        "peak_temperature": 25.48370361328125,
+        "loss": 0.049955322627082306,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 3.0,
+          "pulse_on_min": 1.0034430769654463,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.35,
+          "i_floor": 2.0
+        }
+      },
+      {
+        "omega": 0.8,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.7926605504587156,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.8,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 69.01757604556715,
+        "capacity_fade_pct": 1.033432836531853,
+        "peak_temperature": 24.628202438354492,
+        "loss": 0.7926605504587156,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2218286196347423,
+          "i2": 0.7529080505990877,
+          "soc_switch": 0.7327986187182611
+        }
+      }
+    ],
+    "0.9": [
+      {
+        "omega": 0.9,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 48.5,
+        "sei_per_pct_soc": 82.55268511579989,
+        "capacity_fade_pct": 1.025233692758885,
+        "peak_temperature": 25.48370361328125,
+        "loss": 0.03302752293577982,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 3.0,
+          "pulse_on_min": 1.0326610492474786,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.10497590705433806,
+          "i_floor": 1.9282703146877818
+        }
+      },
+      {
+        "omega": 0.9,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.8917431192660551,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 0.9,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 100.5,
+        "sei_per_pct_soc": 69.07751298633076,
+        "capacity_fade_pct": 1.0357132290075985,
+        "peak_temperature": 24.62793731689453,
+        "loss": 0.8256880733944955,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2193279571787414,
+          "i2": 0.8454039091823904,
+          "soc_switch": 0.7331786854847706
+        }
+      }
+    ],
+    "1.0": [
+      {
+        "omega": 1.0,
+        "family_id": "pulsed",
+        "family_label": "Pulsed charge/rest",
+        "feasible": true,
+        "duration_min": 50.5,
+        "sei_per_pct_soc": 81.48234991524178,
+        "capacity_fade_pct": 1.038369553779483,
+        "peak_temperature": 25.16566276550293,
+        "loss": 0.0,
+        "params": {
+          "family_id": "pulsed",
+          "i_charge": 2.8771054180315008,
+          "pulse_on_min": 1.0038938292050716,
+          "pulse_rest_min": 0.5,
+          "rest_fraction": 0.34789712100862874,
+          "i_floor": 1.5218518870346458
+        }
+      },
+      {
+        "omega": 1.0,
+        "family_id": "cccv",
+        "family_label": "CCCV",
+        "feasible": true,
+        "duration_min": 104.5,
+        "sei_per_pct_soc": 68.0057528757541,
+        "capacity_fade_pct": 1.0198392428050307,
+        "peak_temperature": 24.620620727539062,
+        "loss": 0.9908256880733946,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 1.046975676616607,
+          "v_cv": 4.199792424413934,
+          "i_cutoff": 0.25430575166378144
+        }
+      },
+      {
+        "omega": 1.0,
+        "family_id": "adaptive_two_step",
+        "family_label": "Adaptive 2-step (SoC)",
+        "feasible": true,
+        "duration_min": 100.45,
+        "sei_per_pct_soc": 69.07851180044153,
+        "capacity_fade_pct": 1.0349761717866435,
+        "peak_temperature": 24.628002166748047,
+        "loss": 0.91651376146789,
+        "params": {
+          "family_id": "adaptive_two_step",
+          "i1": 1.2199261349268127,
+          "i2": 0.8415819827849845,
+          "soc_switch": 0.7330800923889993
+        }
+      }
+    ]
+  },
+  "all_runs": [
+    {
+      "omega": 0.0,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 94.0,
+      "sei_per_pct_soc": 68.9237568780661,
+      "capacity_fade_pct": 1.0196682801829373,
+      "peak_temperature": 24.634977340698242,
+      "loss": 0.17353808469777246,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.2857336358438816,
+        "pulse_on_min": 4.254442364744265,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.09523112633731708,
+        "i_floor": 1.2357336358438815
+      }
+    },
+    {
+      "omega": 0.0,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.17588003842507893,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.0,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 105.0,
+      "sei_per_pct_soc": 68.96832816780314,
+      "capacity_fade_pct": 1.0324182587161823,
+      "peak_temperature": 24.62729835510254,
+      "loss": 0.34819532487921034,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2132277316608056,
+        "i2": 0.75,
+        "soc_switch": 0.7333337185118931
+      }
+    },
+    {
+      "omega": 0.1,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 61.0,
+      "sei_per_pct_soc": 78.14025011407014,
+      "capacity_fade_pct": 1.0125518201447845,
+      "peak_temperature": 24.677209854125977,
+      "loss": 0.06844709767542657,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.6634983199727262,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08,
+        "i_floor": 0.75
+      }
+    },
+    {
+      "omega": 0.1,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.15829203458257105,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.1,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 105.0,
+      "sei_per_pct_soc": 68.98023252918557,
+      "capacity_fade_pct": 1.03214347328801,
+      "peak_temperature": 24.62754249572754,
+      "loss": 0.3099880268384791,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2155684090470582,
+        "i2": 0.75,
+        "soc_switch": 0.7332443057846307
+      }
+    },
+    {
+      "omega": 0.2,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 89.5,
+      "sei_per_pct_soc": 69.14528909674003,
+      "capacity_fade_pct": 1.0201658755040441,
+      "peak_temperature": 24.63836097717285,
+      "loss": 0.14428356716760782,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.3269827139486403,
+        "pulse_on_min": 5.406109196909905,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08,
+        "i_floor": 1.2769827139486403
+      }
+    },
+    {
+      "omega": 0.2,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.1981651376146789,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.2,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 105.0,
+      "sei_per_pct_soc": 68.9658643108274,
+      "capacity_fade_pct": 1.0322181565944273,
+      "peak_temperature": 24.627246856689453,
+      "loss": 0.27636335993892963,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2127294090848906,
+        "i2": 0.75,
+        "soc_switch": 0.7332535941775442
+      }
+    },
+    {
+      "omega": 0.3,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 87.5,
+      "sei_per_pct_soc": 70.68729902140383,
+      "capacity_fade_pct": 1.0285501804468091,
+      "peak_temperature": 24.65313148498535,
+      "loss": 0.20664556592830718,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 1.490040617466804,
+        "pulse_on_min": 4.7423152920757525,
+        "pulse_rest_min": 0.9245862797603713,
+        "rest_fraction": 0.19496516423218918,
+        "i_floor": 0.8893046760288654
+      }
+    },
+    {
+      "omega": 0.3,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.29724770642201837,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.3,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 103.5,
+      "sei_per_pct_soc": 69.00831230370736,
+      "capacity_fade_pct": 1.0346382300394865,
+      "peak_temperature": 24.62763023376465,
+      "loss": 0.29174311926605506,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.216405885529869,
+        "i2": 0.7866259766714824,
+        "soc_switch": 0.7332857936713744
+      }
+    },
+    {
+      "omega": 0.4,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 80.44433245099643,
+      "capacity_fade_pct": 1.0068956974357182,
+      "peak_temperature": 24.819509506225586,
+      "loss": 0.029357798165137616,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08,
+        "i_floor": 2.0
+      }
+    },
+    {
+      "omega": 0.4,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.3963302752293578,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.4,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 104.0,
+      "sei_per_pct_soc": 69.00572672332856,
+      "capacity_fade_pct": 1.0326300506399275,
+      "peak_temperature": 24.627784729003906,
+      "loss": 0.3926605504587156,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2178801448265957,
+        "i2": 0.7652521402631379,
+        "soc_switch": 0.7332455968855369
+      }
+    },
+    {
+      "omega": 0.5,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 56.5,
+      "sei_per_pct_soc": 79.7531026197756,
+      "capacity_fade_pct": 1.0126809915577346,
+      "peak_temperature": 24.671415328979492,
+      "loss": 0.05504587155963303,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.8992616573423016,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.3467110051459997,
+        "i_floor": 1.5508799674234695
+      }
+    },
+    {
+      "omega": 0.5,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.4954128440366973,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.5,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 96.51666666666667,
+      "sei_per_pct_soc": 69.19358630596201,
+      "capacity_fade_pct": 1.0372625544142007,
+      "peak_temperature": 24.627595901489258,
+      "loss": 0.42217125382263,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2160790543516362,
+        "i2": 0.9533427899379023,
+        "soc_switch": 0.7332631849196041
+      }
+    },
+    {
+      "omega": 0.6,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 80.44433245099643,
+      "capacity_fade_pct": 1.0068956974357182,
+      "peak_temperature": 24.819509506225586,
+      "loss": 0.044036697247706424,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.08,
+        "i_floor": 0.7957086055033047
+      }
+    },
+    {
+      "omega": 0.6,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.5944954128440367,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.6,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 104.0,
+      "sei_per_pct_soc": 69.0048695831867,
+      "capacity_fade_pct": 1.0325643728167044,
+      "peak_temperature": 24.62776756286621,
+      "loss": 0.5889908256880734,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.217708882737991,
+        "i2": 0.7652668355169404,
+        "soc_switch": 0.7331986891614843
+      }
+    },
+    {
+      "omega": 0.7,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 54.5,
+      "sei_per_pct_soc": 80.44433245099643,
+      "capacity_fade_pct": 1.0068956974357182,
+      "peak_temperature": 24.819509506225586,
+      "loss": 0.05137614678899083,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.35,
+        "i_floor": 1.7103058929493762
+      }
+    },
+    {
+      "omega": 0.7,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 103.0,
+      "sei_per_pct_soc": 68.14909365942736,
+      "capacity_fade_pct": 1.0228260675970446,
+      "peak_temperature": 24.62078285217285,
+      "loss": 0.6743119266055045,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.0635570551434832,
+        "v_cv": 4.199926526954783,
+        "i_cutoff": 0.38583420687733316
+      }
+    },
+    {
+      "omega": 0.7,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 102.0,
+      "sei_per_pct_soc": 69.03771086972186,
+      "capacity_fade_pct": 1.034406082593431,
+      "peak_temperature": 24.627750396728516,
+      "loss": 0.6614678899082569,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2175512079152406,
+        "i2": 0.8118865661797158,
+        "soc_switch": 0.7332522192676305
+      }
+    },
+    {
+      "omega": 0.8,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 48.5,
+      "sei_per_pct_soc": 82.55268511579989,
+      "capacity_fade_pct": 1.025233692758885,
+      "peak_temperature": 25.48370361328125,
+      "loss": 0.049955322627082306,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0034430769654463,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.35,
+        "i_floor": 2.0
+      }
+    },
+    {
+      "omega": 0.8,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.7926605504587156,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.8,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 69.01757604556715,
+      "capacity_fade_pct": 1.033432836531853,
+      "peak_temperature": 24.628202438354492,
+      "loss": 0.7926605504587156,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2218286196347423,
+        "i2": 0.7529080505990877,
+        "soc_switch": 0.7327986187182611
+      }
+    },
+    {
+      "omega": 0.9,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 48.5,
+      "sei_per_pct_soc": 82.55268511579989,
+      "capacity_fade_pct": 1.025233692758885,
+      "peak_temperature": 25.48370361328125,
+      "loss": 0.03302752293577982,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 3.0,
+        "pulse_on_min": 1.0326610492474786,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.10497590705433806,
+        "i_floor": 1.9282703146877818
+      }
+    },
+    {
+      "omega": 0.9,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.8917431192660551,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 0.9,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 100.5,
+      "sei_per_pct_soc": 69.07751298633076,
+      "capacity_fade_pct": 1.0357132290075985,
+      "peak_temperature": 24.62793731689453,
+      "loss": 0.8256880733944955,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2193279571787414,
+        "i2": 0.8454039091823904,
+        "soc_switch": 0.7331786854847706
+      }
+    },
+    {
+      "omega": 1.0,
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "feasible": true,
+      "duration_min": 50.5,
+      "sei_per_pct_soc": 81.48234991524178,
+      "capacity_fade_pct": 1.038369553779483,
+      "peak_temperature": 25.16566276550293,
+      "loss": 0.0,
+      "params": {
+        "family_id": "pulsed",
+        "i_charge": 2.8771054180315008,
+        "pulse_on_min": 1.0038938292050716,
+        "pulse_rest_min": 0.5,
+        "rest_fraction": 0.34789712100862874,
+        "i_floor": 1.5218518870346458
+      }
+    },
+    {
+      "omega": 1.0,
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "feasible": true,
+      "duration_min": 104.5,
+      "sei_per_pct_soc": 68.0057528757541,
+      "capacity_fade_pct": 1.0198392428050307,
+      "peak_temperature": 24.620620727539062,
+      "loss": 0.9908256880733946,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.046975676616607,
+        "v_cv": 4.199792424413934,
+        "i_cutoff": 0.25430575166378144
+      }
+    },
+    {
+      "omega": 1.0,
+      "family_id": "adaptive_two_step",
+      "family_label": "Adaptive 2-step (SoC)",
+      "feasible": true,
+      "duration_min": 100.45,
+      "sei_per_pct_soc": 69.07851180044153,
+      "capacity_fade_pct": 1.0349761717866435,
+      "peak_temperature": 24.628002166748047,
+      "loss": 0.91651376146789,
+      "params": {
+        "family_id": "adaptive_two_step",
+        "i1": 1.2199261349268127,
+        "i2": 0.8415819827849845,
+        "soc_switch": 0.7330800923889993
+      }
+    }
+  ]
+}

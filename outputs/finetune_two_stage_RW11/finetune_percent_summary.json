@@ -1,0 +1,33 @@
+{
+  "source_ckpt": "outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "pipeline": "author_two_stage",
+  "rows": [
+    {
+      "target": "RW11",
+      "fraction": 0.2,
+      "pipeline": "author_two_stage",
+      "n_adapt_windows": 6931,
+      "n_eval_windows": 11553,
+      "finetune_voltage_rmse": 0.0825309830117448,
+      "finetune_temp_rmse": 0.4035558866963613
+    },
+    {
+      "target": "RW11",
+      "fraction": 0.4,
+      "pipeline": "author_two_stage",
+      "n_adapt_windows": 13863,
+      "n_eval_windows": 11553,
+      "finetune_voltage_rmse": 0.06285025014390345,
+      "finetune_temp_rmse": 0.20905101462320752
+    },
+    {
+      "target": "RW11",
+      "fraction": 0.6,
+      "pipeline": "author_two_stage",
+      "n_adapt_windows": 20794,
+      "n_eval_windows": 11553,
+      "finetune_voltage_rmse": 0.04825838527490832,
+      "finetune_temp_rmse": 0.15170198147525749
+    }
+  ]
+}

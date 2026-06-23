@@ -1,0 +1,47 @@
+{
+  "15.0": {
+    "best_family": "pulsed",
+    "best_loss": 1.7209133582789922,
+    "sei_per_pct_soc": 68.74739669882997,
+    "duration_min": 61.5,
+    "peak_temperature": 23.205947875976562,
+    "best_params": {
+      "family_id": "pulsed",
+      "i_charge": 2.0,
+      "pulse_on_min": 3.0,
+      "pulse_rest_min": 0.5,
+      "rest_fraction": 0.15,
+      "i_floor": 0.75
+    }
+  },
+  "25.0": {
+    "best_family": "pulsed",
+    "best_loss": 1.4971530439845937,
+    "sei_per_pct_soc": 79.081435158567,
+    "duration_min": 48.5,
+    "peak_temperature": 25.028621673583984,
+    "best_params": {
+      "family_id": "pulsed",
+      "i_charge": 2.9207688448003157,
+      "pulse_on_min": 1.2489390290905436,
+      "pulse_rest_min": 0.5,
+      "rest_fraction": 0.2506490810179647,
+      "i_floor": 1.4654916248329646
+    }
+  },
+  "35.0": {
+    "best_family": "pulsed",
+    "best_loss": 1.7812747744294635,
+    "sei_per_pct_soc": 90.6464318262045,
+    "duration_min": 50.5,
+    "peak_temperature": 34.90068435668945,
+    "best_params": {
+      "family_id": "pulsed",
+      "i_charge": 3.0,
+      "pulse_on_min": 1.8149151596240687,
+      "pulse_rest_min": 0.5,
+      "rest_fraction": 0.17129390176346532,
+      "i_floor": 1.2964638229095575
+    }
+  }
+}

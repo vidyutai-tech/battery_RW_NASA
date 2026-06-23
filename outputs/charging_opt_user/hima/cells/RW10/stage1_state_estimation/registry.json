@@ -1,0 +1,29 @@
+{
+  "updated_at_utc": "2026-06-15T12:47:08.799621+00:00",
+  "metrics": {
+    "cell": "RW10",
+    "low_current_step_indices": [
+      37200,
+      89670
+    ],
+    "ocv_checks": {
+      "soc_at_v_min": 6.326471735459679e-06,
+      "soc_at_v_max": 1.0,
+      "monotone": true
+    },
+    "heldout_soc_inversion": {
+      "n": 13445,
+      "rmse": 0.01246898672272976,
+      "mae": 0.00990667166696794,
+      "r2": 0.9981349255886368,
+      "step_age": 0.8091718779609627
+    },
+    "n_reference_discharges": 77,
+    "q_age0_ah": 2.2064654344575763,
+    "q_age1_ah": 0.9599409605142375,
+    "artifacts": {
+      "ocv_curve": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_state_estimation/ocv_soc_curve.npz",
+      "capacity_fade": "/data/battery_RW_NASA/outputs/charging_opt_user/hima/cells/RW10/stage1_state_estimation/capacity_fade.npz"
+    }
+  }
+}

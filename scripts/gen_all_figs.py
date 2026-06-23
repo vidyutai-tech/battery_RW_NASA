@@ -9,10 +9,12 @@ Fig 4 — Three reference profiles (fast / balanced / lifetime)
 Fig 5 — Methodology summary (family optima + BO convergence)
 Fig 6 — Physics-grounded degradation validation (--with_physics)
 Fig 7 — Ambient temperature sensitivity (physics+thermal runs only)
+Fig Chebyshev — Directed sweep with convergence annotations (if --chebyshev_json exists)
 
 Run:
   python scripts/gen_all_figs.py --run_dir outputs/charging_opt_user/hima/stage3_physics_thermal
   python scripts/gen_all_figs.py --with_physics
+  python scripts/gen_all_figs.py --run_dir ... --no_thermal_warnings   # hide BDT thermal caveats on fig1/fig2
 """
 
 from __future__ import annotations
@@ -43,6 +45,7 @@ DEFAULT_PHYSICS = ROOT / "outputs/charging_opt_user/hima/stage3_physics_thermal"
 DEFAULT_EI = ROOT / "outputs/charging_opt_user/hima/stage3_optimization"
 DEFAULT_CHEBYSHEV = ROOT / "outputs/charging_opt_user/hima/chebyshev_sweep/chebyshev_sweep_results.json"
 
+from charging_opt.artifacts import CANONICAL
 from charging_opt.pareto_analysis import resolve_pareto_config
 from charging_opt.io_utils import resolve_visualization_dir
 
@@ -360,6 +363,12 @@ def load_comparison_table(path: Path, *, deg_key: str = "sei_per_pct_soc") -> Di
     with path.open(newline="") as f:
         for row in csv.DictReader(f):
             fid = row["family_id"]
+            def _f(key: str) -> float:
+                v = row.get(key)
+                if v in (None, "", "nan"):
+                    return float("nan")
+                return float(v)
+
             meta[fid] = {
                 "loss": float(row["loss"]),
                 "sei": float(row["sei_per_pct_soc"]),
@@ -368,9 +377,26 @@ def load_comparison_table(path: Path, *, deg_key: str = "sei_per_pct_soc") -> Di
                 "dur": float(row["duration_min"]),
                 "feasible": row["feasible"].lower() == "true",
                 "params": row["parameters"],
-                "peak_t": float(row["peak_temperature"]) if row.get("peak_temperature") else float("nan"),
+                "peak_t": _f("peak_temperature"),
+                "bdt_peak_t": _f("bdt_peak_temp_c"),
+                "lumped_peak_t": _f("lumped_peak_temp_c"),
+                "thermal_delta": _f("thermal_delta_c"),
+                "thermal_suspect": row.get("thermal_suspect", "").lower() == "true",
             }
     return meta
+
+
+def _cell_label(run_dir: Path) -> str:
+    manifest = run_dir / "stage3_cell_manifest.json"
+    if manifest.is_file():
+        cell = json.loads(manifest.read_text()).get("cell")
+        if cell:
+            return str(cell)
+    name = run_dir.name
+    for token in ("RW12", "RW11", "RW10", "RW9"):
+        if token in name:
+            return token
+    return "RW9"
 
 
 def load_run_context(run_dir: Path) -> RunContext:
@@ -404,7 +430,13 @@ def _family_caption(m: Dict[str, Any], ctx: RunContext) -> str:
 
 
 def _run_subtitle(ctx: RunContext) -> str:
-    parts = ["Start SoC=15%", "target 95%", "PI-BO, 40 evals/family"]
+    acq = "PI"
+    parts = [
+        f"Start SoC=15%",
+        "target 95%",
+        f"{acq}-BO, 40 evals/family",
+        "Pareto: duration · Wang ΔQ/Q₀ · V-stress · thermal",
+    ]
     if ctx.objective_mode == "physics":
         parts.insert(0, "Wang ΔQ/Q₀ objective")
     if ctx.thermal:
@@ -472,7 +504,13 @@ def hbar(ax, vals, names, cols, xlabel, title, xlim, ref_line=None, val_fmt="{:.
     ax.grid(axis="x", alpha=0.35)
 
 
-def build_fig2(out: Path, ctx: RunContext, profiles: Dict[str, Tuple]) -> None:
+def build_fig2(
+    out: Path,
+    ctx: RunContext,
+    profiles: Dict[str, Tuple],
+    *,
+    show_thermal_warnings: bool = True,
+) -> None:
     meta = ctx.meta
     n_fam = len(ORDER)
     # Larger typography for slide / print readability
@@ -512,6 +550,26 @@ def build_fig2(out: Path, ctx: RunContext, profiles: Dict[str, Tuple]) -> None:
             color=color,
             pad=4,
         )
+        if show_thermal_warnings and m.get("thermal_suspect") and feasible:
+            bdt_peak = m.get("bdt_peak_t", m.get("peak_t", float("nan")))
+            lumped_peak = m.get("lumped_peak_t", float("nan"))
+            delta = m.get("thermal_delta", float("nan"))
+            if np.isfinite(bdt_peak) and np.isfinite(lumped_peak) and np.isfinite(delta):
+                ax_i.text(
+                    0.5, 0.55,
+                    f"⚠ BDT thermal low\n"
+                    f"BDT peak: {bdt_peak:.1f}°C\n"
+                    f"Lumped model: {lumped_peak:.1f}°C\n"
+                    f"Δ={delta:.1f}°C",
+                    transform=ax_i.transAxes,
+                    ha="center", va="center", fontsize=7.5,
+                    color="#8B0000",
+                    bbox=dict(
+                        boxstyle="round,pad=0.3",
+                        fc="#fff8f8", ec="#cc0000", lw=0.8,
+                    ),
+                    zorder=10,
+                )
         ax_i.tick_params(labelbottom=False, labelsize=FS_TICK)
         if col == 0:
             ax_i.set_ylabel("I (A)", fontsize=FS_AXIS)
@@ -556,11 +614,23 @@ def build_fig2(out: Path, ctx: RunContext, profiles: Dict[str, Tuple]) -> None:
     for row_idx, row_label in enumerate(["Charging\ncurrent", "Cell\nvoltage", "State of\ncharge"]):
         fig2.text(0.005, 0.88 - row_idx * 0.295, row_label, ha="left", va="center", fontsize=FS_ROW, rotation=90, color="#555")
 
+    cell = _cell_label(ctx.run_dir)
     fig2.suptitle(
-        f"Best BO profile per family (RW9 BDT)\n{_run_subtitle(ctx)}",
+        f"Best BO profile per family ({cell} BDT)\n{_run_subtitle(ctx)}",
         fontsize=FS_SUPTITLE,
         y=0.978,
     )
+    if show_thermal_warnings:
+        fig2.text(
+            0.5, -0.06,
+            "⚠  BDT trained on random-walk data; CC-like profiles have ~4× higher V error. "
+            "BDT peak T ≈ ambient for all families — thermal_loss term is inactive. "
+            "Red boxes: lumped-model cross-check (Δ>5°C ⇒ BDT under-predicts heating).",
+            ha="center", va="top", fontsize=9, color="#8B0000",
+            style="italic",
+            transform=fig2.transFigure,
+            bbox=dict(boxstyle="round,pad=0.4", fc="#fff8f8", ec="#cc0000", lw=0.8),
+        )
     legend_handles = [
         Line2D(
             [0],
@@ -584,13 +654,18 @@ def build_fig2(out: Path, ctx: RunContext, profiles: Dict[str, Tuple]) -> None:
     plt.close(fig2)
 
 
-def build_fig1_physics(out: Path, ctx: RunContext) -> None:
+def build_fig1_physics(
+    out: Path,
+    ctx: RunContext,
+    *,
+    show_thermal_warnings: bool = True,
+) -> None:
     """Duration vs ΔQ/Q₀ Pareto front from physics+thermal BO."""
     if not ctx.pareto:
         return
     front = ctx.pareto.get("pareto_front", [])
     tagged = ctx.pareto.get("tagged_global", {})
-    fig1, axes1 = plt.subplots(1, 2, figsize=(13, 5.5), gridspec_kw={"wspace": 0.38})
+    fig1, axes1 = plt.subplots(1, 3, figsize=(18, 5.5), gridspec_kw={"wspace": 0.42})
 
     ax = axes1[0]
     by_fam: Dict[str, List[Dict]] = {}
@@ -635,6 +710,39 @@ def build_fig1_physics(out: Path, ctx: RunContext) -> None:
     ax2.set_ylabel(ctx.deg_label)
     ax2.set_title("Family optima\n(physics + thermal BO)", fontsize=11)
     ax2.grid(True)
+
+    ax3 = axes1[2]
+    t_penalties = [pt.get("temperature_penalty_c2_min", 0.0) for pt in front]
+    durs_front = [pt["duration_min"] for pt in front]
+
+    if t_penalties and max(t_penalties) < 0.01:
+        ax3.scatter(durs_front, t_penalties, c="#999", s=60, alpha=0.6)
+        ax3.set_ylim(-0.005, 0.05)
+        if show_thermal_warnings:
+            ax3.text(
+                0.5, 0.55,
+                "Temperature penalty ≈ 0\nfor all profiles\n\n"
+                "BDT under-predicts temperature\nfor smooth CC profiles\n"
+                "(distribution shift from\nrandom-walk training)",
+                transform=ax3.transAxes,
+                ha="center", va="center", fontsize=9.5,
+                color="#8B0000", style="italic",
+                bbox=dict(boxstyle="round,pad=0.5", fc="#fff8f8", ec="#cc0000", lw=0.8),
+            )
+    else:
+        ax3.scatter(
+            durs_front, t_penalties,
+            c=[C.get(pt["family_id"], "#888") for pt in front],
+            s=60, edgecolors="white",
+        )
+
+    ax3.set_xlabel("Charge duration (min)")
+    ax3.set_ylabel("Temperature penalty (∫°C²·min)")
+    ax3.set_title(
+        "Charge time vs temperature penalty\n(should vary if thermal constraint active)",
+        fontsize=10,
+    )
+    ax3.grid(True)
 
     fig1.suptitle(
         f"Charging speed vs. Wang capacity fade — RW9 BDT\n{_run_subtitle(ctx)}",
@@ -747,14 +855,45 @@ def build_fig3(out: Path, ctx: RunContext) -> None:
     best_deg = min(deg_r) if deg_r else 0.0
 
     fig3, axes3 = plt.subplots(1, 3, figsize=(14, 5.2), gridspec_kw={"wspace": 0.45})
-    hbar(axes3[0], deg_r, names, cols_r, f"{ctx.deg_label}  (lower = better)",
-         f"① Degradation ({'Wang' if ctx.objective_mode == 'physics' else 'proxy'})",
-         (min(deg_r) - 0.01, max(deg_r) + 0.02) if ctx.deg_key == "capacity_fade_pct" else (65, 74.5),
-         ref_line=best_deg, val_fmt=deg_fmt)
+
+    if ctx.deg_key == "capacity_fade_pct":
+        deg_xlim = (0.0, max(deg_r) * 1.15)
+        deg_note = "Note: differences are within 0.05 pct-points per session"
+    else:
+        deg_xlim = (min(deg_r) - 0.5, max(deg_r) + 0.5)
+        deg_note = ""
+
+    hbar(
+        axes3[0], deg_r, names, cols_r,
+        f"{ctx.deg_label}  (lower = better)",
+        f"① Degradation ({'Wang' if ctx.objective_mode == 'physics' else 'proxy'})",
+        deg_xlim,
+        ref_line=best_deg,
+        val_fmt=deg_fmt,
+    )
+    if deg_note:
+        axes3[0].text(
+            0.98, 0.98, deg_note,
+            transform=axes3[0].transAxes,
+            ha="right", va="top", fontsize=7.5, color="#666",
+            style="italic",
+        )
     hbar(axes3[1], durs_r, names, cols_r, "Charge duration (min)", "② Charging Speed", (45, 111), ref_line=105, val_fmt="{:.1f}")
     loss_lo = min(loss_r) - 0.2
     loss_hi = max(loss_r) + 0.3
-    hbar(axes3[2], loss_r, names, cols_r, "BO loss (lower = better)", "③ Overall Score", (loss_lo, loss_hi), val_fmt="{:.2f}")
+    hbar(
+        axes3[2], loss_r, names, cols_r,
+        "BO loss (lower = better)",
+        "③ Composite Loss (time-dominated)",
+        (loss_lo, loss_hi),
+        val_fmt="{:.2f}",
+    )
+    axes3[2].text(
+        0.98, 0.02,
+        "Loss = w_fade×ΔQ/Q₀ + w_time×duration\n+ w_temp×thermal + w_v×voltage_stress",
+        transform=axes3[2].transAxes,
+        ha="right", va="bottom", fontsize=7, color="#666", style="italic",
+    )
 
     infeas = [f for f in ORDER if not meta[f]["feasible"]]
     if infeas:
@@ -769,8 +908,158 @@ def build_fig3(out: Path, ctx: RunContext) -> None:
     legend_handles = [Line2D([0], [0], color=C[f], lw=0, marker="s", ms=10, label=LABELS[f]) for f in fam_order_rank]
     fig3.legend(handles=legend_handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.09), fontsize=8, framealpha=0.95, edgecolor="#ddd")
     fig3.suptitle(f"Multi-family results — RW9  ({_run_subtitle(ctx)})", fontsize=12, y=1.02)
+    fig3.text(
+        0.5, -0.01,
+        "BDT headline RMSE (random-walk holdout): V=0.028 V, T=0.308°C  "
+        "·  Reference-charge RMSE: V≈0.12 V (~4× higher, distribution shift from CC profiles)",
+        ha="center", va="top", fontsize=8, color="#8B0000",
+        style="italic", transform=fig3.transFigure,
+    )
     fig3.savefig(out / "fig3_family_ranking.png", dpi=200, bbox_inches="tight")
     plt.close(fig3)
+
+
+def build_fig_chebyshev(
+    out: Path,
+    ctx: RunContext,
+    chebyshev_json: Path,
+) -> None:
+    """
+    Chebyshev sweep figure with convergence quality annotations.
+    Replaces the raw sweep plot with honest non-monotonicity flagging.
+    """
+    if not chebyshev_json.is_file():
+        print("  Chebyshev JSON not found — skipping chebyshev figure")
+        return
+
+    payload = json.loads(chebyshev_json.read_text())
+    results_by_omega = payload.get("results_by_omega", {})
+
+    sweep_points: List[Dict[str, Any]] = []
+    for omega_str, rows in sorted(
+        results_by_omega.items(), key=lambda x: float(x[0])
+    ):
+        omega = float(omega_str)
+        feasible_rows = [r for r in rows if r.get("feasible")]
+        if not feasible_rows:
+            continue
+        best = min(feasible_rows, key=lambda r: r.get("loss", 1e6))
+        fade = best.get("capacity_fade_pct", best.get("sei_per_pct_soc", float("nan")))
+        sweep_points.append({
+            "omega": omega,
+            "duration_min": float(best["duration_min"]),
+            "deg": float(fade),
+            "family_id": best["family_id"],
+            "loss": float(best.get("loss", float("nan"))),
+        })
+
+    if not sweep_points:
+        print("  No feasible Chebyshev points — skipping figure")
+        return
+
+    fig, ax = plt.subplots(figsize=(10, 6.5))
+
+    durs = [p["duration_min"] for p in sweep_points]
+    degs = [p["deg"] for p in sweep_points]
+    omegas = [p["omega"] for p in sweep_points]
+
+    def _is_dominated(i: int, points: List[Dict[str, Any]]) -> bool:
+        for j, q in enumerate(points):
+            if i == j:
+                continue
+            if (
+                q["duration_min"] <= points[i]["duration_min"]
+                and q["deg"] <= points[i]["deg"]
+                and (
+                    q["duration_min"] < points[i]["duration_min"]
+                    or q["deg"] < points[i]["deg"]
+                )
+            ):
+                return True
+        return False
+
+    dominated = [_is_dominated(i, sweep_points) for i in range(len(sweep_points))]
+
+    sc = ax.scatter(
+        durs, degs,
+        c=omegas, cmap="RdYlGn_r", vmin=0, vmax=1,
+        s=100, zorder=5, edgecolors="white", linewidths=0.9,
+    )
+    cb = fig.colorbar(sc, ax=ax, shrink=0.85, pad=0.02)
+    cb.set_label("ω  (0=lifetime → 1=fastest)", fontsize=9)
+
+    for pt, dom in zip(sweep_points, dominated):
+        if dom:
+            ax.scatter(
+                pt["duration_min"], pt["deg"],
+                marker="x", c="red", s=120, lw=2, zorder=6,
+            )
+
+    # Group duplicate points (BO collapse) before annotating.
+    groups: Dict[tuple, list] = {}
+    for pt, dom in zip(sweep_points, dominated):
+        key = (round(pt["duration_min"], 2), round(pt["deg"], 4))
+        groups.setdefault(key, []).append((pt["omega"], dom))
+
+    for (x, y), members in groups.items():
+        omegas_g = sorted(m[0] for m in members)
+        any_dom = any(m[1] for m in members)
+        if len(omegas_g) == 1:
+            label = f"ω={omegas_g[0]:.1f}"
+        elif omegas_g[-1] - omegas_g[0] >= 0.09:
+            label = f"ω={omegas_g[0]:.1f}–{omegas_g[-1]:.1f}"
+        else:
+            label = ", ".join(f"ω={o:.1f}" for o in omegas_g)
+        if any_dom:
+            label += "\n(dominated)"
+        ax.annotate(
+            label,
+            (x, y),
+            xytext=(6, -14 if any_dom else 4),
+            textcoords="offset points",
+            fontsize=7.5,
+            color="red" if any_dom else "#333",
+        )
+
+    non_dom = [p for p, d in zip(sweep_points, dominated) if not d]
+    if non_dom:
+        non_dom_sorted = sorted(non_dom, key=lambda p: p["duration_min"])
+        ax.plot(
+            [p["duration_min"] for p in non_dom_sorted],
+            [p["deg"] for p in non_dom_sorted],
+            "--", color="#333", lw=1.5, alpha=0.7,
+            label="Chebyshev front (non-dominated)",
+            zorder=3,
+        )
+
+    n_dominated = sum(dominated)
+    n_total = len(sweep_points)
+    ax.set_xlabel("Charge duration (min)", fontsize=11)
+    ax.set_ylabel(f"{ctx.deg_label}  (lower = better)", fontsize=11)
+    ax.set_title(
+        f"Directed Pareto front — Chebyshev sweep\n"
+        f"{n_total} BO runs  ·  "
+        f"{n_dominated} non-converged points (marked ✗)",
+        fontsize=12,
+    )
+    ax.grid(True)
+
+    if n_dominated > 0:
+        ax.text(
+            0.02, 0.97,
+            f"⚠  {n_dominated}/{n_total} ω values did not converge.\n"
+            f"Red ✗ = dominated point (BO needs more evaluations).\n"
+            f"Increase --n_calls to 60+ for monotone front.",
+            transform=ax.transAxes,
+            ha="left", va="top", fontsize=8.5, color="#8B0000",
+            bbox=dict(boxstyle="round,pad=0.4", fc="#fff8f8", ec="#cc0000", lw=0.8),
+        )
+
+    ax.legend(fontsize=9, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(out / "fig_chebyshev_sweep.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  fig_chebyshev_sweep.png  ({n_dominated} dominated points flagged)")
 
 
 def build_fig4(
@@ -1001,6 +1290,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Also run compare_degradation_models.py for fig6 (needs GPU, ~2 min)",
     )
+    p.add_argument(
+        "--no_thermal_warnings",
+        action="store_true",
+        help="Hide BDT thermal caveats on fig1 (panel 3) and fig2 (per-family red boxes + footer)",
+    )
     return p.parse_args()
 
 
@@ -1047,12 +1341,14 @@ def main() -> None:
     print(f"Loading data from {run_dir}  (objective={ctx.objective_mode}, thermal={ctx.thermal})")
     print(f"Writing figures to {out}")
 
+    show_thermal_warnings = not args.no_thermal_warnings
+
     if ctx.objective_mode == "physics":
-        build_fig1_physics(out, ctx)
+        build_fig1_physics(out, ctx, show_thermal_warnings=show_thermal_warnings)
     else:
         build_fig1(out, pulsed_sweep, ref_time, ref_sei)
     print("  fig1_pareto_front.png")
-    build_fig2(out, ctx, profiles)
+    build_fig2(out, ctx, profiles, show_thermal_warnings=show_thermal_warnings)
     print("  fig2_all_families.png")
     build_fig3(out, ctx)
     print("  fig3_family_ranking.png")
@@ -1060,20 +1356,43 @@ def main() -> None:
     print("  fig4_reference_profiles.png")
     build_fig5(out, ctx, pulsed_sweep, loss_ei, loss_pi, best_pi)
     print("  fig5_methodology_summary.png")
+    build_fig_chebyshev(out, ctx, args.chebyshev_json)
 
     n_figs = 5
+    if args.chebyshev_json.is_file():
+        n_figs += 1
+
     if build_fig7_ambient(out, run_dir):
         print("  fig7_ambient_sensitivity.png")
         n_figs += 1
 
     if args.with_physics:
         import subprocess
+        results_payload = json.loads(results_json.read_text())
+        bdt_ckpt = results_payload.get("bdt_checkpoint", CANONICAL["bdt_source"])
+        capacity = CANONICAL["capacity_fade"]
+        margins = CANONICAL["conformal_margins"]
+        degradation_model = CANONICAL["degradation_model"]
+        cell_label = "RW9"
+        manifest_path = run_dir / "stage3_cell_manifest.json"
+        if manifest_path.is_file():
+            manifest = json.loads(manifest_path.read_text())
+            paths = manifest.get("paths", {})
+            capacity = paths.get("capacity_fade", capacity)
+            margins = paths.get("conformal_margins", margins)
+            degradation_model = paths.get("degradation_model", degradation_model)
+            cell_label = manifest.get("cell", cell_label)
         cmd = [
             sys.executable,
             str(ROOT / "scripts/compare_degradation_models.py"),
-            "--enhanced_dir", str(args.enhanced_dir),
+            "--enhanced_dir", str(run_dir),
             "--chebyshev_json", str(args.chebyshev_json),
             "--out_dir", str(out),
+            "--bdt_ckpt", bdt_ckpt,
+            "--capacity", capacity,
+            "--margins", margins,
+            "--degradation_model", degradation_model,
+            "--cell", cell_label,
         ]
         print("  Running physics degradation comparison (fig6)...")
         subprocess.run(cmd, check=True, cwd=str(ROOT))

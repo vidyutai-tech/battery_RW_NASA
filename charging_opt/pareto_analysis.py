@@ -45,9 +45,18 @@ def resolve_pareto_config(constraints: Optional[Mapping] = None) -> tuple[tuple[
     Physics BO runs use capacity_fade_pct instead of SEI/ΔSoC on Pareto axes.
     """
     mode = (constraints or {}).get("objective_mode", "composite")
-    if mode == "physics":
-        return PHYSICS_PARETO_OBJECTIVES, "capacity_fade_pct", DEGRADATION_LABELS["capacity_fade_pct"]
-    return PARETO_OBJECTIVES, "sei_per_pct_soc", DEGRADATION_LABELS["sei_per_pct_soc"]
+    # Always prefer Wang ΔQ/Q₀ when available
+    if mode in ("physics", "composite"):
+        return (
+            PHYSICS_PARETO_OBJECTIVES,
+            "capacity_fade_pct",
+            DEGRADATION_LABELS["capacity_fade_pct"],
+        )
+    return (
+        PARETO_OBJECTIVES,
+        "sei_per_pct_soc",
+        DEGRADATION_LABELS["sei_per_pct_soc"],
+    )
 
 
 def degradation_value(metrics: Mapping, key: str) -> float:

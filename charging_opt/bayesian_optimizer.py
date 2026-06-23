@@ -102,9 +102,10 @@ class LifetimeBayesianOptimizer:
         weights: LifetimeWeights = LifetimeWeights(),
         objective_mode: ObjectiveMode = "composite",
         v_ref_stress: float = 4.0,
-        t_comfort_c: float = 35.0,
+        t_comfort_c: float = 33.0,
         search_space: Optional[List[Real]] = None,
         allow_pulsed: bool = False,
+        acq_func: str = "PI",
         random_state: int = 42,
     ):
         self.simulator = simulator
@@ -117,6 +118,7 @@ class LifetimeBayesianOptimizer:
         self.t_comfort_c = t_comfort_c
         self.allow_pulsed = allow_pulsed
         self.search_space = search_space or default_search_space(allow_pulsed=allow_pulsed)
+        self.acq_func = acq_func
         self.random_state = random_state
         self.history: List[Dict] = []
 
@@ -168,7 +170,7 @@ class LifetimeBayesianOptimizer:
             n_initial_points=n_random,
             x0=seeds,
             random_state=self.random_state,
-            acq_func="EI",
+            acq_func=self.acq_func,
         )
 
         entry = self._best_feasible_entry()

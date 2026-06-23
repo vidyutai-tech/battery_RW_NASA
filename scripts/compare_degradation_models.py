@@ -114,7 +114,13 @@ def _spearman(x: List[float], y: List[float]) -> Dict[str, float]:
     return {"rho": float(rho), "p": float(p)}
 
 
-def plot_fig6(profiles: List[Dict[str, Any]], out_png: Path, model_info: Dict) -> None:
+def plot_fig6(
+    profiles: List[Dict[str, Any]],
+    out_png: Path,
+    model_info: Dict,
+    *,
+    cell: str = "RW9",
+) -> None:
     feas = [p for p in profiles if p.get("feasible") and p.get("sei_per_pct_soc") is not None
             and p.get("capacity_fade_pct") is not None and p.get("equiv_cycles_to_eol") is not None]
     if len(feas) < 3:
@@ -198,7 +204,7 @@ def plot_fig6(profiles: List[Dict[str, Any]], out_png: Path, model_info: Dict) -
     ax.grid(True, alpha=0.3)
 
     fig.suptitle(
-        "Physics-Grounded Degradation Analysis — RW9 Cell\n"
+        f"Physics-Grounded Degradation Analysis — {cell} Cell\n"
         "Wang capacity-fade model calibrated from measured reference discharges",
         fontsize=12, y=1.02,
     )
@@ -215,8 +221,10 @@ def main() -> None:
     p.add_argument("--bdt_ckpt", default=CANONICAL["bdt_source"])
     p.add_argument("--capacity", default=CANONICAL["capacity_fade"])
     p.add_argument("--margins", default=CANONICAL["conformal_margins"])
+    p.add_argument("--degradation_model", default=CANONICAL["degradation_model"])
     p.add_argument("--max_duration_min", type=float, default=105.0)
     p.add_argument("--soc_target", type=float, default=0.95)
+    p.add_argument("--cell", default="RW9", help="Cell label for figure title")
     args = p.parse_args()
 
     results_json = args.enhanced_dir / "models/family_optimization_results.json"
@@ -224,7 +232,11 @@ def main() -> None:
     start = dict(payload["initial_state"])
     constraints = payload.get("constraints", {})
 
-    model = get_degradation_model(reload=True)
+    model = get_degradation_model(
+        degradation_model_path=ROOT / args.degradation_model,
+        capacity_fade_path=ROOT / args.capacity,
+        reload=True,
+    )
     bdt_path = resolve_bdt_ckpt(args.bdt_ckpt, root=ROOT)
     sim = ProfileSimulator(
         bdt_path=bdt_path,
@@ -280,7 +292,7 @@ def main() -> None:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     json_path = args.out_dir / "degradation_model_comparison.json"
     json_path.write_text(json.dumps(out, indent=2, default=float) + "\n")
-    plot_fig6(profiles, args.out_dir / "fig6_physics_degradation.png", model.calibration_info)
+    plot_fig6(profiles, args.out_dir / "fig6_physics_degradation.png", model.calibration_info, cell=args.cell)
 
     sp = out["spearman"]["sei_vs_equiv_cycles_to_eol"]
     print(f"Saved {json_path}")

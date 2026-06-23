@@ -22,6 +22,11 @@ def calibrate_arrhenius_k(
     Fit k so a simple SEI proxy tracks normalized capacity vs relative age.
 
     Returns (k_opt, fit_info). Falls back to DEFAULT_K_ARRHENIUS if fit fails.
+
+    WARNING: This calibration is non-functional. The residual function's
+    exponent is always zero because it computes k*(T_nom - T_nom). The SEI
+    proxy k is not calibrated from data. Use the Wang ΔQ/Q₀ model
+    (physics_degradation.py) as the primary degradation metric instead.
     """
     age = np.asarray(capacity_table["age"], dtype=np.float64)
     q_full = np.asarray(capacity_table["q_full_as"], dtype=np.float64)

@@ -365,6 +365,7 @@ def main() -> None:
             "max_duration_min": max_duration,
             **objective_config,
         },
+        simulator=sim,
     )
 
     _, pareto_plots_dir = resolve_stage3_pareto_dirs(ROOT, out_dir=out_base)

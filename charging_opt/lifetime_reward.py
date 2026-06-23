@@ -13,7 +13,7 @@ ENHANCEMENTS vs original:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Literal, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple
 
 import numpy as np
 
@@ -193,6 +193,47 @@ _UTOPIA_FADE_PCT = 1.007
 _NADIR_FADE_PCT = 1.08
 
 
+def calibrate_chebyshev_bounds_from_runs(
+    runs: List[Dict[str, Any]],
+    *,
+    degradation_key: str = "capacity_fade_pct",
+    max_duration_min: float = 105.0,
+) -> tuple[float, float, float, float]:
+    """
+    Component-wise utopia/nadir from feasible BO results.
+
+    Utopia uses independent best time and best degradation (may be infeasible
+    as a single profile) so Chebyshev omega sweeps retain a trade-off scale.
+    """
+    def _deg(run: Dict[str, Any]) -> Optional[float]:
+        if degradation_key == "capacity_fade_pct":
+            v = run.get("capacity_fade_pct")
+            if v is not None:
+                return float(v)
+        v = run.get("sei_per_pct_soc")
+        return float(v) if v is not None else None
+
+    feas = [
+        r for r in runs
+        if r.get("feasible") and r.get("duration_min") is not None and _deg(r) is not None
+    ]
+    if not feas:
+        _, ut_t, ut_d, nad_t, nad_d = chebyshev_degradation_config("physics")
+        return ut_t, ut_d, nad_t, nad_d
+
+    durs = [float(r["duration_min"]) for r in feas]
+    degs = [_deg(r) for r in feas]
+    ut_t = min(durs)
+    ut_d = min(degs)
+    nad_t = max(max(durs), max_duration_min)
+    nad_d = max(degs)
+    span_t = max(nad_t - ut_t, 1e-3)
+    span_d = max(nad_d - ut_d, 1e-6)
+    ut_t = max(ut_t - 0.02 * span_t, 1.0)
+    ut_d = max(ut_d - 0.02 * span_d, 1e-6)
+    return ut_t, ut_d, nad_t, nad_d
+
+
 def chebyshev_degradation_config(
     objective_mode: str = "composite",
 ) -> tuple[str, float, float, float, float]:
@@ -316,6 +357,30 @@ def aggregate_lifetime_reward(
         m.update(feasible=False, loss=loss, reward=-loss)
         return -loss, m
 
+    from charging_opt.physics_degradation import (
+        compute_physics_degradation,
+        physics_aware_loss,
+    )
+
+    age = float(session.get("initial_state", {}).get("age", 0.0))
+    phys = compute_physics_degradation(
+        session,
+        q0_as=session.get("q_as"),
+        use_paper1_sei=True,
+        current_q_loss_pct=max(age * 40.0, 0.0),
+    )
+    m.update(
+        capacity_fade_pct=phys["capacity_fade_pct"],
+        capacity_fade_frac=phys["capacity_fade_frac"],
+        equiv_cycles_to_eol=phys["equiv_cycles_to_eol"],
+        ah_throughput=phys["ah_throughput"],
+        nominal_c_rate=phys["nominal_c_rate"],
+        physics_model_source=phys["model_source"],
+        physics_degradation=phys,
+    )
+    if "sei_fade_pct_per_cycle_paper1" in phys:
+        m["sei_fade_pct_per_cycle_paper1"] = phys["sei_fade_pct_per_cycle_paper1"]
+
     soc0 = session["initial_state"]["soc"]
     required_pct = (soc_target - soc0) * 100.0
     shortfall_pct = max(0.0, required_pct - m["delta_soc_pct_total"])
@@ -382,30 +447,6 @@ def aggregate_lifetime_reward(
         loss = INFEASIBLE_BASE
         m.update(feasible=False, loss=loss, reward=-loss)
         return -loss, m
-
-    from charging_opt.physics_degradation import (
-        compute_physics_degradation,
-        physics_aware_loss,
-    )
-
-    age = float(session.get("initial_state", {}).get("age", 0.0))
-    phys = compute_physics_degradation(
-        session,
-        q0_as=session.get("q_as"),
-        use_paper1_sei=True,
-        current_q_loss_pct=max(age * 40.0, 0.0),
-    )
-    m.update(
-        capacity_fade_pct=phys["capacity_fade_pct"],
-        capacity_fade_frac=phys["capacity_fade_frac"],
-        equiv_cycles_to_eol=phys["equiv_cycles_to_eol"],
-        ah_throughput=phys["ah_throughput"],
-        nominal_c_rate=phys["nominal_c_rate"],
-        physics_model_source=phys["model_source"],
-        physics_degradation=phys,
-    )
-    if "sei_fade_pct_per_cycle_paper1" in phys:
-        m["sei_fade_pct_per_cycle_paper1"] = phys["sei_fade_pct_per_cycle_paper1"]
 
     if objective_mode == "physics":
         loss, comp = physics_aware_loss(

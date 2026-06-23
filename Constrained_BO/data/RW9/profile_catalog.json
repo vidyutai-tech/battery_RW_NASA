@@ -1,0 +1,37 @@
+{
+  "cell_id": "RW9",
+  "rw_charge_currents_a": [
+    0.75,
+    1.5,
+    2.25,
+    3.0,
+    3.75,
+    4.5
+  ],
+  "v_min": 3.2,
+  "v_max": 4.2,
+  "cv_levels_v": [
+    4.05,
+    4.1,
+    4.15,
+    4.2
+  ],
+  "reference_cccv": {
+    "i_cc": 2.0,
+    "v_cv": 4.2,
+    "i_cutoff": 0.01
+  },
+  "pulsed_charge": {
+    "i_charge": 1.0,
+    "pulse_on_min": 10.0,
+    "pulse_rest_min": 20.0,
+    "rest_fraction": 2.0
+  },
+  "soc_switch_levels": [
+    0.3,
+    0.5,
+    0.56,
+    0.65,
+    0.88
+  ]
+}
