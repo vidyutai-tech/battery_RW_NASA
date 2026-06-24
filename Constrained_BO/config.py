@@ -6,19 +6,22 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import numpy as np
-
 from Constrained_BO.objective import V_NOM_FALLBACK
-from Constrained_BO.profile_catalog import ProfileCatalog
+from Constrained_BO.profile_catalog import ProfileBounds
+from Constrained_BO.decision_interval import (
+    DECISION_INTERVAL_CANDIDATES,
+    DEFAULT_DECISION_INTERVAL_S,
+)
+from rw_transfer.constants import NASA_NOMINAL_Q_AH, NASA_NOMINAL_Q_AS, SECONDS_PER_AH
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-Q_RATED_AS = 7200.0
+Q_RATED_AH = NASA_NOMINAL_Q_AH
+Q_RATED_AS = NASA_NOMINAL_Q_AS  # Q_RATED_AH * SECONDS_PER_AH
 SOC_TARGET = 0.95
 SOC_START = 0.20
 MAX_DURATION_MIN = 150.0
 V_MAX = 4.2
-DECISION_INTERVAL_S = 30
 
 TWIN_SOURCE = REPO_ROOT / "outputs/twin_source/20260610_111409/twin_source_RW9.pt"
 FINETUNE_FRAC = "0.40"
@@ -35,7 +38,10 @@ class CellConfig:
     energy_fraction: Optional[float] = None
     v_nom: float = V_NOM_FALLBACK
     constraint_mode: str = "soc"
-    profile_catalog: Optional[ProfileCatalog] = None
+    profile_bounds: Optional[ProfileBounds] = None
+    decision_interval_s: Optional[int] = None
+    auto_decision_interval: bool = True
+    decision_interval_candidates: tuple[int, ...] = DECISION_INTERVAL_CANDIDATES
 
     def with_run_overrides(
         self,
@@ -45,11 +51,19 @@ class CellConfig:
         energy_fraction: Optional[float] = None,
         max_duration_min: Optional[float] = None,
         v_nom: Optional[float] = None,
+        decision_interval_s: Optional[int] = None,
+        auto_decision_interval: Optional[bool] = None,
     ) -> "CellConfig":
         """Apply CLI overrides; soc_delta sets energy_fraction when energy mode is used."""
         frac = energy_fraction if energy_fraction is not None else soc_delta
         v = v_nom if v_nom is not None else self.v_nom
         max_d = max_duration_min if max_duration_min is not None else self.max_duration_min
+        dt = decision_interval_s if decision_interval_s is not None else self.decision_interval_s
+        auto_dt = (
+            self.auto_decision_interval
+            if auto_decision_interval is None
+            else auto_decision_interval
+        )
 
         if frac is not None:
             soc_start = float(self.start_state.get("soc", SOC_START))
@@ -64,7 +78,10 @@ class CellConfig:
                 energy_fraction=frac,
                 v_nom=v,
                 constraint_mode="energy",
-                profile_catalog=self.profile_catalog,
+                profile_bounds=self.profile_bounds,
+                decision_interval_s=dt,
+                auto_decision_interval=auto_dt,
+                decision_interval_candidates=self.decision_interval_candidates,
             )
 
         target = soc_target if soc_target is not None else self.soc_target
@@ -78,7 +95,10 @@ class CellConfig:
             energy_fraction=None,
             v_nom=v,
             constraint_mode="soc",
-            profile_catalog=self.profile_catalog,
+            profile_bounds=self.profile_bounds,
+            decision_interval_s=dt,
+            auto_decision_interval=auto_dt,
+            decision_interval_candidates=self.decision_interval_candidates,
         )
 
 
@@ -117,7 +137,6 @@ def get_cell_config(
     *,
     matlab_dir: Optional[Path] = None,
     refit_ocv: bool = False,
-    refit_catalog: bool = False,
 ) -> CellConfig:
     cell_id = cell_id.upper()
     if cell_id == "RW9":
@@ -152,21 +171,14 @@ def get_cell_config(
     except Exception:
         v_nom = V_NOM_FALLBACK
 
-    from Constrained_BO.profile_catalog import load_or_extract_catalog
-
-    catalog = load_or_extract_catalog(
-        cell_id,
-        matlab_dir=matlab_dir,
-        refit=refit_catalog,
-        q_rated_as=Q_RATED_AS,
-    )
+    bounds = ProfileBounds.defaults(cell_id)
 
     return CellConfig(
         cell_id=cell_id,
         bdt_ckpt=ckpt,
         start_state=state,
         v_nom=v_nom,
-        profile_catalog=catalog,
+        profile_bounds=bounds,
     )
 
 

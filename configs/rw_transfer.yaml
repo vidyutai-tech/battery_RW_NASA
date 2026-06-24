@@ -11,7 +11,7 @@ data:
   cells:
     source: "RW9"
     targets: ["RW10", "RW11", "RW12"]
-  q_rated_as: 7200.0
+  q_rated_ah: 2.0  # q_rated_as = q_rated_ah × 3600 (A·s), resolved in load_config
   soc_q_norm: "per_file"
 
 windows:

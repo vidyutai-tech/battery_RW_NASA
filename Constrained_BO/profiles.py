@@ -8,32 +8,28 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import numpy as np
 
-from Constrained_BO.profile_catalog import ProfileCatalog, snap_to_nearest
+from Constrained_BO.profile_catalog import ProfileBounds
 
 CV_STEP_A = 0.25
 MIN_CHARGE_A = 0.05
 
-_active_catalog: Optional[ProfileCatalog] = None
+_active_bounds: Optional[ProfileBounds] = None
 
 
-def set_profile_catalog(catalog: ProfileCatalog) -> None:
-    global _active_catalog
-    _active_catalog = catalog
+def set_profile_bounds(bounds: ProfileBounds) -> None:
+    global _active_bounds
+    _active_bounds = bounds
 
 
-def active_catalog() -> ProfileCatalog:
-    if _active_catalog is None:
-        return ProfileCatalog.nasa_defaults("RW9")
-    return _active_catalog
+def set_profile_catalog(bounds: ProfileBounds) -> None:
+    """Backward-compatible alias."""
+    set_profile_bounds(bounds)
 
 
-def _amps(cat: ProfileCatalog) -> List[float]:
-    return cat.rw_charge_currents_a
-
-
-def _i_bounds(cat: ProfileCatalog) -> Tuple[float, float]:
-    amps = _amps(cat)
-    return amps[0], amps[-1]
+def active_bounds() -> ProfileBounds:
+    if _active_bounds is None:
+        return ProfileBounds.defaults("RW9")
+    return _active_bounds
 
 
 @dataclass
@@ -136,9 +132,9 @@ class CCCVFamily(ProfileFamily):
 
     @classmethod
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
-        cat = active_catalog()
-        i_lo, i_hi = _i_bounds(cat)
-        v_lo, v_hi = min(cat.cv_levels_v), max(cat.cv_levels_v)
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        v_lo, v_hi = b.v_cv_bounds()
         return {
             "i_cc": (i_lo, i_hi),
             "v_cv": (v_lo, v_hi),
@@ -147,12 +143,11 @@ class CCCVFamily(ProfileFamily):
 
     @classmethod
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
-        cat = active_catalog()
-        i_lo, i_hi = _i_bounds(cat)
-        i_cc = snap_to_nearest(float(values["i_cc"]), _amps(cat))
-        i_cc = float(np.clip(i_cc, i_lo, i_hi))
-        v_cv = snap_to_nearest(float(values["v_cv"]), cat.cv_levels_v)
-        v_cv = float(np.clip(v_cv, min(cat.cv_levels_v), max(cat.cv_levels_v)))
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        v_lo, v_hi = b.v_cv_bounds()
+        i_cc = float(np.clip(values["i_cc"], i_lo, i_hi))
+        v_cv = float(np.clip(values["v_cv"], v_lo, v_hi))
         i_cutoff = float(np.clip(
             values["i_cutoff"],
             0.01,
@@ -163,23 +158,15 @@ class CCCVFamily(ProfileFamily):
         })
 
     @classmethod
-    def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        return cls.from_dict({
-            "i_cc": float(rng.choice(amps)),
-            "v_cv": float(rng.choice(cat.cv_levels_v)),
-            "i_cutoff": float(rng.uniform(0.01, min(0.50, amps[-1] - CV_STEP_A))),
-        })
-
-    @classmethod
     def seed_params(cls) -> List[ProfileParams]:
-        cat = active_catalog()
-        ref = cat.reference_cccv
-        seeds = [dict(ref)]
-        for i_cc in _amps(cat)[::2]:
-            seeds.append({"i_cc": i_cc, "v_cv": max(cat.cv_levels_v), "i_cutoff": ref["i_cutoff"]})
-        for v_cv in cat.cv_levels_v:
+        b = active_bounds()
+        ref = dict(b.seed_cccv)
+        i_lo, i_hi = b.i_bounds()
+        v_lo, v_hi = b.v_cv_bounds()
+        seeds = [ref]
+        for i_cc in (i_lo, (i_lo + i_hi) / 2, i_hi):
+            seeds.append({"i_cc": i_cc, "v_cv": v_hi, "i_cutoff": ref["i_cutoff"]})
+        for v_cv in (v_lo, (v_lo + v_hi) / 2, v_hi):
             seeds.append({"i_cc": ref["i_cc"], "v_cv": v_cv, "i_cutoff": ref["i_cutoff"]})
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]
@@ -221,9 +208,9 @@ class TwoStepFamily(ProfileFamily):
 
     @classmethod
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
-        cat = active_catalog()
-        i_lo, i_hi = _i_bounds(cat)
-        soc_lo, soc_hi = min(cat.soc_switch_levels), max(cat.soc_switch_levels)
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
         return {
             "i1": (i_lo, i_hi),
             "i2": (i_lo, i_hi),
@@ -232,40 +219,39 @@ class TwoStepFamily(ProfileFamily):
 
     @classmethod
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i_lo, i_hi = _i_bounds(cat)
-        i1 = snap_to_nearest(float(values["i1"]), amps)
-        i1 = float(np.clip(i1, i_lo, i_hi))
-        i2 = snap_to_nearest(float(values["i2"]), amps)
-        i2 = float(np.clip(i2, i_lo, min(i1, i_hi)))
-        soc_sw = snap_to_nearest(float(values["soc_switch"]), cat.soc_switch_levels)
-        soc_sw = float(np.clip(soc_sw, 0.10, 0.90))
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        i1 = float(np.clip(values["i1"], i_lo, i_hi))
+        i2 = float(np.clip(values["i2"], i_lo, min(i1, i_hi)))
+        soc_sw = float(np.clip(values["soc_switch"], soc_lo, soc_hi))
         return ProfileParams(family_id=cls.family_id, values={
             "i1": i1, "i2": i2, "soc_switch": soc_sw,
         })
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i1, i2 = sorted(rng.choice(amps, size=2, replace=False), reverse=True)
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        i1 = float(rng.uniform(i_lo, i_hi))
+        i2 = float(rng.uniform(i_lo, i1))
         return cls.from_dict({
-            "i1": float(i1),
-            "i2": float(i2),
-            "soc_switch": float(rng.choice(cat.soc_switch_levels)),
+            "i1": i1,
+            "i2": i2,
+            "soc_switch": float(rng.uniform(soc_lo, soc_hi)),
         })
 
     @classmethod
     def seed_params(cls) -> List[ProfileParams]:
-        cat = active_catalog()
-        amps = _amps(cat)
-        ref_i = cat.reference_cccv["i_cc"]
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        ref_i = b.seed_cccv["i_cc"]
         seeds = []
-        for soc in cat.soc_switch_levels[:3]:
-            for i1 in (amps[-1], ref_i, amps[len(amps) // 2]):
-                low = [a for a in amps if a < i1]
-                i2 = low[len(low) // 2] if low else amps[0]
+        for soc in (soc_lo, (soc_lo + soc_hi) / 2, soc_hi):
+            for i1 in (i_hi, ref_i, (i_lo + i_hi) / 2):
+                i2 = max(i_lo, i1 * 0.5)
                 seeds.append({"i1": i1, "i2": i2, "soc_switch": soc})
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]
@@ -299,10 +285,9 @@ class ThreeStepFamily(ProfileFamily):
 
     @classmethod
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
-        cat = active_catalog()
-        i_lo, i_hi = _i_bounds(cat)
-        socs = cat.soc_switch_levels
-        soc_lo, soc_hi = min(socs), max(socs)
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
         return {
             "i1": (i_lo, i_hi),
             "i2": (i_lo, i_hi),
@@ -313,51 +298,43 @@ class ThreeStepFamily(ProfileFamily):
 
     @classmethod
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i_lo, i_hi = _i_bounds(cat)
-        i1 = snap_to_nearest(float(values["i1"]), amps)
-        i1 = float(np.clip(i1, i_lo, i_hi))
-        i2 = snap_to_nearest(float(values["i2"]), amps)
-        i2 = float(np.clip(i2, i_lo, min(i1, i_hi)))
-        i3 = snap_to_nearest(float(values["i3"]), amps)
-        i3 = float(np.clip(i3, i_lo, min(i2, i_hi)))
-        soc1 = snap_to_nearest(float(values["soc1"]), cat.soc_switch_levels)
-        soc2 = snap_to_nearest(float(values["soc2"]), cat.soc_switch_levels)
-        soc1 = float(np.clip(soc1, 0.10, 0.55))
-        soc2 = float(np.clip(soc2, max(0.35, soc1 + 0.05), 0.90))
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        i1 = float(np.clip(values["i1"], i_lo, i_hi))
+        i2 = float(np.clip(values["i2"], i_lo, min(i1, i_hi)))
+        i3 = float(np.clip(values["i3"], i_lo, min(i2, i_hi)))
+        soc1 = float(np.clip(values["soc1"], soc_lo, min(0.55, soc_hi)))
+        soc2 = float(np.clip(values["soc2"], max(0.35, soc1 + 0.05), soc_hi))
         return ProfileParams(family_id=cls.family_id, values={
             "i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2,
         })
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i1, i2, i3 = sorted(rng.choice(amps, size=3, replace=False), reverse=True)
-        socs = sorted(rng.choice(cat.soc_switch_levels, size=2, replace=False))
-        if socs[1] <= socs[0] + 0.05:
-            socs[1] = min(0.90, socs[0] + 0.10)
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        i1 = float(rng.uniform(i_lo, i_hi))
+        i2 = float(rng.uniform(i_lo, i1))
+        i3 = float(rng.uniform(i_lo, i2))
+        soc1 = float(rng.uniform(soc_lo, min(0.55, soc_hi)))
+        soc2 = float(rng.uniform(max(soc1 + 0.05, 0.35), soc_hi))
         return cls.from_dict({
-            "i1": float(i1), "i2": float(i2), "i3": float(i3),
-            "soc1": float(socs[0]), "soc2": float(socs[1]),
+            "i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2,
         })
 
     @classmethod
     def seed_params(cls) -> List[ProfileParams]:
-        cat = active_catalog()
-        amps = _amps(cat)
-        socs = cat.soc_switch_levels
-        if len(socs) < 2:
-            socs = socs + [0.50, 0.70]
-        seeds = []
-        for i1 in (amps[-1], amps[len(amps) // 2]):
-            mid = amps[len(amps) // 2]
-            low = amps[0]
-            seeds.append({
-                "i1": i1, "i2": mid, "i3": low,
-                "soc1": socs[0], "soc2": socs[min(1, len(socs) - 1)],
-            })
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        soc_lo, soc_hi = b.soc_bounds()
+        mid = (i_lo + i_hi) / 2
+        seeds = [
+            {"i1": i_hi, "i2": mid, "i3": i_lo, "soc1": soc_lo, "soc2": soc_hi},
+            {"i1": mid, "i2": (i_lo + mid) / 2, "i3": i_lo,
+             "soc1": (soc_lo + soc_hi) / 2, "soc2": soc_hi},
+        ]
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]
 
@@ -394,27 +371,23 @@ class PulsedFamily(ProfileFamily):
 
     @classmethod
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
-        cat = active_catalog()
-        i_lo, i_hi = _i_bounds(cat)
-        pul = cat.pulsed_charge
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
         return {
             "i_charge": (i_lo, i_hi),
-            "pulse_on_min": (1.0, max(12.0, pul["pulse_on_min"])),
-            "rest_fraction": (0.5, max(2.5, pul["rest_fraction"])),
+            "pulse_on_min": (b.pulse_on_min_min, b.pulse_on_max_min),
+            "rest_fraction": (b.rest_fraction_min, b.rest_fraction_max),
             "i_floor": (i_lo, i_hi),
         }
 
     @classmethod
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i_lo, i_hi = _i_bounds(cat)
-        i_cc = snap_to_nearest(float(values["i_charge"]), amps)
-        i_cc = float(np.clip(i_cc, i_lo, i_hi))
-        pulse_on = float(np.clip(values["pulse_on_min"], 1.0, 15.0))
-        rest_frac = float(np.clip(values["rest_fraction"], 0.5, 2.5))
-        i_floor = snap_to_nearest(float(values["i_floor"]), amps)
-        i_floor = float(np.clip(i_floor, i_lo, min(i_cc - 0.05, i_hi)))
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        i_cc = float(np.clip(values["i_charge"], i_lo, i_hi))
+        pulse_on = float(np.clip(values["pulse_on_min"], b.pulse_on_min_min, b.pulse_on_max_min))
+        rest_frac = float(np.clip(values["rest_fraction"], b.rest_fraction_min, b.rest_fraction_max))
+        i_floor = float(np.clip(values["i_floor"], i_lo, min(i_cc - 0.05, i_hi)))
         pulse_rest = max(0.5, pulse_on * rest_frac)
         return ProfileParams(family_id=cls.family_id, values={
             "i_charge": i_cc,
@@ -426,37 +399,29 @@ class PulsedFamily(ProfileFamily):
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
-        cat = active_catalog()
-        amps = _amps(cat)
-        i_charge = float(rng.choice(amps))
-        low = [a for a in amps if a < i_charge]
-        i_floor = float(rng.choice(low)) if low else amps[0]
+        b = active_bounds()
+        i_lo, i_hi = b.i_bounds()
+        i_charge = float(rng.uniform(i_lo, i_hi))
+        i_floor = float(rng.uniform(i_lo, max(i_lo, i_charge - 0.05)))
         return cls.from_dict({
             "i_charge": i_charge,
-            "pulse_on_min": float(rng.uniform(2.0, 12.0)),
-            "rest_fraction": float(rng.uniform(0.5, 2.5)),
+            "pulse_on_min": float(rng.uniform(b.pulse_on_min_min, b.pulse_on_max_min)),
+            "rest_fraction": float(rng.uniform(b.rest_fraction_min, b.rest_fraction_max)),
             "i_floor": i_floor,
         })
 
     @classmethod
     def seed_params(cls) -> List[ProfileParams]:
-        cat = active_catalog()
-        pul = cat.pulsed_charge
-        amps = _amps(cat)
-        seeds = [
-            {
-                "i_charge": pul["i_charge"],
-                "pulse_on_min": pul["pulse_on_min"],
-                "rest_fraction": pul["rest_fraction"],
-                "i_floor": amps[0],
-            },
-        ]
-        for i_cc in (amps[-1], amps[len(amps) // 2]):
+        b = active_bounds()
+        pul = dict(b.seed_pulsed)
+        i_lo, i_hi = b.i_bounds()
+        seeds = [pul]
+        for i_cc in (i_hi, (i_lo + i_hi) / 2):
             seeds.append({
                 "i_charge": i_cc,
                 "pulse_on_min": pul["pulse_on_min"],
                 "rest_fraction": pul["rest_fraction"],
-                "i_floor": amps[0],
+                "i_floor": pul["i_floor"],
             })
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]

@@ -15,8 +15,7 @@ import numpy as np
 from Constrained_BO.config import SOC_START, get_cell_config
 from Constrained_BO.objective import energy_required_j, evaluate_session, full_capacity_joules
 from Constrained_BO.ocv import ocv_curve_path
-from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, get_family, set_profile_catalog
-from Constrained_BO.profile_catalog import catalog_path
+from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
 from Constrained_BO.viz import plot_best_profiles
 
@@ -181,11 +180,6 @@ def main() -> None:
     parser.add_argument("--n-random", type=int, default=80, help="Random samples per family")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--refit-ocv", action="store_true", help="Re-fit OCV curve before run")
-    parser.add_argument(
-        "--refit-catalog",
-        action="store_true",
-        help="Re-extract I/V profile catalog from NASA Matlab steps",
-    )
     parser.add_argument("--device", default="auto")
     parser.add_argument(
         "--out-dir",
@@ -226,23 +220,37 @@ def main() -> None:
         help="Override nominal voltage for E_full = Q_rated × V_nom "
         "(default: OCV at 50% SoC from cell NASA data)",
     )
+    parser.add_argument(
+        "--decision-interval",
+        type=int,
+        default=None,
+        metavar="SEC",
+        help="Fixed BDT re-anchor interval in seconds (default: auto from drift error)",
+    )
+    parser.add_argument(
+        "--no-auto-decision-interval",
+        action="store_true",
+        help="Use 30 s re-anchor interval instead of auto-selecting from drift error",
+    )
     args = parser.parse_args()
 
     cells = args.cells or [args.cell.upper()]
     for cell_id in cells:
         cell_id = cell_id.upper()
-        cell = get_cell_config(
-            cell_id, refit_ocv=args.refit_ocv, refit_catalog=args.refit_catalog,
-        )
+        cell = get_cell_config(cell_id, refit_ocv=args.refit_ocv)
         cell = cell.with_run_overrides(
             soc_target=args.soc_target,
             soc_delta=args.soc_delta,
             energy_fraction=args.energy_fraction,
             max_duration_min=args.max_duration_min,
             v_nom=args.v_nom,
+            decision_interval_s=args.decision_interval,
+            auto_decision_interval=(
+                not args.no_auto_decision_interval and args.decision_interval is None
+            ),
         )
-        if cell.profile_catalog is not None:
-            set_profile_catalog(cell.profile_catalog)
+        if cell.profile_bounds is not None:
+            set_profile_bounds(cell.profile_bounds)
         out_dir = _resolve_out_dir(cell_id, args.out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -261,15 +269,22 @@ def main() -> None:
         else:
             print(f"SoC target: {cell.soc_target:.0%}")
         print(f"Max duration: {cell.max_duration_min} min")
-        if cell.profile_catalog is not None:
-            cat = cell.profile_catalog
+        if cell.profile_bounds is not None:
+            b = cell.profile_bounds
             print(
-                f"Profile catalog: {catalog_path(cell_id)}  "
-                f"RW currents (A)={cat.rw_charge_currents_a}  "
-                f"ref CCCV={cat.reference_cccv}  pulsed={cat.pulsed_charge}"
+                f"Profile bounds: I=[{b.i_min_a}, {b.i_max_a}] A  "
+                f"V_cv=[{b.v_cv_min_v}, {b.v_cv_max_v}] V  "
+                f"SoC switch=[{b.soc_switch_min}, {b.soc_switch_max}]"
             )
 
         simulator = ChargingSimulator.from_cell(cell, device=args.device)
+        dt_info = simulator.decision_interval_info
+        print(
+            f"Decision interval: {simulator.decision_interval_s} s "
+            f"(method={dt_info.get('method', dt_info.get('source', '?'))})"
+        )
+        if dt_info.get("scores"):
+            print(f"  calibration scores (V RMSE + 0.01·T RMSE): {dt_info['scores']}")
         results = _optimize_all_families(
             simulator,
             cell.start_state,
@@ -313,11 +328,11 @@ def main() -> None:
                 "w_temperature": args.w_temperature,
             },
             "families": args.families,
-            "profile_catalog": str(catalog_path(cell_id)),
+            "decision_interval_s": simulator.decision_interval_s,
+            "decision_interval_selection": simulator.decision_interval_info,
         }
-        if cell.profile_catalog is not None:
-            meta["rw_charge_currents_a"] = cell.profile_catalog.rw_charge_currents_a
-            meta["reference_cccv"] = cell.profile_catalog.reference_cccv
+        if cell.profile_bounds is not None:
+            meta["profile_bounds"] = cell.profile_bounds.to_dict()
         if cell.constraint_mode == "energy":
             meta["energy_fraction"] = cell.energy_fraction
             meta["energy_full_j"] = full_capacity_joules(cell.q_rated_as, cell.v_nom)

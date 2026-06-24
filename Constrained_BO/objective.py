@@ -24,7 +24,7 @@ VOLTAGE_PENALTY_SCALE = 100.0
 
 
 def full_capacity_joules(q_rated_as: float, v_nom: float = V_NOM_FALLBACK) -> float:
-    """Convert rated capacity (A·s) to full-pack energy at nominal voltage (J)."""
+    """Full-pack energy (J): ``q_rated_as`` in A·s (= q_rated_ah × 3600) times ``v_nom``."""
     return float(q_rated_as) * float(v_nom)
 
 

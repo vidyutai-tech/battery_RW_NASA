@@ -9,7 +9,8 @@ import numpy as np
 
 from rw_transfer.training.twin_trainer import TwinTrainer
 
-from Constrained_BO.config import CellConfig
+from Constrained_BO.config import CellConfig, DEFAULT_DECISION_INTERVAL_S
+from Constrained_BO.decision_interval import select_decision_interval_s
 from Constrained_BO.objective import (
     V_NOM_FALLBACK,
     energy_required_j,
@@ -87,7 +88,7 @@ class ChargingSimulator:
         q_rated_as: float,
         soc_target: float = 0.95,
         max_duration_min: float = 150.0,
-        decision_interval_s: int = 30,
+        decision_interval_s: int = DEFAULT_DECISION_INTERVAL_S,
         v_max: float = V_CEILING,
         constraint_mode: str = "soc",
         energy_fraction: Optional[float] = None,
@@ -98,6 +99,7 @@ class ChargingSimulator:
         self.soc_target = float(soc_target)
         self.max_duration_min = float(max_duration_min)
         self.decision_interval_s = int(decision_interval_s)
+        self.decision_interval_info: Dict = {}
         self.v_max = float(v_max)
         self.constraint_mode = constraint_mode
         self.energy_fraction = energy_fraction
@@ -112,7 +114,30 @@ class ChargingSimulator:
     @classmethod
     def from_cell(cls, cell: CellConfig, device: str = "auto") -> ChargingSimulator:
         bdt = FrozenBDT(cell.bdt_ckpt, device=device)
-        return cls(
+        interval_info: Dict = {"source": "default", "selected_s": DEFAULT_DECISION_INTERVAL_S}
+        interval_s = cell.decision_interval_s
+        if interval_s is None and cell.auto_decision_interval:
+            interval_s, interval_info = select_decision_interval_s(
+                bdt,
+                cell.cell_id,
+                cell.start_state,
+                candidates=cell.decision_interval_candidates,
+            )
+        elif interval_s is None:
+            interval_s = DEFAULT_DECISION_INTERVAL_S
+            interval_info = {
+                "method": "default",
+                "source": "default",
+                "selected_s": int(interval_s),
+            }
+        else:
+            interval_info = {
+                "method": "fixed",
+                "source": "fixed",
+                "selected_s": int(interval_s),
+            }
+
+        sim = cls(
             bdt,
             q_rated_as=cell.q_rated_as,
             soc_target=cell.soc_target,
@@ -120,7 +145,10 @@ class ChargingSimulator:
             constraint_mode=cell.constraint_mode,
             energy_fraction=cell.energy_fraction,
             v_nom=cell.v_nom,
+            decision_interval_s=interval_s,
         )
+        sim.decision_interval_info = interval_info
+        return sim
 
     def simulate(
         self,
@@ -213,4 +241,5 @@ class ChargingSimulator:
             "energy_required_j": self.energy_required_j,
             "energy_full_j": self.energy_full_j,
             "v_nom": self.v_nom,
+            "decision_interval_s": self.decision_interval_s,
         }
