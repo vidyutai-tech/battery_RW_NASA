@@ -18,8 +18,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 Q_RATED_AH = NASA_NOMINAL_Q_AH
 Q_RATED_AS = NASA_NOMINAL_Q_AS  # Q_RATED_AH * SECONDS_PER_AH
-SOC_TARGET = 0.95
+# SOC_TARGET = 0.95
+# SOC_START = 0.20
+SOC_TARGET = 0.80     # wider window → more charge throughput → more heating
 SOC_START = 0.20
+AMBIENT_T0_C = 24.0   # NEW: start near ambient, not warm (TUNE to your data's ambient)
 MAX_DURATION_MIN = 150.0
 V_MAX = 4.2
 
@@ -166,6 +169,7 @@ def get_cell_config(
         ocv_spline=ocv_spline,
         refit_ocv=False,
     )
+    state["t0"] = AMBIENT_T0_C
     try:
         v_nom = nominal_voltage_from_ocv(cell_id, ocv_spline=ocv_spline)
     except Exception:

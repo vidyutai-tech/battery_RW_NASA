@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import Dict, Tuple
 
 import numpy as np
-
-TEMP_PLATEAU = 1.5
-TEMP_FLOOR = -2.2
+TEMP_COMFORT_C = 25.0
+TEMP_PLATEAU   = 1.5
+TEMP_FLOOR     = -2.2
 TEMP_LOW_C = 15.0
 TEMP_HIGH_C = 35.0
 TEMP_MAX_C = 50.0
@@ -15,7 +15,7 @@ TEMP_MAX_C = 50.0
 TIME_MAX_REWARD = 1.5
 TIME_DECAY_PER_S = 0.01
 TIME_ZERO_AT_S = 150.0
-
+    
 V_NOM_FALLBACK = 3.7
 
 SOC_PENALTY_SCALE = 300.0
@@ -55,15 +55,25 @@ def energy_delivered_j(
     return float(max(0.0, np.trapz(power_w, t)))
 
 
+# def temperature_reward(t_c: float) -> float:
+#     """Plateau 1.5 in [15, 35] °C; linear penalty outside (unbounded, no floor at 0)."""
+#     t = float(t_c)
+#     if TEMP_LOW_C <= t <= TEMP_HIGH_C:
+#         return TEMP_PLATEAU
+#     slope = (TEMP_PLATEAU - TEMP_FLOOR) / TEMP_LOW_C
+#     if t < TEMP_LOW_C:
+#         return TEMP_PLATEAU - slope * (TEMP_LOW_C - t)
+#     return TEMP_PLATEAU - slope * (t - TEMP_HIGH_C)
+
 def temperature_reward(t_c: float) -> float:
-    """Plateau 1.5 in [15, 35] °C; linear penalty outside (unbounded, no floor at 0)."""
     t = float(t_c)
-    if TEMP_LOW_C <= t <= TEMP_HIGH_C:
-        return TEMP_PLATEAU
-    slope = (TEMP_PLATEAU - TEMP_FLOOR) / TEMP_LOW_C
-    if t < TEMP_LOW_C:
-        return TEMP_PLATEAU - slope * (TEMP_LOW_C - t)
-    return TEMP_PLATEAU - slope * (t - TEMP_HIGH_C)
+    if t <= TEMP_COMFORT_C:
+        return TEMP_PLATEAU                      # cool: full reward
+    if t <= TEMP_HIGH_C:                          # safe but warm: decline gently
+        frac = (t - TEMP_COMFORT_C) / (TEMP_HIGH_C - TEMP_COMFORT_C)
+        return TEMP_PLATEAU - frac * (TEMP_PLATEAU - 0.0)   # 1.5 → 0 across [25,35]
+    over = t - TEMP_HIGH_C                        # unsafe: steep penalty
+    return -abs(TEMP_FLOOR) - over * (abs(TEMP_FLOOR) / 5.0)
 
 
 def time_reward(t_sec: float) -> float:

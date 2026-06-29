@@ -12,7 +12,8 @@ class ProfileBounds:
 
     cell_id: str
     i_min_a: float = 0.75
-    i_max_a: float = 4.5
+    # i_max_a: float = 4.5
+    i_max_a: float = 6.0
     v_cv_min_v: float = 4.05
     v_cv_max_v: float = 4.20
     soc_switch_min: float = 0.10
