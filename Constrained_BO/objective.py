@@ -5,11 +5,10 @@ from __future__ import annotations
 from typing import Dict, Tuple
 
 import numpy as np
-TEMP_COMFORT_C = 25.0
 TEMP_PLATEAU   = 1.5
 TEMP_FLOOR     = -2.2
-TEMP_LOW_C = 15.0
-TEMP_HIGH_C = 35.0
+TEMP_LOW_C = 20.0   # optimal band lower bound (°C)
+TEMP_HIGH_C = 30.0  # optimal band upper bound (°C)
 TEMP_MAX_C = 50.0
 
 TIME_MAX_REWARD = 1.5
@@ -55,25 +54,15 @@ def energy_delivered_j(
     return float(max(0.0, np.trapz(power_w, t)))
 
 
-# def temperature_reward(t_c: float) -> float:
-#     """Plateau 1.5 in [15, 35] °C; linear penalty outside (unbounded, no floor at 0)."""
-#     t = float(t_c)
-#     if TEMP_LOW_C <= t <= TEMP_HIGH_C:
-#         return TEMP_PLATEAU
-#     slope = (TEMP_PLATEAU - TEMP_FLOOR) / TEMP_LOW_C
-#     if t < TEMP_LOW_C:
-#         return TEMP_PLATEAU - slope * (TEMP_LOW_C - t)
-#     return TEMP_PLATEAU - slope * (t - TEMP_HIGH_C)
-
 def temperature_reward(t_c: float) -> float:
+    """Plateau TEMP_PLATEAU in [TEMP_LOW_C, TEMP_HIGH_C]; linear penalty outside."""
     t = float(t_c)
-    if t <= TEMP_COMFORT_C:
-        return TEMP_PLATEAU                      # cool: full reward
-    if t <= TEMP_HIGH_C:                          # safe but warm: decline gently
-        frac = (t - TEMP_COMFORT_C) / (TEMP_HIGH_C - TEMP_COMFORT_C)
-        return TEMP_PLATEAU - frac * (TEMP_PLATEAU - 0.0)   # 1.5 → 0 across [25,35]
-    over = t - TEMP_HIGH_C                        # unsafe: steep penalty
-    return -abs(TEMP_FLOOR) - over * (abs(TEMP_FLOOR) / 5.0)
+    if TEMP_LOW_C <= t <= TEMP_HIGH_C:
+        return TEMP_PLATEAU
+    slope = (TEMP_PLATEAU - TEMP_FLOOR) / TEMP_LOW_C
+    if t < TEMP_LOW_C:
+        return TEMP_PLATEAU - slope * (TEMP_LOW_C - t)
+    return TEMP_PLATEAU - slope * (t - TEMP_HIGH_C)
 
 
 def time_reward(t_sec: float) -> float:
@@ -88,19 +77,23 @@ def mean_temperature_reward(temperature_c: np.ndarray) -> float:
 
 
 def aggregate_reward(
-    temperature_c: np.ndarray,
+    session: Dict,
     duration_s: float,
     *,
     w_time: float = 1.0,
     w_temperature: float = 1.0,
 ) -> dict:
-    tr = mean_temperature_reward(temperature_c)
+    from Constrained_BO.bdt_thermal import bdt_thermal_metrics
+
+    tr = mean_temperature_reward(session["temperature_c"])
+    thermal = bdt_thermal_metrics(session)
     tim = time_reward(duration_s)
     total = w_time * tim + w_temperature * tr
     return {
         "temperature_reward": tr,
         "time_reward": tim,
         "total_reward": total,
+        "thermal_metrics": thermal,
         "reward_weights": {"w_time": w_time, "w_temperature": w_temperature},
     }
 
@@ -133,11 +126,12 @@ def evaluate_session(
         energy_required = energy_required_j(q_rated, frac, v_nom)
 
     rewards = aggregate_reward(
-        session["temperature_c"],
+        session,
         duration_s,
         w_time=w_time,
         w_temperature=w_temperature,
     )
+    thermal = rewards.get("thermal_metrics", {})
 
     if constraint_mode == "energy":
         energy_shortfall_j = max(0.0, energy_required - energy_delivered)
@@ -157,8 +151,9 @@ def evaluate_session(
             loss += ENERGY_PENALTY_SCALE * rel_shortfall
         else:
             loss += SOC_PENALTY_SCALE * max(0.0, soc_target - soc_end)
-    if peak_v > 4.2 + 1e-4:
-        loss += VOLTAGE_PENALTY_SCALE * (peak_v - 4.2)
+    v_ceiling = float(session.get("v_max", 4.2))
+    if peak_v > v_ceiling + 1e-4:
+        loss += VOLTAGE_PENALTY_SCALE * (peak_v - v_ceiling)
 
     metrics = {
         "feasible": feasible,
@@ -177,6 +172,10 @@ def evaluate_session(
         "peak_voltage": peak_v,
         "peak_temperature": peak_t,
         "mean_temperature": mean_t,
+        "dT_peak_charge": thermal.get("dT_peak_charge"),
+        "dT_dt_max_charge": thermal.get("dT_dt_max_charge"),
+        "stem_charge_per_kj": thermal.get("stem_charge_per_kj"),
+        "rest_cooling_mean": thermal.get("rest_cooling_mean"),
         "energy_delivered_j": energy_delivered,
         "energy_required_j": energy_required,
         "energy_full_j": energy_full_j,

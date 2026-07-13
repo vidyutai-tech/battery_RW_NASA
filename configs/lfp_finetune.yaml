@@ -1,0 +1,116 @@
+# Fine-tune the NASA temperature-aware BDT on LFP data (lfp_processed.mat).
+#
+# Cross-chemistry transfer: source checkpoint is trained on NASA RW9 (NCA).
+# LFP voltage span (~2.5–3.6 V) differs from NASA (~2.7–4.2 V); expect higher
+# initial voltage RMSE until the head/backbone adapt.
+#
+# Usage (after confirming q_rated_ah and decimation):
+#   python3 scripts/explore_lfp_mat.py
+#   python3 scripts/finetune_lfp.py --config configs/lfp_finetune.yaml \
+#       --source_ckpt outputs/temp_aware/twin_source/<run>/twin_source_RW9.pt
+#
+# Quick smoke (single fraction, heavy decimation):
+#   python3 scripts/finetune_lfp.py --fractions 0.20 --out outputs/lfp_finetune_smoke
+
+seed: 42
+
+data:
+  format: lfp
+  lfp_mat: "lfp_processed.mat"
+  cell_id: "LFP"
+  # Required by load_config (unused for LFP stitch — NASA RW path only)
+  matlab_dir: "NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab"
+  cells:
+    source: "RW9"
+    targets: ["LFP"]
+  # rw_only (553 steps) | rw_plus_reference (579) | all (660 incl. HPPC)
+  comment_mode: "rw_only"
+  # Full resolution ≈ 6.8M samples; decimate to keep training tractable.
+  decimation: 10
+  # Calibrate from 1C Reference discharge steps before charging optimization.
+  q_rated_ah: 3.0
+
+windows:
+  seq_len: 150
+  stride: 50
+
+splits:
+  train_frac: 0.80
+  val_frac: 0.10
+
+transfer:
+  eval_tail_frac: 0.20
+
+twin:
+  pipeline: author
+  chunk_size: 150
+  d_model: 150
+  nhead: 20
+  num_layers: 1
+  dropout: 0.1
+  temp_delta_scale: 1.0
+  author_style: true
+  voltage_weight: 10.0
+  temp_weight: 50.0
+  pearson_temp_weight: 5.0
+  optimizer: adam
+  lr: 1.0e-3
+  batch_size: 128
+  epochs: 10000
+  early_stop_patience: 50
+  plateau_patience: 3
+  plateau_factor: 0.1
+  grad_clip: 1.0
+  num_workers: 0
+  author_split:
+    train_frac: 0.6
+    val_frac: 0.2
+    shuffle: true
+  temp_smooth_series_window: 0
+  smooth_temp_targets: false
+  loss:
+    mse_voltage: 10.0
+    mse_temp: 50.0
+    mape_voltage: 0.0
+    mape_temp: 0.0
+    corr_temp: 5.0
+  early_stop_metric: val_loss
+
+soc:
+  variants: ["v_only", "vta", "vta_i"]
+  hidden: 64
+  epochs: 1000
+  batch_size: 256
+  lr: 1.0e-3
+  log_every: 50
+  soc_input: "measured"
+
+phase2:
+  data_fractions: [0.20, 0.40, 0.60]
+  finetune_lr: 5.0e-7
+
+finetune_temp:
+  stage1_epochs: 50
+  stage1_voltage_weight: 1.0
+  stage1_temp_weight: 100.0
+  stage1_pearson_weight: 5.0
+  stage1_lr: null
+
+  stage2_epochs: 500
+  stage2_voltage_weight: 10.0
+  stage2_temp_weight: 50.0
+  stage2_pearson_weight: 5.0
+
+phase3:
+  adaptation_hours: [0.5, 1, 2, 3, 6, 12, 24, 48, 72, null]
+  performance_thresholds: [0.90, 0.95, 0.98, 0.99]
+  primary_metric: "voltage_rmse"
+  finetune_epochs: 500
+  scratch_epochs: 500
+
+output:
+  root: "outputs/lfp_finetune"
+
+# NASA BDT source checkpoint (override via --source_ckpt if null)
+source:
+  checkpoint: null

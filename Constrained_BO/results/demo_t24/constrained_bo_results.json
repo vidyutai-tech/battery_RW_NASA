@@ -1,0 +1,3439 @@
+{
+  "meta": {
+    "cell": "RW9",
+    "bdt_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "finetune_fraction": null,
+    "soc_start": 0.2,
+    "ocv_curve": "/data/battery_RW_NASA/Constrained_BO/data/RW9/ocv_soc_curve.npz",
+    "start_state": {
+      "soc": 0.2,
+      "v0": 3.7373055650901823,
+      "t0": 24.0,
+      "age": 0.0,
+      "prev_i": 0.0
+    },
+    "soc_target": 0.8,
+    "max_duration_min": 150.0,
+    "constraint_mode": "soc",
+    "v_nom": 3.82383112687065,
+    "n_random": 20,
+    "method": "random_search",
+    "reward_weights": {
+      "w_time": 1.0,
+      "w_temperature": 1.0
+    },
+    "families": [
+      "cccv",
+      "two_step",
+      "three_step",
+      "pulsed"
+    ],
+    "decision_interval_s": 60,
+    "decision_interval_selection": {
+      "method": "chained_rollout",
+      "source": "chained_rollout",
+      "selected_s": 60,
+      "scores": {
+        "10": 0.04941263399019073,
+        "15": 0.04063532220997442,
+        "30": 0.03671095241585661,
+        "60": 0.03310456706298906
+      },
+      "horizon_s": 600.0
+    },
+    "profile_bounds": {
+      "cell_id": "RW9",
+      "i_min_a": 0.75,
+      "i_max_a": 6.0,
+      "v_cv_min_v": 4.05,
+      "v_cv_max_v": 4.2,
+      "soc_switch_min": 0.1,
+      "soc_switch_max": 0.9,
+      "pulse_on_min_min": 1.0,
+      "pulse_on_max_min": 15.0,
+      "rest_fraction_min": 0.5,
+      "rest_fraction_max": 2.5,
+      "seed_cccv": {
+        "i_cc": 2.0,
+        "v_cv": 4.2,
+        "i_cutoff": 0.01
+      },
+      "seed_pulsed": {
+        "i_charge": 1.0,
+        "pulse_on_min": 10.0,
+        "rest_fraction": 2.0,
+        "i_floor": 0.75
+      }
+    }
+  },
+  "families": {
+    "cccv": {
+      "family_id": "cccv",
+      "family_label": "CCCV",
+      "best_params": {
+        "family_id": "cccv",
+        "i_cc": 0.75,
+        "v_cv": 4.2,
+        "i_cutoff": 0.01
+      },
+      "best_loss": 60.33854082132906,
+      "best_metrics": {
+        "feasible": false,
+        "loss": 60.33854082132906,
+        "constraint_mode": "soc",
+        "total_reward": -53.410000000000004,
+        "time_reward": -54.910000000000004,
+        "temperature_reward": 1.5,
+        "duration_min": 94.01666666666667,
+        "duration_s": 5641.0,
+        "soc_start": 0.2,
+        "soc_end": 0.7775000000000023,
+        "soc_target": 0.8,
+        "soc_delta": 0.5775000000000023,
+        "end_reason": "CV cutoff current",
+        "peak_voltage": 4.200845241546631,
+        "peak_temperature": 24.0,
+        "mean_temperature": 21.604808586917223,
+        "energy_delivered_j": 16506.570063643456,
+        "energy_required_j": 0.0,
+        "energy_full_j": 27531.58411346868,
+        "energy_fraction": null,
+        "energy_shortfall_j": 0.0,
+        "reward_weights": {
+          "w_time": 1.0,
+          "w_temperature": 1.0
+        }
+      },
+      "history": [
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 2.0,
+            "v_cv": 4.125,
+            "i_cutoff": 0.01
+          },
+          "loss": 132.71513333333334,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 132.71513333333334,
+            "constraint_mode": "soc",
+            "total_reward": -3.08,
+            "time_reward": -4.58,
+            "temperature_reward": 1.5,
+            "duration_min": 10.133333333333333,
+            "duration_s": 608.0,
+            "soc_start": 0.2,
+            "soc_end": 0.36791666666666667,
+            "soc_target": 0.8,
+            "soc_delta": 0.16791666666666666,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.1379218101501465,
+            "peak_temperature": 24.0,
+            "mean_temperature": 23.585643467150238,
+            "energy_delivered_j": 4893.926383435726,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 2.0,
+            "v_cv": 4.05,
+            "i_cutoff": 0.01
+          },
+          "loss": 154.31833333333344,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 154.31833333333344,
+            "constraint_mode": "soc",
+            "total_reward": -8.75,
+            "time_reward": -10.25,
+            "temperature_reward": 1.5,
+            "duration_min": 19.583333333333332,
+            "duration_s": 1175.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3148374999999997,
+            "soc_target": 0.8,
+            "soc_delta": 0.1148374999999997,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.057772636413574,
+            "peak_temperature": 24.0,
+            "mean_temperature": 22.616960976783265,
+            "energy_delivered_j": 3317.4065511846543,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 3.375,
+            "v_cv": 4.2,
+            "i_cutoff": 0.01
+          },
+          "loss": 154.96877594401042,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 154.96877594401042,
+            "constraint_mode": "soc",
+            "total_reward": -4.5600000000000005,
+            "time_reward": -6.0600000000000005,
+            "temperature_reward": 1.5,
+            "duration_min": 12.6,
+            "duration_s": 756.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3012215277777777,
+            "soc_target": 0.8,
+            "soc_delta": 0.10122152777777771,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.2076263427734375,
+            "peak_temperature": 24.64057731628418,
+            "mean_temperature": 22.612898041962318,
+            "energy_delivered_j": 3025.3774938440324,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 0.75,
+            "v_cv": 4.2,
+            "i_cutoff": 0.01
+          },
+          "loss": 60.33854082132906,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 60.33854082132906,
+            "constraint_mode": "soc",
+            "total_reward": -53.410000000000004,
+            "time_reward": -54.910000000000004,
+            "temperature_reward": 1.5,
+            "duration_min": 94.01666666666667,
+            "duration_s": 5641.0,
+            "soc_start": 0.2,
+            "soc_end": 0.7775000000000023,
+            "soc_target": 0.8,
+            "soc_delta": 0.5775000000000023,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.200845241546631,
+            "peak_temperature": 24.0,
+            "mean_temperature": 21.604808586917223,
+            "energy_delivered_j": 16506.570063643456,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 6.0,
+            "v_cv": 4.2,
+            "i_cutoff": 0.01
+          },
+          "loss": 176.16144030141996,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 176.16144030141996,
+            "constraint_mode": "soc",
+            "total_reward": 2.601718590385036,
+            "time_reward": 1.12,
+            "temperature_reward": 1.4817185903850356,
+            "duration_min": 0.6333333333333333,
+            "duration_s": 38.0,
+            "soc_start": 0.2,
+            "soc_end": 0.22208333333333335,
+            "soc_target": 0.8,
+            "soc_delta": 0.022083333333333344,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.253875255584717,
+            "peak_temperature": 25.399322509765625,
+            "mean_temperature": 24.77051238009804,
+            "energy_delivered_j": 655.7344737648964,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 2.0,
+            "v_cv": 4.2,
+            "i_cutoff": 0.01
+          },
+          "loss": 95.91523951721126,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 95.91523951721126,
+            "constraint_mode": "soc",
+            "total_reward": -13.95,
+            "time_reward": -15.45,
+            "temperature_reward": 1.5,
+            "duration_min": 28.25,
+            "duration_s": 1695.0,
+            "soc_start": 0.2,
+            "soc_end": 0.5276000000000022,
+            "soc_target": 0.8,
+            "soc_delta": 0.32760000000000217,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.202169895172119,
+            "peak_temperature": 24.0,
+            "mean_temperature": 23.14187386886912,
+            "energy_delivered_j": 9701.928392660619,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.813269254918808,
+            "v_cv": 4.115831765962808,
+            "i_cutoff": 0.4307129807565774
+          },
+          "loss": 170.48388905114484,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 170.48388905114484,
+            "constraint_mode": "soc",
+            "total_reward": 2.44,
+            "time_reward": 0.94,
+            "temperature_reward": 1.5,
+            "duration_min": 0.9333333333333333,
+            "duration_s": 56.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23212403864936845,
+            "soc_target": 0.8,
+            "soc_delta": 0.03212403864936844,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.225601673126221,
+            "peak_temperature": 24.89513397216797,
+            "mean_temperature": 24.378753355571202,
+            "energy_delivered_j": 955.1085278123371,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.41118215256166,
+            "v_cv": 4.064126602183148,
+            "i_cutoff": 0.4880549523020104
+          },
+          "loss": 168.51184565031127,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 168.51184565031127,
+            "constraint_mode": "soc",
+            "total_reward": 2.33,
+            "time_reward": 0.83,
+            "temperature_reward": 1.5,
+            "duration_min": 1.1166666666666667,
+            "duration_s": 67.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23688183391967096,
+            "soc_target": 0.8,
+            "soc_delta": 0.03688183391967095,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.219052791595459,
+            "peak_temperature": 24.78290557861328,
+            "mean_temperature": 24.315937013768437,
+            "energy_delivered_j": 1096.4184951806906,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.745983435449353,
+            "v_cv": 4.167909645791543,
+            "i_cutoff": 0.07277568001101747
+          },
+          "loss": 170.1982911138465,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 170.1982911138465,
+            "constraint_mode": "soc",
+            "total_reward": 2.41,
+            "time_reward": 0.91,
+            "temperature_reward": 1.5,
+            "duration_min": 0.9833333333333333,
+            "duration_s": 59.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23295319759604327,
+            "soc_target": 0.8,
+            "soc_delta": 0.03295319759604326,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.224932670593262,
+            "peak_temperature": 24.875322341918945,
+            "mean_temperature": 24.371594412852144,
+            "energy_delivered_j": 980.5440344815131,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 3.1145261739517274,
+            "v_cv": 4.105619703634887,
+            "i_cutoff": 0.46411484453581486
+          },
+          "loss": 169.0702934020595,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 169.0702934020595,
+            "constraint_mode": "soc",
+            "total_reward": 2.29,
+            "time_reward": 0.79,
+            "temperature_reward": 1.5,
+            "duration_min": 1.1833333333333333,
+            "duration_s": 71.0,
+            "soc_start": 0.2,
+            "soc_end": 0.22880296643757958,
+            "soc_target": 0.8,
+            "soc_delta": 0.02880296643757957,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.141479969024658,
+            "peak_temperature": 24.186077117919922,
+            "mean_temperature": 24.045040641032475,
+            "energy_delivered_j": 840.2249319610601,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.1302918804234885,
+            "v_cv": 4.173414241990624,
+            "i_cutoff": 0.22727295742539225
+          },
+          "loss": 167.56649238272794,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 167.56649238272794,
+            "constraint_mode": "soc",
+            "total_reward": 2.24,
+            "time_reward": 0.74,
+            "temperature_reward": 1.5,
+            "duration_min": 1.2666666666666666,
+            "duration_s": 76.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23943085873780356,
+            "soc_target": 0.8,
+            "soc_delta": 0.039430858737803554,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.216344833374023,
+            "peak_temperature": 24.719741821289062,
+            "mean_temperature": 24.282587979969225,
+            "energy_delivered_j": 1171.9464122484926,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.9430032893700786,
+            "v_cv": 4.133187718052375,
+            "i_cutoff": 0.04127045549104591
+          },
+          "loss": 117.03390674398136,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 117.03390674398136,
+            "constraint_mode": "soc",
+            "total_reward": -12.280000000000001,
+            "time_reward": -13.780000000000001,
+            "temperature_reward": 1.5,
+            "duration_min": 25.466666666666665,
+            "duration_s": 1528.0,
+            "soc_start": 0.2,
+            "soc_end": 0.45090519974228443,
+            "soc_target": 0.8,
+            "soc_delta": 0.2509051997422844,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.136739730834961,
+            "peak_temperature": 24.000974655151367,
+            "mean_temperature": 22.833858668492102,
+            "energy_delivered_j": 7348.583930625801,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 5.095063652961056,
+            "v_cv": 4.144749659868309,
+            "i_cutoff": 0.3814629926418332
+          },
+          "loss": 171.64733880667163,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 171.64733880667163,
+            "constraint_mode": "soc",
+            "total_reward": 2.49,
+            "time_reward": 0.99,
+            "temperature_reward": 1.5,
+            "duration_min": 0.85,
+            "duration_s": 51.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23015253420847412,
+            "soc_target": 0.8,
+            "soc_delta": 0.030152534208474108,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.231822490692139,
+            "peak_temperature": 24.979368209838867,
+            "mean_temperature": 24.42387969821107,
+            "energy_delivered_j": 896.727570548002,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 2.611261332681809,
+            "v_cv": 4.195604703659235,
+            "i_cutoff": 0.44762934944787686
+          },
+          "loss": 134.0633772279292,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 134.0633772279292,
+            "constraint_mode": "soc",
+            "total_reward": -5.82,
+            "time_reward": -7.32,
+            "temperature_reward": 1.5,
+            "duration_min": 14.7,
+            "duration_s": 882.0,
+            "soc_start": 0.2,
+            "soc_end": 0.37341262991284335,
+            "soc_target": 0.8,
+            "soc_delta": 0.17341262991284334,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.202524662017822,
+            "peak_temperature": 24.622560501098633,
+            "mean_temperature": 23.267673935749634,
+            "energy_delivered_j": 5157.995033101807,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.83651335963725,
+            "v_cv": 4.079195806177795,
+            "i_cutoff": 0.23869329182624674
+          },
+          "loss": 170.88294875936808,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 170.88294875936808,
+            "constraint_mode": "soc",
+            "total_reward": 2.45,
+            "time_reward": 0.95,
+            "temperature_reward": 1.5,
+            "duration_min": 0.9166666666666666,
+            "duration_s": 55.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23100808816389568,
+            "soc_target": 0.8,
+            "soc_delta": 0.031008088163895664,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.226344585418701,
+            "peak_temperature": 24.899015426635742,
+            "mean_temperature": 24.385583773526278,
+            "energy_delivered_j": 921.9865298158641,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 0.9799697703829511,
+            "v_cv": 4.073143423810132,
+            "i_cutoff": 0.3446939870888028
+          },
+          "loss": 95.58612903657973,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 95.58612903657973,
+            "constraint_mode": "soc",
+            "total_reward": -23.43,
+            "time_reward": -24.93,
+            "temperature_reward": 1.5,
+            "duration_min": 44.05,
+            "duration_s": 2643.0,
+            "soc_start": 0.2,
+            "soc_end": 0.5596264032114009,
+            "soc_target": 0.8,
+            "soc_delta": 0.3596264032114009,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.078162670135498,
+            "peak_temperature": 24.0,
+            "mean_temperature": 22.014279420024916,
+            "energy_delivered_j": 10236.44524890115,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.66000131851604,
+            "v_cv": 4.195126459865132,
+            "i_cutoff": 0.16965442548769447
+          },
+          "loss": 169.7526311794114,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 169.7526311794114,
+            "constraint_mode": "soc",
+            "total_reward": 2.39,
+            "time_reward": 0.89,
+            "temperature_reward": 1.5,
+            "duration_min": 1.0166666666666666,
+            "duration_s": 61.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23416806672631646,
+            "soc_target": 0.8,
+            "soc_delta": 0.03416806672631645,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.2239203453063965,
+            "peak_temperature": 24.868459701538086,
+            "mean_temperature": 24.362630187487994,
+            "energy_delivered_j": 1016.5018833139629,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 2.6949134566830617,
+            "v_cv": 4.120433371691371,
+            "i_cutoff": 0.10284096595129999
+          },
+          "loss": 158.03908040723059,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 158.03908040723059,
+            "constraint_mode": "soc",
+            "total_reward": 1.0899999999999999,
+            "time_reward": -0.41000000000000014,
+            "temperature_reward": 1.5,
+            "duration_min": 3.183333333333333,
+            "duration_s": 191.0,
+            "soc_start": 0.2,
+            "soc_end": 0.26958034308700923,
+            "soc_target": 0.8,
+            "soc_delta": 0.06958034308700922,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.147238731384277,
+            "peak_temperature": 24.21042823791504,
+            "mean_temperature": 24.033752451392367,
+            "energy_delivered_j": 2042.8847437229035,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 1.4320879030112261,
+            "v_cv": 4.12135573893389,
+            "i_cutoff": 0.12118558103493321
+          },
+          "loss": 106.71669415434755,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 106.71669415434755,
+            "constraint_mode": "soc",
+            "total_reward": -15.129999999999999,
+            "time_reward": -16.63,
+            "temperature_reward": 1.5,
+            "duration_min": 30.216666666666665,
+            "duration_s": 1813.0,
+            "soc_start": 0.2,
+            "soc_end": 0.49481174170773046,
+            "soc_target": 0.8,
+            "soc_delta": 0.29481174170773045,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.124678134918213,
+            "peak_temperature": 24.017484664916992,
+            "mean_temperature": 22.47673091372928,
+            "energy_delivered_j": 8528.023801890493,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        },
+        {
+          "family_id": "cccv",
+          "params": {
+            "family_id": "cccv",
+            "i_cc": 4.266523472083179,
+            "v_cv": 4.11557278783085,
+            "i_cutoff": 0.41801231606834033
+          },
+          "loss": 167.66457998776954,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 167.66457998776954,
+            "constraint_mode": "soc",
+            "total_reward": 2.26,
+            "time_reward": 0.76,
+            "temperature_reward": 1.5,
+            "duration_min": 1.2333333333333334,
+            "duration_s": 74.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23968371346307712,
+            "soc_target": 0.8,
+            "soc_delta": 0.039683713463077114,
+            "end_reason": "CV cutoff current",
+            "peak_voltage": 4.218284606933594,
+            "peak_temperature": 24.767772674560547,
+            "mean_temperature": 24.30636488424765,
+            "energy_delivered_j": 1180.4241863776308,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "CV cutoff current"
+        }
+      ],
+      "n_evaluated": 20
+    },
+    "two_step": {
+      "family_id": "two_step",
+      "family_label": "2-step (SoC)",
+      "best_params": {
+        "family_id": "two_step",
+        "i1": 0.8269900964321735,
+        "i2": 0.7678354465004272,
+        "soc_switch": 0.8114999030764897
+      },
+      "best_loss": 57.46411556778678,
+      "best_metrics": {
+        "feasible": false,
+        "loss": 57.46411556778678,
+        "constraint_mode": "soc",
+        "total_reward": -45.94,
+        "time_reward": -47.44,
+        "temperature_reward": 1.5,
+        "duration_min": 81.56666666666666,
+        "duration_s": 4894.0,
+        "soc_start": 0.2,
+        "soc_end": 0.7621235461027116,
+        "soc_target": 0.8,
+        "soc_delta": 0.5621235461027116,
+        "end_reason": "time budget",
+        "peak_voltage": 4.200796127319336,
+        "peak_temperature": 24.0,
+        "mean_temperature": 21.75987172409326,
+        "energy_delivered_j": 16131.075119123345,
+        "energy_required_j": 0.0,
+        "energy_full_j": 27531.58411346868,
+        "energy_fraction": null,
+        "energy_shortfall_j": 0.0,
+        "reward_weights": {
+          "w_time": 1.0,
+          "w_temperature": 1.0
+        }
+      },
+      "history": [
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 3.375,
+            "i2": 1.6875,
+            "soc_switch": 0.1
+          },
+          "loss": 90.34070906677248,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 90.34070906677248,
+            "constraint_mode": "soc",
+            "total_reward": -11.49,
+            "time_reward": -12.99,
+            "temperature_reward": 1.5,
+            "duration_min": 24.15,
+            "duration_s": 1449.0,
+            "soc_start": 0.2,
+            "soc_end": 0.539609375,
+            "soc_target": 0.8,
+            "soc_delta": 0.33960937499999994,
+            "end_reason": "time budget",
+            "peak_voltage": 4.207093715667725,
+            "peak_temperature": 24.173688888549805,
+            "mean_temperature": 23.226606237386488,
+            "energy_delivered_j": 9954.587443336844,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.0,
+            "i2": 1.0,
+            "soc_switch": 0.9
+          },
+          "loss": 105.52165907491047,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 105.52165907491047,
+            "constraint_mode": "soc",
+            "total_reward": -7.18,
+            "time_reward": -8.68,
+            "temperature_reward": 1.5,
+            "duration_min": 16.966666666666665,
+            "duration_s": 1018.0,
+            "soc_start": 0.2,
+            "soc_end": 0.4827777777777778,
+            "soc_target": 0.8,
+            "soc_delta": 0.2827777777777778,
+            "end_reason": "time budget",
+            "peak_voltage": 4.2315802574157715,
+            "peak_temperature": 24.892038345336914,
+            "mean_temperature": 23.74599805843151,
+            "energy_delivered_j": 8351.286858081818,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 3.375,
+            "i2": 1.6875,
+            "soc_switch": 0.5
+          },
+          "loss": 148.6143507942259,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 148.6143507942259,
+            "constraint_mode": "soc",
+            "total_reward": -0.0966659268756842,
+            "time_reward": -1.48,
+            "temperature_reward": 1.3833340731243158,
+            "duration_min": 4.966666666666667,
+            "duration_s": 298.0,
+            "soc_start": 0.2,
+            "soc_end": 0.33968750000000003,
+            "soc_target": 0.8,
+            "soc_delta": 0.13968750000000002,
+            "end_reason": "time budget",
+            "peak_voltage": 4.304189682006836,
+            "peak_temperature": 27.887025833129883,
+            "mean_temperature": 25.37932269205183,
+            "energy_delivered_j": 4215.486899614334,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.0,
+            "i2": 1.0,
+            "soc_switch": 0.1
+          },
+          "loss": 62.135240762329104,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 62.135240762329104,
+            "constraint_mode": "soc",
+            "total_reward": -33.31,
+            "time_reward": -34.81,
+            "temperature_reward": 1.5,
+            "duration_min": 60.516666666666666,
+            "duration_s": 3631.0,
+            "soc_start": 0.2,
+            "soc_end": 0.7043055555555555,
+            "soc_target": 0.8,
+            "soc_delta": 0.5043055555555556,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200563907623291,
+            "peak_temperature": 24.0,
+            "mean_temperature": 22.075401184283745,
+            "energy_delivered_j": 14570.163013458252,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 6.0,
+            "i2": 3.0,
+            "soc_switch": 0.9
+          },
+          "loss": 149.36776161585303,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 149.36776161585303,
+            "constraint_mode": "soc",
+            "total_reward": 0.9536138795489915,
+            "time_reward": -0.13000000000000012,
+            "temperature_reward": 1.0836138795489916,
+            "duration_min": 2.716666666666667,
+            "duration_s": 163.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3358333333333333,
+            "soc_target": 0.8,
+            "soc_delta": 0.1358333333333333,
+            "end_reason": "time budget",
+            "peak_voltage": 4.3106865882873535,
+            "peak_temperature": 29.06611442565918,
+            "mean_temperature": 27.696202576526105,
+            "energy_delivered_j": 4156.8135638237,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.0,
+            "i2": 1.0,
+            "soc_switch": 0.5
+          },
+          "loss": 105.52165907491047,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 105.52165907491047,
+            "constraint_mode": "soc",
+            "total_reward": -7.18,
+            "time_reward": -8.68,
+            "temperature_reward": 1.5,
+            "duration_min": 16.966666666666665,
+            "duration_s": 1018.0,
+            "soc_start": 0.2,
+            "soc_end": 0.4827777777777778,
+            "soc_target": 0.8,
+            "soc_delta": 0.2827777777777778,
+            "end_reason": "time budget",
+            "peak_voltage": 4.2315802574157715,
+            "peak_temperature": 24.892038345336914,
+            "mean_temperature": 23.74599805843151,
+            "energy_delivered_j": 8351.286858081818,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 3.375,
+            "i2": 1.6875,
+            "soc_switch": 0.9
+          },
+          "loss": 148.6143507942259,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 148.6143507942259,
+            "constraint_mode": "soc",
+            "total_reward": -0.0966659268756842,
+            "time_reward": -1.48,
+            "temperature_reward": 1.3833340731243158,
+            "duration_min": 4.966666666666667,
+            "duration_s": 298.0,
+            "soc_start": 0.2,
+            "soc_end": 0.33968750000000003,
+            "soc_target": 0.8,
+            "soc_delta": 0.13968750000000002,
+            "end_reason": "time budget",
+            "peak_voltage": 4.304189682006836,
+            "peak_temperature": 27.887025833129883,
+            "mean_temperature": 25.37932269205183,
+            "energy_delivered_j": 4215.486899614334,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 6.0,
+            "i2": 3.0,
+            "soc_switch": 0.1
+          },
+          "loss": 141.2338164870313,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 141.2338164870313,
+            "constraint_mode": "soc",
+            "total_reward": -0.9176984002800184,
+            "time_reward": -2.36,
+            "temperature_reward": 1.4423015997199815,
+            "duration_min": 6.433333333333334,
+            "duration_s": 386.0,
+            "soc_start": 0.2,
+            "soc_end": 0.36083333333333334,
+            "soc_target": 0.8,
+            "soc_delta": 0.16083333333333333,
+            "end_reason": "time budget",
+            "peak_voltage": 4.28559684753418,
+            "peak_temperature": 26.992759704589844,
+            "mean_temperature": 24.911368384880106,
+            "energy_delivered_j": 4830.089675188065,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 6.0,
+            "i2": 3.0,
+            "soc_switch": 0.5
+          },
+          "loss": 149.36776161585303,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 149.36776161585303,
+            "constraint_mode": "soc",
+            "total_reward": 0.9536138795489915,
+            "time_reward": -0.13000000000000012,
+            "temperature_reward": 1.0836138795489916,
+            "duration_min": 2.716666666666667,
+            "duration_s": 163.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3358333333333333,
+            "soc_target": 0.8,
+            "soc_delta": 0.1358333333333333,
+            "end_reason": "time budget",
+            "peak_voltage": 4.3106865882873535,
+            "peak_temperature": 29.06611442565918,
+            "mean_temperature": 27.696202576526105,
+            "energy_delivered_j": 4156.8135638237,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.6263945295837496,
+            "i2": 1.4484102913115893,
+            "soc_switch": 0.5608029298735627
+          },
+          "loss": 131.66365786453244,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 131.66365786453244,
+            "constraint_mode": "soc",
+            "total_reward": -2.2478017114817987,
+            "time_reward": -3.7300000000000004,
+            "temperature_reward": 1.4821982885182017,
+            "duration_min": 8.716666666666667,
+            "duration_s": 523.0,
+            "soc_start": 0.2,
+            "soc_end": 0.39077838041281837,
+            "soc_target": 0.8,
+            "soc_delta": 0.19077838041281836,
+            "end_reason": "time budget",
+            "peak_voltage": 4.266406536102295,
+            "peak_temperature": 26.0369873046875,
+            "mean_temperature": 24.502114487423725,
+            "energy_delivered_j": 5698.2784255284505,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 4.67223243449084,
+            "i2": 1.4740729409828104,
+            "soc_switch": 0.5676845169526435
+          },
+          "loss": 155.31116985326577,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 155.31116985326577,
+            "constraint_mode": "soc",
+            "total_reward": 0.7559049847722055,
+            "time_reward": -0.41999999999999993,
+            "temperature_reward": 1.1759049847722054,
+            "duration_min": 3.2,
+            "duration_s": 192.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3245928649197562,
+            "soc_target": 0.8,
+            "soc_delta": 0.12459286491975619,
+            "end_reason": "time budget",
+            "peak_voltage": 4.334417343139648,
+            "peak_temperature": 29.945507049560547,
+            "mean_temperature": 26.971229513486225,
+            "energy_delivered_j": 3798.8621298129647,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 3.5575548095618785,
+            "i2": 2.441529785582593,
+            "soc_switch": 0.31133092767429227
+          },
+          "loss": 151.5554286034012,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 151.5554286034012,
+            "constraint_mode": "soc",
+            "total_reward": 0.1833087026539133,
+            "time_reward": -1.1800000000000002,
+            "temperature_reward": 1.3633087026539135,
+            "duration_min": 4.466666666666667,
+            "duration_s": 268.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3259099497160358,
+            "soc_target": 0.8,
+            "soc_delta": 0.1259099497160358,
+            "end_reason": "time budget",
+            "peak_voltage": 4.295072555541992,
+            "peak_temperature": 27.658945083618164,
+            "mean_temperature": 25.553345203399658,
+            "energy_delivered_j": 3804.4316094943833,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 0.8269900964321735,
+            "i2": 0.7678354465004272,
+            "soc_switch": 0.8114999030764897
+          },
+          "loss": 57.46411556778678,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 57.46411556778678,
+            "constraint_mode": "soc",
+            "total_reward": -45.94,
+            "time_reward": -47.44,
+            "temperature_reward": 1.5,
+            "duration_min": 81.56666666666666,
+            "duration_s": 4894.0,
+            "soc_start": 0.2,
+            "soc_end": 0.7621235461027116,
+            "soc_target": 0.8,
+            "soc_delta": 0.5621235461027116,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200796127319336,
+            "peak_temperature": 24.0,
+            "mean_temperature": 21.75987172409326,
+            "energy_delivered_j": 16131.075119123345,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 5.452115475095658,
+            "i2": 1.0723114584331395,
+            "soc_switch": 0.42323720879852
+          },
+          "loss": 152.32031903168698,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 152.32031903168698,
+            "constraint_mode": "soc",
+            "total_reward": 0.8914327066084919,
+            "time_reward": -0.19999999999999996,
+            "temperature_reward": 1.091432706608492,
+            "duration_min": 2.8333333333333335,
+            "duration_s": 170.0,
+            "soc_start": 0.2,
+            "soc_end": 0.32873050427309164,
+            "soc_target": 0.8,
+            "soc_delta": 0.12873050427309163,
+            "end_reason": "time budget",
+            "peak_voltage": 4.3182806968688965,
+            "peak_temperature": 29.612112045288086,
+            "mean_temperature": 27.609069274453557,
+            "energy_delivered_j": 3936.3915065749093,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 5.209178504990142,
+            "i2": 5.116728251259117,
+            "soc_switch": 0.5457806223270234
+          },
+          "loss": 153.125932311473,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 153.125932311473,
+            "constraint_mode": "soc",
+            "total_reward": 0.8377136653964801,
+            "time_reward": -0.27,
+            "temperature_reward": 1.10771366539648,
+            "duration_min": 2.95,
+            "duration_s": 177.0,
+            "soc_start": 0.2,
+            "soc_end": 0.32805897158100794,
+            "soc_target": 0.8,
+            "soc_delta": 0.12805897158100793,
+            "end_reason": "time budget",
+            "peak_voltage": 4.323783874511719,
+            "peak_temperature": 29.87175750732422,
+            "mean_temperature": 27.474223088409943,
+            "energy_delivered_j": 3913.537365596581,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.4148702193601292,
+            "i2": 1.7489212486328203,
+            "soc_switch": 0.7907723624363042
+          },
+          "loss": 125.63052390504514,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 125.63052390504514,
+            "constraint_mode": "soc",
+            "total_reward": -3.3077476106371195,
+            "time_reward": -4.8,
+            "temperature_reward": 1.4922523893628803,
+            "duration_min": 10.5,
+            "duration_s": 630.0,
+            "soc_start": 0.2,
+            "soc_end": 0.41130114419401426,
+            "soc_target": 0.8,
+            "soc_delta": 0.21130114419401425,
+            "end_reason": "time budget",
+            "peak_voltage": 4.257026195526123,
+            "peak_temperature": 25.689971923828125,
+            "mean_temperature": 24.281243481711737,
+            "energy_delivered_j": 6289.218450380085,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 1.6314163074193038,
+            "i2": 0.9209766546351661,
+            "soc_switch": 0.5114747182787822
+          },
+          "loss": 74.9856686122152,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 74.9856686122152,
+            "constraint_mode": "soc",
+            "total_reward": -18.59,
+            "time_reward": -20.09,
+            "temperature_reward": 1.5,
+            "duration_min": 35.983333333333334,
+            "duration_s": 2159.0,
+            "soc_start": 0.2,
+            "soc_end": 0.6123326830832518,
+            "soc_target": 0.8,
+            "soc_delta": 0.4123326830832518,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200594902038574,
+            "peak_temperature": 24.009174346923828,
+            "mean_temperature": 22.932991295514586,
+            "energy_delivered_j": 12117.368830834508,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 1.2783870653383957,
+            "i2": 1.164408257564482,
+            "soc_switch": 0.45525030841602054
+          },
+          "loss": 79.42078565205068,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 79.42078565205068,
+            "constraint_mode": "soc",
+            "total_reward": -20.580000000000002,
+            "time_reward": -22.080000000000002,
+            "temperature_reward": 1.5,
+            "duration_min": 39.3,
+            "duration_s": 2358.0,
+            "soc_start": 0.2,
+            "soc_end": 0.6041394659071455,
+            "soc_target": 0.8,
+            "soc_delta": 0.4041394659071455,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200433254241943,
+            "peak_temperature": 24.01177215576172,
+            "mean_temperature": 22.58641988610291,
+            "energy_delivered_j": 11777.981951131049,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 5.0136386945959,
+            "i2": 4.61764645878319,
+            "soc_switch": 0.643475297709799
+          },
+          "loss": 153.8570040273727,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 153.8570040273727,
+            "constraint_mode": "soc",
+            "total_reward": 0.7976909562407946,
+            "time_reward": -0.33000000000000007,
+            "temperature_reward": 1.1276909562407946,
+            "duration_min": 3.05,
+            "duration_s": 183.0,
+            "soc_start": 0.2,
+            "soc_end": 0.32742998348764574,
+            "soc_target": 0.8,
+            "soc_delta": 0.12742998348764573,
+            "end_reason": "time budget",
+            "peak_voltage": 4.328806400299072,
+            "peak_temperature": 30.015531539916992,
+            "mean_temperature": 27.320745405603628,
+            "energy_delivered_j": 3892.1082496148138,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "two_step",
+          "params": {
+            "family_id": "two_step",
+            "i1": 2.1490334148153005,
+            "i2": 1.4576021631177865,
+            "soc_switch": 0.36255880520727946
+          },
+          "loss": 92.89774293595529,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 92.89774293595529,
+            "constraint_mode": "soc",
+            "total_reward": -10.18,
+            "time_reward": -11.68,
+            "temperature_reward": 1.5,
+            "duration_min": 21.966666666666665,
+            "duration_s": 1318.0,
+            "soc_start": 0.2,
+            "soc_end": 0.5244414447233022,
+            "soc_target": 0.8,
+            "soc_delta": 0.3244414447233022,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200282096862793,
+            "peak_temperature": 24.0,
+            "mean_temperature": 23.77920932509288,
+            "energy_delivered_j": 9611.346105766417,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        }
+      ],
+      "n_evaluated": 20
+    },
+    "three_step": {
+      "family_id": "three_step",
+      "family_label": "3-step (SoC)",
+      "best_params": {
+        "family_id": "three_step",
+        "i1": 1.6435805496375135,
+        "i2": 1.0457634921648358,
+        "i3": 0.7997701455358149,
+        "soc1": 0.523189162041426,
+        "soc2": 0.7896015890221973
+      },
+      "best_loss": 74.02210734782996,
+      "best_metrics": {
+        "feasible": false,
+        "loss": 74.02210734782996,
+        "constraint_mode": "soc",
+        "total_reward": -17.19,
+        "time_reward": -18.69,
+        "temperature_reward": 1.5,
+        "duration_min": 33.65,
+        "duration_s": 2019.0,
+        "soc_start": 0.2,
+        "soc_end": 0.6108202005641996,
+        "soc_target": 0.8,
+        "soc_delta": 0.4108202005641996,
+        "end_reason": "time budget",
+        "peak_voltage": 4.200445175170898,
+        "peak_temperature": 24.008785247802734,
+        "mean_temperature": 23.062422797253607,
+        "energy_delivered_j": 12082.868898552533,
+        "energy_required_j": 0.0,
+        "energy_full_j": 27531.58411346868,
+        "energy_fraction": null,
+        "energy_shortfall_j": 0.0,
+        "reward_weights": {
+          "w_time": 1.0,
+          "w_temperature": 1.0
+        }
+      },
+      "history": [
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 6.0,
+            "i2": 3.375,
+            "i3": 0.75,
+            "soc1": 0.1,
+            "soc2": 0.9
+          },
+          "loss": 148.6143507942259,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 148.6143507942259,
+            "constraint_mode": "soc",
+            "total_reward": -0.0966659268756842,
+            "time_reward": -1.48,
+            "temperature_reward": 1.3833340731243158,
+            "duration_min": 4.966666666666667,
+            "duration_s": 298.0,
+            "soc_start": 0.2,
+            "soc_end": 0.33968750000000003,
+            "soc_target": 0.8,
+            "soc_delta": 0.13968750000000002,
+            "end_reason": "time budget",
+            "peak_voltage": 4.304189682006836,
+            "peak_temperature": 27.887025833129883,
+            "mean_temperature": 25.37932269205183,
+            "energy_delivered_j": 4215.486899614334,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.375,
+            "i2": 2.0625,
+            "i3": 0.75,
+            "soc1": 0.5,
+            "soc2": 0.9
+          },
+          "loss": 148.6143507942259,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 148.6143507942259,
+            "constraint_mode": "soc",
+            "total_reward": -0.0966659268756842,
+            "time_reward": -1.48,
+            "temperature_reward": 1.3833340731243158,
+            "duration_min": 4.966666666666667,
+            "duration_s": 298.0,
+            "soc_start": 0.2,
+            "soc_end": 0.33968750000000003,
+            "soc_target": 0.8,
+            "soc_delta": 0.13968750000000002,
+            "end_reason": "time budget",
+            "peak_voltage": 4.304189682006836,
+            "peak_temperature": 27.887025833129883,
+            "mean_temperature": 25.37932269205183,
+            "energy_delivered_j": 4215.486899614334,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.550707123758293,
+            "i2": 1.5713305713909507,
+            "i3": 1.4010104925116538,
+            "soc1": 0.12477827111570715,
+            "soc2": 0.49158145202256415
+          },
+          "loss": 82.75646763554987,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 82.75646763554987,
+            "constraint_mode": "soc",
+            "total_reward": -14.469999999999999,
+            "time_reward": -15.969999999999999,
+            "temperature_reward": 1.5,
+            "duration_min": 29.116666666666667,
+            "duration_s": 1747.0,
+            "soc_start": 0.2,
+            "soc_end": 0.5725843110098913,
+            "soc_target": 0.8,
+            "soc_delta": 0.37258431100989126,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200326442718506,
+            "peak_temperature": 24.01167106628418,
+            "mean_temperature": 23.03456346744391,
+            "energy_delivered_j": 10907.123460520568,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 5.68205398212946,
+            "i2": 2.827600844850101,
+            "i3": 0.9764967215554583,
+            "soc1": 0.32063141258040484,
+            "soc2": 0.7421053651462037
+          },
+          "loss": 152.3251912967176,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 152.3251912967176,
+            "constraint_mode": "soc",
+            "total_reward": 0.9126592418125699,
+            "time_reward": -0.17999999999999994,
+            "temperature_reward": 1.0926592418125698,
+            "duration_min": 2.8,
+            "duration_s": 168.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3266344822136884,
+            "soc_target": 0.8,
+            "soc_delta": 0.1266344822136884,
+            "end_reason": "time budget",
+            "peak_voltage": 4.312253952026367,
+            "peak_temperature": 29.301301956176758,
+            "mean_temperature": 27.613764149802073,
+            "energy_delivered_j": 3874.847413083594,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.1515922663527154,
+            "i2": 2.9007572866171922,
+            "i3": 2.747810504099191,
+            "soc1": 0.22189830082251943,
+            "soc2": 0.6092360244051843
+          },
+          "loss": 142.05216456692168,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 142.05216456692168,
+            "constraint_mode": "soc",
+            "total_reward": -0.8688573361441732,
+            "time_reward": -2.3200000000000003,
+            "temperature_reward": 1.4511426638558271,
+            "duration_min": 6.366666666666666,
+            "duration_s": 382.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3559915808710954,
+            "soc_target": 0.8,
+            "soc_delta": 0.15599158087109538,
+            "end_reason": "time budget",
+            "peak_voltage": 4.2797441482543945,
+            "peak_temperature": 26.726585388183594,
+            "mean_temperature": 24.902229109359663,
+            "energy_delivered_j": 4688.0290771701975,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 4.007409353606052,
+            "i2": 1.2698046795161029,
+            "i3": 0.961011952149888,
+            "soc1": 0.32774238616227563,
+            "soc2": 0.5175520507780998
+          },
+          "loss": 155.2029120262663,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 155.2029120262663,
+            "constraint_mode": "soc",
+            "total_reward": 0.6326930612987942,
+            "time_reward": -0.6600000000000001,
+            "temperature_reward": 1.2926930612987944,
+            "duration_min": 3.6,
+            "duration_s": 216.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3202222806081814,
+            "soc_target": 0.8,
+            "soc_delta": 0.12022228060818141,
+            "end_reason": "time budget",
+            "peak_voltage": 4.318986892700195,
+            "peak_temperature": 28.885225296020508,
+            "mean_temperature": 26.116205674630624,
+            "energy_delivered_j": 3646.223321405133,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 2.131303767049374,
+            "i2": 1.4179580922973551,
+            "i3": 1.2145913160896233,
+            "soc1": 0.1609563012818865,
+            "soc2": 0.3646406778975371
+          },
+          "loss": 77.0929356759668,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 77.0929356759668,
+            "constraint_mode": "soc",
+            "total_reward": -19.87,
+            "time_reward": -21.37,
+            "temperature_reward": 1.5,
+            "duration_min": 38.11666666666667,
+            "duration_s": 2287.0,
+            "soc_start": 0.2,
+            "soc_end": 0.609527559987717,
+            "soc_target": 0.8,
+            "soc_delta": 0.409527559987717,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200430870056152,
+            "peak_temperature": 24.01707649230957,
+            "mean_temperature": 22.684726832681314,
+            "energy_delivered_j": 11956.045424400025,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 1.6435805496375135,
+            "i2": 1.0457634921648358,
+            "i3": 0.7997701455358149,
+            "soc1": 0.523189162041426,
+            "soc2": 0.7896015890221973
+          },
+          "loss": 74.02210734782996,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 74.02210734782996,
+            "constraint_mode": "soc",
+            "total_reward": -17.19,
+            "time_reward": -18.69,
+            "temperature_reward": 1.5,
+            "duration_min": 33.65,
+            "duration_s": 2019.0,
+            "soc_start": 0.2,
+            "soc_end": 0.6108202005641996,
+            "soc_target": 0.8,
+            "soc_delta": 0.4108202005641996,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200445175170898,
+            "peak_temperature": 24.008785247802734,
+            "mean_temperature": 23.062422797253607,
+            "energy_delivered_j": 12082.868898552533,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 5.844060750785856,
+            "i2": 5.234598085720655,
+            "i3": 3.537868099586977,
+            "soc1": 0.5301078597939868,
+            "soc2": 0.8754362146700099
+          },
+          "loss": 150.12061545061314,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 150.12061545061314,
+            "constraint_mode": "soc",
+            "total_reward": 0.933617522499778,
+            "time_reward": -0.15000000000000013,
+            "temperature_reward": 1.0836175224997782,
+            "duration_min": 2.75,
+            "duration_s": 165.0,
+            "soc_start": 0.2,
+            "soc_end": 0.33392639220550896,
+            "soc_target": 0.8,
+            "soc_delta": 0.13392639220550895,
+            "end_reason": "time budget",
+            "peak_voltage": 4.312294006347656,
+            "peak_temperature": 29.237693786621094,
+            "mean_temperature": 27.687508762244022,
+            "energy_delivered_j": 4097.708815953839,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.0691491848581975,
+            "i2": 2.4296272222916864,
+            "i3": 1.760238517700106,
+            "soc1": 0.3431065662575018,
+            "soc2": 0.5257308713901114
+          },
+          "loss": 142.3896787320293,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 142.3896787320293,
+            "constraint_mode": "soc",
+            "total_reward": -0.7630339926642342,
+            "time_reward": -2.2,
+            "temperature_reward": 1.436966007335766,
+            "duration_min": 6.166666666666667,
+            "duration_s": 370.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3547002016208718,
+            "soc_target": 0.8,
+            "soc_delta": 0.15470020162087178,
+            "end_reason": "time budget",
+            "peak_voltage": 4.2803053855896,
+            "peak_temperature": 26.760059356689453,
+            "mean_temperature": 24.96197695345492,
+            "energy_delivered_j": 4648.959060557174,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.4000364272994883,
+            "i2": 1.3286388396373208,
+            "i3": 0.941316947428317,
+            "soc1": 0.39743539543216133,
+            "soc2": 0.6884200402152763
+          },
+          "loss": 149.3392056346896,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 149.3392056346896,
+            "constraint_mode": "soc",
+            "total_reward": -0.031681089499562054,
+            "time_reward": -1.4100000000000001,
+            "temperature_reward": 1.378318910500438,
+            "duration_min": 4.85,
+            "duration_s": 291.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3374181389366875,
+            "soc_target": 0.8,
+            "soc_delta": 0.13741813893668747,
+            "end_reason": "time budget",
+            "peak_voltage": 4.305281162261963,
+            "peak_temperature": 27.943559646606445,
+            "mean_temperature": 25.419064511957856,
+            "energy_delivered_j": 4148.119817908309,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 4.1112297589716125,
+            "i2": 3.95586468061111,
+            "i3": 1.787674646521033,
+            "soc1": 0.4691979169362843,
+            "soc2": 0.8241355867490805
+          },
+          "loss": 155.77714308205867,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 155.77714308205867,
+            "constraint_mode": "soc",
+            "total_reward": 0.6829393735456695,
+            "time_reward": -0.5899999999999999,
+            "temperature_reward": 1.2729393735456693,
+            "duration_min": 3.4833333333333334,
+            "duration_s": 209.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3193398638368147,
+            "soc_target": 0.8,
+            "soc_delta": 0.11933986383681466,
+            "end_reason": "time budget",
+            "peak_voltage": 4.322585582733154,
+            "peak_temperature": 29.067197799682617,
+            "mean_temperature": 26.2657453363592,
+            "energy_delivered_j": 3622.918941896009,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 2.413772081218599,
+            "i2": 1.4815597585443987,
+            "i3": 1.4362234727717675,
+            "soc1": 0.30017893602083956,
+            "soc2": 0.5751603011643863
+          },
+          "loss": 89.98263434838134,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 89.98263434838134,
+            "constraint_mode": "soc",
+            "total_reward": -11.58,
+            "time_reward": -13.08,
+            "temperature_reward": 1.5,
+            "duration_min": 24.3,
+            "duration_s": 1458.0,
+            "soc_start": 0.2,
+            "soc_end": 0.5388580312166585,
+            "soc_target": 0.8,
+            "soc_delta": 0.33885803121665853,
+            "end_reason": "time budget",
+            "peak_voltage": 4.200357437133789,
+            "peak_temperature": 24.068477630615234,
+            "mean_temperature": 23.648212517894017,
+            "energy_delivered_j": 10022.491870357904,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 5.854987855950367,
+            "i2": 5.651114652734551,
+            "i3": 1.8968182950737242,
+            "soc1": 0.2772414200470983,
+            "soc2": 0.7947181550025684
+          },
+          "loss": 150.8667178011723,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 150.8667178011723,
+            "constraint_mode": "soc",
+            "total_reward": 0.9264619601856579,
+            "time_reward": -0.15000000000000013,
+            "temperature_reward": 1.076461960185658,
+            "duration_min": 2.75,
+            "duration_s": 165.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3321947044453757,
+            "soc_target": 0.8,
+            "soc_delta": 0.13219470444537568,
+            "end_reason": "time budget",
+            "peak_voltage": 4.314488410949707,
+            "peak_temperature": 29.40273666381836,
+            "mean_temperature": 27.735379721901634,
+            "energy_delivered_j": 4045.1629452397674,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 2.9258794267661448,
+            "i2": 2.528646757011856,
+            "i3": 1.6418864151501422,
+            "soc1": 0.42235825356417167,
+            "soc2": 0.6917979094259635
+          },
+          "loss": 138.7824279260531,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 138.7824279260531,
+            "constraint_mode": "soc",
+            "total_reward": -1.1857965332528815,
+            "time_reward": -2.6399999999999997,
+            "temperature_reward": 1.4542034667471182,
+            "duration_min": 6.9,
+            "duration_s": 414.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3682380670390546,
+            "soc_target": 0.8,
+            "soc_delta": 0.16823806703905458,
+            "end_reason": "time budget",
+            "peak_voltage": 4.280611515045166,
+            "peak_temperature": 26.77387046813965,
+            "mean_temperature": 24.816776814668074,
+            "energy_delivered_j": 5047.27831420515,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 4.2199815319375125,
+            "i2": 1.4262455119598094,
+            "i3": 0.9480144612941849,
+            "soc1": 0.37038832920582276,
+            "soc2": 0.5924513765723748
+          },
+          "loss": 155.2863833986946,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 155.2863833986946,
+            "constraint_mode": "soc",
+            "total_reward": 0.6669637992165309,
+            "time_reward": -0.5899999999999999,
+            "temperature_reward": 1.2569637992165308,
+            "duration_min": 3.4833333333333334,
+            "duration_s": 209.0,
+            "soc_start": 0.2,
+            "soc_end": 0.32249668613540794,
+            "soc_target": 0.8,
+            "soc_delta": 0.12249668613540793,
+            "end_reason": "time budget",
+            "peak_voltage": 4.326988697052002,
+            "peak_temperature": 29.28395652770996,
+            "mean_temperature": 26.379845450369366,
+            "energy_delivered_j": 3722.6344825600086,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 5.703543628047928,
+            "i2": 4.536114418370037,
+            "i3": 0.9986466983624644,
+            "soc1": 0.319472834935884,
+            "soc2": 0.638681717554537
+          },
+          "loss": 152.36573254770605,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 152.36573254770605,
+            "constraint_mode": "soc",
+            "total_reward": 0.9071834806033545,
+            "time_reward": -0.17999999999999994,
+            "temperature_reward": 1.0871834806033545,
+            "duration_min": 2.8,
+            "duration_s": 168.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3303262545760455,
+            "soc_target": 0.8,
+            "soc_delta": 0.13032625457604546,
+            "end_reason": "time budget",
+            "peak_voltage": 4.3236799240112305,
+            "peak_temperature": 29.550491333007812,
+            "mean_temperature": 27.650802033288137,
+            "energy_delivered_j": 3988.0502798861867,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 4.260688438299367,
+            "i2": 3.0826338850885038,
+            "i3": 2.0307828202781915,
+            "soc1": 0.45362542373333703,
+            "soc2": 0.5604296544670694
+          },
+          "loss": 155.33345994416246,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 155.33345994416246,
+            "constraint_mode": "soc",
+            "total_reward": 0.681266402092533,
+            "time_reward": -0.5699999999999998,
+            "temperature_reward": 1.2512664020925328,
+            "duration_min": 3.45,
+            "duration_s": 207.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3224947926011064,
+            "soc_target": 0.8,
+            "soc_delta": 0.1224947926011064,
+            "end_reason": "time budget",
+            "peak_voltage": 4.327597141265869,
+            "peak_temperature": 29.337369918823242,
+            "mean_temperature": 26.422395632462802,
+            "energy_delivered_j": 3723.098528022999,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 5.105522146436017,
+            "i2": 1.1712645444007264,
+            "i3": 0.9258441350876075,
+            "soc1": 0.4524482634281404,
+            "soc2": 0.7556004547660535
+          },
+          "loss": 153.52689896870325,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 153.52689896870325,
+            "constraint_mode": "soc",
+            "total_reward": 0.8175603755315146,
+            "time_reward": -0.30000000000000004,
+            "temperature_reward": 1.1175603755315147,
+            "duration_min": 3.0,
+            "duration_s": 180.0,
+            "soc_start": 0.2,
+            "soc_end": 0.32763805366090026,
+            "soc_target": 0.8,
+            "soc_delta": 0.12763805366090025,
+            "end_reason": "time budget",
+            "peak_voltage": 4.326328754425049,
+            "peak_temperature": 29.956335067749023,
+            "mean_temperature": 27.397811359829372,
+            "energy_delivered_j": 3899.414708954952,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "three_step",
+          "params": {
+            "family_id": "three_step",
+            "i1": 3.233957203224084,
+            "i2": 2.342135050499537,
+            "i3": 2.0424763263860433,
+            "soc1": 0.33663747894180446,
+            "soc2": 0.5046050252913096
+          },
+          "loss": 145.95554511743975,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 145.95554511743975,
+            "constraint_mode": "soc",
+            "total_reward": -0.3604862613852966,
+            "time_reward": -1.77,
+            "temperature_reward": 1.4095137386147034,
+            "duration_min": 5.45,
+            "duration_s": 327.0,
+            "soc_start": 0.2,
+            "soc_end": 0.34415054417976954,
+            "soc_target": 0.8,
+            "soc_delta": 0.14415054417976952,
+            "end_reason": "time budget",
+            "peak_voltage": 4.2883477210998535,
+            "peak_temperature": 27.2830753326416,
+            "mean_temperature": 25.175329587510603,
+            "energy_delivered_j": 4341.7726319820595,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        }
+      ],
+      "n_evaluated": 20
+    },
+    "pulsed": {
+      "family_id": "pulsed",
+      "family_label": "Pulsed charge/rest",
+      "best_params": {
+        "family_id": "pulsed",
+        "i_charge": 2.9914371478710966,
+        "pulse_on_min": 1.1188423319604202,
+        "pulse_rest_min": 1.974593221502263,
+        "rest_fraction": 1.7648538718073064,
+        "i_floor": 0.962439486794099
+      },
+      "best_loss": 26.449,
+      "best_metrics": {
+        "feasible": true,
+        "loss": 26.449,
+        "constraint_mode": "soc",
+        "total_reward": -26.400000000000002,
+        "time_reward": -27.900000000000002,
+        "temperature_reward": 1.5,
+        "duration_min": 49.0,
+        "duration_s": 2940.0,
+        "soc_start": 0.2,
+        "soc_end": 0.8232160724731499,
+        "soc_target": 0.8,
+        "soc_delta": 0.6232160724731499,
+        "end_reason": "SoC target",
+        "peak_voltage": 4.196286678314209,
+        "peak_temperature": 24.85348129272461,
+        "mean_temperature": 24.49281360016388,
+        "energy_delivered_j": 18621.995302271553,
+        "energy_required_j": 0.0,
+        "energy_full_j": 27531.58411346868,
+        "energy_fraction": null,
+        "energy_shortfall_j": 0.0,
+        "reward_weights": {
+          "w_time": 1.0,
+          "w_temperature": 1.0
+        }
+      },
+      "history": [
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.375,
+            "pulse_on_min": 10.0,
+            "pulse_rest_min": 20.0,
+            "rest_fraction": 2.0,
+            "i_floor": 0.75
+          },
+          "loss": 157.19850893554687,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 157.19850893554687,
+            "constraint_mode": "soc",
+            "total_reward": 1.39,
+            "time_reward": -0.1100000000000001,
+            "temperature_reward": 1.5,
+            "duration_min": 2.683333333333333,
+            "duration_s": 161.0,
+            "soc_start": 0.2,
+            "soc_end": 0.2735590277777778,
+            "soc_target": 0.8,
+            "soc_delta": 0.07355902777777779,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.206535339355469,
+            "peak_temperature": 24.598831176757812,
+            "mean_temperature": 24.25341567045413,
+            "energy_delivered_j": 2190.43026933074,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0,
+            "pulse_on_min": 10.0,
+            "pulse_rest_min": 20.0,
+            "rest_fraction": 2.0,
+            "i_floor": 0.75
+          },
+          "loss": 142.15,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 142.15,
+            "constraint_mode": "soc",
+            "total_reward": -87.0,
+            "time_reward": -88.5,
+            "temperature_reward": 1.5,
+            "duration_min": 150.0,
+            "duration_s": 9000.0,
+            "soc_start": 0.2,
+            "soc_end": 0.6166666666666667,
+            "soc_target": 0.8,
+            "soc_delta": 0.4166666666666667,
+            "end_reason": "time budget",
+            "peak_voltage": 4.047870635986328,
+            "peak_temperature": 24.0,
+            "mean_temperature": 21.400210164811877,
+            "energy_delivered_j": 11864.06929063797,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 6.0,
+            "pulse_on_min": 10.0,
+            "pulse_rest_min": 20.0,
+            "rest_fraction": 2.0,
+            "i_floor": 0.75
+          },
+          "loss": 176.29583040193293,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 176.29583040193293,
+            "constraint_mode": "soc",
+            "total_reward": 2.648154767541324,
+            "time_reward": 1.16,
+            "temperature_reward": 1.4881547675413243,
+            "duration_min": 0.5666666666666667,
+            "duration_s": 34.0,
+            "soc_start": 0.2,
+            "soc_end": 0.2210416666666667,
+            "soc_target": 0.8,
+            "soc_delta": 0.02104166666666668,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.252559185028076,
+            "peak_temperature": 25.278470993041992,
+            "mean_temperature": 24.684650645536536,
+            "energy_delivered_j": 622.4400472640991,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 0.807952424871039,
+            "pulse_on_min": 14.672632900707802,
+            "pulse_rest_min": 29.970405071234733,
+            "rest_fraction": 2.04260580047559,
+            "i_floor": 0.7572811010343817
+          },
+          "loss": 145.9571362693469,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 145.9571362693469,
+            "constraint_mode": "soc",
+            "total_reward": -87.0,
+            "time_reward": -88.5,
+            "temperature_reward": 1.5,
+            "duration_min": 150.0,
+            "duration_s": 9000.0,
+            "soc_start": 0.2,
+            "soc_end": 0.6039762124355104,
+            "soc_target": 0.8,
+            "soc_delta": 0.40397621243551035,
+            "end_reason": "time budget",
+            "peak_voltage": 4.005766868591309,
+            "peak_temperature": 24.0,
+            "mean_temperature": 21.20762626838684,
+            "energy_delivered_j": 11383.955718239129,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.882853966385124,
+            "pulse_on_min": 10.403536960651506,
+            "pulse_rest_min": 19.16116170842827,
+            "rest_fraction": 1.84179301528894,
+            "i_floor": 3.6756996983840513
+          },
+          "loss": 164.59204518525593,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 164.59204518525593,
+            "constraint_mode": "soc",
+            "total_reward": 2.16,
+            "time_reward": 0.66,
+            "temperature_reward": 1.5,
+            "duration_min": 1.4,
+            "duration_s": 84.0,
+            "soc_start": 0.2,
+            "soc_end": 0.24527119151504853,
+            "soc_target": 0.8,
+            "soc_delta": 0.04527119151504852,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.203320026397705,
+            "peak_temperature": 24.480844497680664,
+            "mean_temperature": 24.222434066590807,
+            "energy_delivered_j": 1338.974682916068,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 0.8175548306237377,
+            "pulse_on_min": 4.3641081493103115,
+            "pulse_rest_min": 3.5560890271920154,
+            "rest_fraction": 0.8148489692570995,
+            "i_floor": 0.7567533175971201
+          },
+          "loss": 93.41959849247809,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 93.41959849247809,
+            "constraint_mode": "soc",
+            "total_reward": -87.0,
+            "time_reward": -88.5,
+            "temperature_reward": 1.5,
+            "duration_min": 150.0,
+            "duration_s": 9000.0,
+            "soc_start": 0.2,
+            "soc_end": 0.7791013383584064,
+            "soc_target": 0.8,
+            "soc_delta": 0.5791013383584065,
+            "end_reason": "time budget",
+            "peak_voltage": 3.9087085723876953,
+            "peak_temperature": 24.0,
+            "mean_temperature": 21.310007575564914,
+            "energy_delivered_j": 16159.706210864953,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "time budget"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 5.775502815147799,
+            "pulse_on_min": 3.9053929090457142,
+            "pulse_rest_min": 4.200885247592431,
+            "rest_fraction": 1.0756626402076714,
+            "i_floor": 2.2414626210205357
+          },
+          "loss": 175.69936061680738,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 175.69936061680738,
+            "constraint_mode": "soc",
+            "total_reward": 2.6966709899902344,
+            "time_reward": 1.2,
+            "temperature_reward": 1.4966709899902344,
+            "duration_min": 0.5,
+            "duration_s": 30.0,
+            "soc_start": 0.2,
+            "soc_end": 0.22041876172978253,
+            "soc_target": 0.8,
+            "soc_delta": 0.02041876172978252,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.245211601257324,
+            "peak_temperature": 25.16217803955078,
+            "mean_temperature": 24.51242669423421,
+            "energy_delivered_j": 600.0882013745418,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.774870180772373,
+            "pulse_on_min": 14.375199525106645,
+            "pulse_rest_min": 20.19765441191014,
+            "rest_fraction": 1.4050347180666558,
+            "i_floor": 1.8611426464033785
+          },
+          "loss": 143.5324255081993,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 143.5324255081993,
+            "constraint_mode": "soc",
+            "total_reward": -0.20000000000000018,
+            "time_reward": -1.7000000000000002,
+            "temperature_reward": 1.5,
+            "duration_min": 5.333333333333333,
+            "duration_s": 320.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3231192302565502,
+            "soc_target": 0.8,
+            "soc_delta": 0.1231192302565502,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.2026286125183105,
+            "peak_temperature": 24.685762405395508,
+            "mean_temperature": 24.228128266334533,
+            "energy_delivered_j": 3653.284854210563,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.2098213878720427,
+            "pulse_on_min": 13.156528412935318,
+            "pulse_rest_min": 21.67125940110779,
+            "rest_fraction": 1.647186759373461,
+            "i_floor": 0.978745469027161
+          },
+          "loss": 116.95567948080152,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 116.95567948080152,
+            "constraint_mode": "soc",
+            "total_reward": -5.51,
+            "time_reward": -7.01,
+            "temperature_reward": 1.5,
+            "duration_min": 14.183333333333334,
+            "duration_s": 851.0,
+            "soc_start": 0.2,
+            "soc_end": 0.4293169259887454,
+            "soc_target": 0.8,
+            "soc_delta": 0.22931692598874537,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.202265739440918,
+            "peak_temperature": 24.240821838378906,
+            "mean_temperature": 23.826825071305702,
+            "energy_delivered_j": 6785.787215363819,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 5.150242017027976,
+            "pulse_on_min": 10.558470336934704,
+            "pulse_rest_min": 25.739716817207942,
+            "rest_fraction": 2.4378263134544733,
+            "i_floor": 2.7990281051142065
+          },
+          "loss": 172.54906626112495,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 172.54906626112495,
+            "constraint_mode": "soc",
+            "total_reward": 2.62,
+            "time_reward": 1.12,
+            "temperature_reward": 1.5,
+            "duration_min": 0.6333333333333333,
+            "duration_s": 38.0,
+            "soc_start": 0.2,
+            "soc_end": 0.22561933286764768,
+            "soc_target": 0.8,
+            "soc_delta": 0.02561933286764767,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.228542327880859,
+            "peak_temperature": 24.852706909179688,
+            "mean_temperature": 24.295058551587555,
+            "energy_delivered_j": 754.4282291316653,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.150197584660706,
+            "pulse_on_min": 13.032723435947213,
+            "pulse_rest_min": 12.688716931322352,
+            "rest_fraction": 0.9736044038442484,
+            "i_floor": 2.2212805344738067
+          },
+          "loss": 152.4801566640759,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 152.4801566640759,
+            "constraint_mode": "soc",
+            "total_reward": 0.94,
+            "time_reward": -0.56,
+            "temperature_reward": 1.5,
+            "duration_min": 3.433333333333333,
+            "duration_s": 206.0,
+            "soc_start": 0.2,
+            "soc_end": 0.28992231978334826,
+            "soc_target": 0.8,
+            "soc_delta": 0.08992231978334825,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.203934192657471,
+            "peak_temperature": 24.647111892700195,
+            "mean_temperature": 24.253934536165403,
+            "energy_delivered_j": 2672.853615824002,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 4.022833827162737,
+            "pulse_on_min": 11.85225850717543,
+            "pulse_rest_min": 7.843400232033721,
+            "rest_fraction": 0.6617641884274865,
+            "i_floor": 3.5190885850600413
+          },
+          "loss": 166.85277960192886,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 166.85277960192886,
+            "constraint_mode": "soc",
+            "total_reward": 2.32,
+            "time_reward": 0.82,
+            "temperature_reward": 1.5,
+            "duration_min": 1.1333333333333333,
+            "duration_s": 68.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23788926392320367,
+            "soc_target": 0.8,
+            "soc_delta": 0.03788926392320366,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.205384254455566,
+            "peak_temperature": 24.527130126953125,
+            "mean_temperature": 24.20535895403694,
+            "energy_delivered_j": 1117.4987998693632,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.422526972005817,
+            "pulse_on_min": 10.157093764038517,
+            "pulse_rest_min": 10.079633635510262,
+            "rest_fraction": 0.9923737901482701,
+            "i_floor": 2.3485292254479573
+          },
+          "loss": 133.26653860271657,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 133.26653860271657,
+            "constraint_mode": "soc",
+            "total_reward": -1.8100000000000005,
+            "time_reward": -3.3100000000000005,
+            "temperature_reward": 1.5,
+            "duration_min": 8.016666666666667,
+            "duration_s": 481.0,
+            "soc_start": 0.2,
+            "soc_end": 0.361838260213167,
+            "soc_target": 0.8,
+            "soc_delta": 0.161838260213167,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.2000412940979,
+            "peak_temperature": 24.44407844543457,
+            "mean_temperature": 24.040641507091244,
+            "energy_delivered_j": 4783.533109492962,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.9914371478710966,
+            "pulse_on_min": 1.1188423319604202,
+            "pulse_rest_min": 1.974593221502263,
+            "rest_fraction": 1.7648538718073064,
+            "i_floor": 0.962439486794099
+          },
+          "loss": 26.449,
+          "feasible": true,
+          "metrics": {
+            "feasible": true,
+            "loss": 26.449,
+            "constraint_mode": "soc",
+            "total_reward": -26.400000000000002,
+            "time_reward": -27.900000000000002,
+            "temperature_reward": 1.5,
+            "duration_min": 49.0,
+            "duration_s": 2940.0,
+            "soc_start": 0.2,
+            "soc_end": 0.8232160724731499,
+            "soc_target": 0.8,
+            "soc_delta": 0.6232160724731499,
+            "end_reason": "SoC target",
+            "peak_voltage": 4.196286678314209,
+            "peak_temperature": 24.85348129272461,
+            "mean_temperature": 24.49281360016388,
+            "energy_delivered_j": 18621.995302271553,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 1.0883889955531356,
+            "pulse_on_min": 10.496522205232125,
+            "pulse_rest_min": 11.108344358422489,
+            "rest_fraction": 1.058288082588478,
+            "i_floor": 1.0349945098721156
+          },
+          "loss": 80.539,
+          "feasible": true,
+          "metrics": {
+            "feasible": true,
+            "loss": 80.539,
+            "constraint_mode": "soc",
+            "total_reward": -80.4,
+            "time_reward": -81.9,
+            "temperature_reward": 1.5,
+            "duration_min": 139.0,
+            "duration_s": 8340.0,
+            "soc_start": 0.2,
+            "soc_end": 0.8076838558504575,
+            "soc_target": 0.8,
+            "soc_delta": 0.6076838558504576,
+            "end_reason": "SoC target",
+            "peak_voltage": 4.156443119049072,
+            "peak_temperature": 24.000690460205078,
+            "mean_temperature": 21.801502929888755,
+            "energy_delivered_j": 17556.795827523983,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "SoC target"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 3.772260271715681,
+            "pulse_on_min": 10.503331388644845,
+            "pulse_rest_min": 18.38681411499847,
+            "rest_fraction": 1.750569741603741,
+            "i_floor": 1.2943989252924226
+          },
+          "loss": 163.53440318663897,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 163.53440318663897,
+            "constraint_mode": "soc",
+            "total_reward": 1.98,
+            "time_reward": 0.48,
+            "temperature_reward": 1.5,
+            "duration_min": 1.7,
+            "duration_s": 102.0,
+            "soc_start": 0.2,
+            "soc_end": 0.2518778538493056,
+            "soc_target": 0.8,
+            "soc_delta": 0.0518778538493056,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.210760593414307,
+            "peak_temperature": 24.617921829223633,
+            "mean_temperature": 24.250408714892817,
+            "energy_delivered_j": 1542.000848093558,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 4.057057051105926,
+            "pulse_on_min": 14.68383764647094,
+            "pulse_rest_min": 18.181239501045944,
+            "rest_fraction": 1.2381803680194978,
+            "i_floor": 1.8167983101345018
+          },
+          "loss": 167.52856982225452,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 167.52856982225452,
+            "constraint_mode": "soc",
+            "total_reward": 2.3,
+            "time_reward": 0.7999999999999999,
+            "temperature_reward": 1.5,
+            "duration_min": 1.1666666666666667,
+            "duration_s": 70.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23819361021908536,
+            "soc_target": 0.8,
+            "soc_delta": 0.03819361021908535,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.212854862213135,
+            "peak_temperature": 24.661014556884766,
+            "mean_temperature": 24.233721433367048,
+            "energy_delivered_j": 1130.2255202448926,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 4.315970172349912,
+            "pulse_on_min": 9.891801283119564,
+            "pulse_rest_min": 11.440012655068037,
+            "rest_fraction": 1.1565146051397643,
+            "i_floor": 3.8234114032666944
+          },
+          "loss": 167.87829351956242,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 167.87829351956242,
+            "constraint_mode": "soc",
+            "total_reward": 2.44,
+            "time_reward": 0.94,
+            "temperature_reward": 1.5,
+            "duration_min": 0.9333333333333333,
+            "duration_s": 56.0,
+            "soc_start": 0.2,
+            "soc_end": 0.23353393467383268,
+            "soc_target": 0.8,
+            "soc_delta": 0.03353393467383267,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.203775405883789,
+            "peak_temperature": 24.480424880981445,
+            "mean_temperature": 24.207268714904785,
+            "energy_delivered_j": 986.8928846297388,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 4.849166193611141,
+            "pulse_on_min": 14.1027020178194,
+            "pulse_rest_min": 26.947773498787612,
+            "rest_fraction": 1.9108234340297259,
+            "i_floor": 1.8036566295509584
+          },
+          "loss": 171.1559455485687,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 171.1559455485687,
+            "constraint_mode": "soc",
+            "total_reward": 2.52,
+            "time_reward": 1.02,
+            "temperature_reward": 1.5,
+            "duration_min": 0.8,
+            "duration_s": 48.0,
+            "soc_start": 0.2,
+            "soc_end": 0.229619441290741,
+            "soc_target": 0.8,
+            "soc_delta": 0.029619441290740983,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.22560977935791,
+            "peak_temperature": 24.829570770263672,
+            "mean_temperature": 24.319016178448994,
+            "energy_delivered_j": 876.6702766782346,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        },
+        {
+          "family_id": "pulsed",
+          "params": {
+            "family_id": "pulsed",
+            "i_charge": 2.372353481021329,
+            "pulse_on_min": 12.160413706120874,
+            "pulse_rest_min": 28.456094490904913,
+            "rest_fraction": 2.340059736337893,
+            "i_floor": 1.7281947914674674
+          },
+          "loss": 129.96695043601625,
+          "feasible": false,
+          "metrics": {
+            "feasible": false,
+            "loss": 129.96695043601625,
+            "constraint_mode": "soc",
+            "total_reward": -2.3100000000000005,
+            "time_reward": -3.8100000000000005,
+            "temperature_reward": 1.5,
+            "duration_min": 8.85,
+            "duration_s": 531.0,
+            "soc_start": 0.2,
+            "soc_end": 0.3748569025586568,
+            "soc_target": 0.8,
+            "soc_delta": 0.17485690255865677,
+            "end_reason": "V ceiling @ min current",
+            "peak_voltage": 4.201051712036133,
+            "peak_temperature": 24.424518585205078,
+            "mean_temperature": 24.018267353151252,
+            "energy_delivered_j": 5170.310066595663,
+            "energy_required_j": 0.0,
+            "energy_full_j": 27531.58411346868,
+            "energy_fraction": null,
+            "energy_shortfall_j": 0.0,
+            "reward_weights": {
+              "w_time": 1.0,
+              "w_temperature": 1.0
+            }
+          },
+          "end_reason": "V ceiling @ min current"
+        }
+      ],
+      "n_evaluated": 20
+    }
+  }
+}

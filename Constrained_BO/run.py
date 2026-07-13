@@ -5,14 +5,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import sys
 from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+os.environ.setdefault("MPLCONFIGDIR", str(_ROOT / ".mplconfig"))
+
 from typing import Any, Dict, List, Optional
 
 import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 
-from Constrained_BO.config import SOC_START, get_cell_config
+from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config
 from Constrained_BO.objective import energy_required_j, evaluate_session, full_capacity_joules
 from Constrained_BO.ocv import ocv_curve_path
 from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, get_family, set_profile_bounds
@@ -118,25 +126,38 @@ def _is_writable_out_dir(d: Path) -> bool:
 
 
 def _resolve_out_dir(cell_id: str, out_dir: Path | None) -> Path:
-    """Pick a writable output directory (fallback to results/<user>/<cell>)."""
+    """Pick a writable output directory with fallbacks."""
     import getpass
 
     if out_dir is not None:
         return Path(out_dir)
 
     base = Path(__file__).resolve().parent / "results"
-    primary = base / cell_id
-    if _is_writable_out_dir(primary):
-        return primary
-
     user = getpass.getuser()
-    fallback = base / user / cell_id
+    candidates = [
+        base / cell_id,
+        base / user / cell_id,
+        base / "_run" / user / cell_id,
+    ]
+
+    for i, candidate in enumerate(candidates):
+        if _is_writable_out_dir(candidate):
+            if i > 0:
+                print(
+                    f"Warning: {candidates[0]} is not writable; "
+                    f"writing to {candidate} instead.\n"
+                    f"  To reuse {candidates[0]}, run: "
+                    f"sudo chown -R $USER {candidates[0]}"
+                )
+            return candidate
+
+    # Last resort: create _run path (new files, no root-owned conflicts).
+    last = candidates[-1]
     print(
-        f"Warning: {primary} has root-owned or read-only outputs; "
-        f"writing to {fallback} instead.\n"
-        f"  To reuse {primary}, run: sudo chown -R $USER {primary}"
+        f"Warning: no writable results directory found; creating {last}\n"
+        f"  Fix ownership with: sudo chown -R $USER {base / user}"
     )
-    return fallback
+    return last
 
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -174,7 +195,7 @@ def _strip_sessions(results: Dict[str, Dict]) -> Dict[str, Dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Constrained BO — random-search baseline")
-    parser.add_argument("--cell", default="RW9", help="Cell ID (RW9, RW10, RW11, RW12)")
+    parser.add_argument("--cell", default="RW9", help="Cell ID (RW9–RW12, LFP)")
     parser.add_argument("--cells", nargs="+", default=None, help="Run multiple cells")
     parser.add_argument("--families", nargs="+", default=DEFAULT_FAMILIES)
     parser.add_argument("--n-random", type=int, default=80, help="Random samples per family")
@@ -257,7 +278,11 @@ def main() -> None:
         print(f"\n=== {cell_id} ===")
         print(f"BDT: {cell.bdt_ckpt}")
         print(f"Start state: {cell.start_state}")
-        print(f"V_nom: {cell.v_nom:.4f} V (OCV at 50% SoC from {ocv_curve_path(cell_id).name})")
+        print(f"V_nom: {cell.v_nom:.4f} V", end="")
+        if cell_id == "LFP":
+            print(" (OCV at 50% SoC from LFP 1C Reference discharge)")
+        else:
+            print(f" (OCV at 50% SoC from {ocv_curve_path(cell_id).name})")
         print(f"Constraint mode: {cell.constraint_mode}")
         if cell.constraint_mode == "energy":
             e_full = full_capacity_joules(cell.q_rated_as, cell.v_nom)
@@ -313,7 +338,7 @@ def main() -> None:
         meta: Dict[str, Any] = {
             "cell": cell_id,
             "bdt_ckpt": str(cell.bdt_ckpt),
-            "finetune_fraction": "0.20" if cell_id != "RW9" else None,
+            "finetune_fraction": finetune_frac_for(cell_id) if cell_id not in ("RW9",) else None,
             "soc_start": cell.start_state.get("soc", SOC_START),
             "ocv_curve": str(ocv_curve_path(cell_id)),
             "start_state": cell.start_state,

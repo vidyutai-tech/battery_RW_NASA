@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +17,7 @@ from Constrained_BO.objective import (
     temperature_reward,
     time_reward,
 )
-from Constrained_BO.profiles import get_family
+from Constrained_BO.profiles import DEFAULT_FAMILIES, get_family
 
 REWARDS_OUT_DIR = Path(__file__).resolve().parent / "data" / "rewards"
 
@@ -32,7 +33,8 @@ def plot_temperature_reward(out_path: Path | None = None) -> plt.Figure:
 
     fig, ax = plt.subplots(figsize=(7, 4.5))
     ax.plot(t, r, color="#2563eb", lw=2.2)
-    ax.axvspan(TEMP_LOW_C, TEMP_HIGH_C, color="#22c55e", alpha=0.12, label="Optimal band (15–35 °C)")
+    band_label = f"Optimal band ({TEMP_LOW_C:.0f}–{TEMP_HIGH_C:.0f} °C)"
+    ax.axvspan(TEMP_LOW_C, TEMP_HIGH_C, color="#22c55e", alpha=0.12, label=band_label)
     ax.axhline(1.5, color="gray", ls="--", lw=0.9, alpha=0.6)
     ax.axvline(TEMP_LOW_C, color="#22c55e", ls=":", lw=1, alpha=0.7)
     ax.axvline(TEMP_HIGH_C, color="#22c55e", ls=":", lw=1, alpha=0.7)
@@ -44,7 +46,7 @@ def plot_temperature_reward(out_path: Path | None = None) -> plt.Figure:
     ax.grid(True, alpha=0.35)
     ax.legend(loc="upper right", fontsize=9)
     note = (
-        "Reward = 1.5 for 15 °C ≤ T ≤ 35 °C.\n"
+        f"Reward = {1.5:.1f} for {TEMP_LOW_C:.0f} °C ≤ T ≤ {TEMP_HIGH_C:.0f} °C.\n"
         "Linear penalty outside this range (continues below 0)."
     )
     ax.text(
@@ -142,8 +144,13 @@ def plot_best_profiles(
     soc_start: float = 0.20,
     out_path: Optional[Path] = None,
     title_suffix: str = "",
+    family_order: Optional[List[str]] = None,
 ) -> plt.Figure:
-    families = [fid for fid in family_results if family_results[fid].get("best_session")]
+    order = family_order or DEFAULT_FAMILIES
+    families = [
+        fid for fid in order
+        if fid in family_results and family_results[fid].get("best_session")
+    ]
     n_cols = len(families)
     if n_cols == 0:
         raise ValueError("No sessions to plot")
@@ -178,9 +185,9 @@ def plot_best_profiles(
         axes[2, col].axhline(soc_target * 100.0, color="gray", ls="--", lw=0.8, alpha=0.7)
         axes[2, col].axhline(soc_start * 100.0, color="C2", ls=":", lw=0.8, alpha=0.5)
         axes[3, col].plot(t_min, session["temperature_c"], color="C3", lw=1.2)
-        axes[3, col].axhline(15.0, color="green", ls="--", lw=0.8, alpha=0.6)
-        axes[3, col].axhline(35.0, color="green", ls="--", lw=0.8, alpha=0.6)
-        axes[3, col].axhspan(15.0, 35.0, color="green", alpha=0.08)
+        axes[3, col].axhline(TEMP_LOW_C, color="green", ls="--", lw=0.8, alpha=0.6)
+        axes[3, col].axhline(TEMP_HIGH_C, color="green", ls="--", lw=0.8, alpha=0.6)
+        axes[3, col].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color="green", alpha=0.08)
 
         for row in range(4):
             axes[row, col].grid(True, alpha=0.3)
@@ -204,7 +211,252 @@ def plot_best_profiles(
     return fig
 
 
+def _rest_intervals_min(
+    time_s: np.ndarray,
+    current_a: np.ndarray,
+    *,
+    eps_a: float = 0.02,
+) -> List[Tuple[float, float]]:
+    """Return (t_start_min, t_end_min) spans where |I| ≈ 0 (rest)."""
+    t_min = np.asarray(time_s, dtype=np.float64) / 60.0
+    rest = np.abs(np.asarray(current_a, dtype=np.float64)) <= eps_a
+    if rest.size == 0:
+        return []
+    spans: List[Tuple[float, float]] = []
+    in_rest = False
+    start_idx = 0
+    for k, is_rest in enumerate(rest):
+        if is_rest and not in_rest:
+            in_rest = True
+            start_idx = k
+        elif not is_rest and in_rest:
+            in_rest = False
+            end_idx = max(start_idx, k - 1)
+            spans.append((float(t_min[start_idx]), float(t_min[end_idx])))
+    if in_rest:
+        spans.append((float(t_min[start_idx]), float(t_min[-1])))
+    return spans
+
+
+def plot_optimized_profile(
+    session: Dict,
+    metrics: Dict,
+    *,
+    family_label: str,
+    params: Optional[Dict] = None,
+    soc_target: float = 0.95,
+    soc_start: float = 0.20,
+    out_path: Optional[Path] = None,
+) -> plt.Figure:
+    """Four-panel trajectory plot for a single optimized charging session."""
+    t_min = session["time_s"] / 60.0
+    i_plot = _charge_current_plot(session["current_a"])
+    rest_spans = _rest_intervals_min(session["time_s"], session["current_a"])
+    t_end = float(t_min[-1]) if t_min.size else 0.0
+    soc_end_pct = float(session["soc"][-1] * 100.0) if session["soc"].size else 0.0
+
+    fig, axes = plt.subplots(4, 1, figsize=(8.5, 10), sharex=True)
+    row_labels = ["Current (A)", "Voltage (V)", "SoC (%)", "Temperature (°C)"]
+
+    feasible = metrics.get("feasible", False)
+    header = (
+        f"Optimized charging profile\n"
+        f"Family: {family_label}\n"
+        f"Reward = {metrics['total_reward']:.1f}  |  "
+        f"Time = {metrics['duration_min']:.0f} min  |  "
+        f"Peak T = {metrics['peak_temperature']:.1f}°C\n"
+        f"{'Feasible' if feasible else 'Infeasible'}"
+    )
+    if metrics.get("constraint_mode") == "energy":
+        header += (
+            f"  |  E={metrics.get('energy_delivered_j', 0):.0f}/"
+            f"{metrics.get('energy_required_j', 0):.0f} J"
+        )
+    axes[0].set_title(header, fontsize=10, fontweight="bold", loc="left")
+
+    for ax in axes:
+        for t0, t1 in rest_spans:
+            ax.axvspan(t0, t1, color="#94a3b8", alpha=0.18, zorder=0)
+        ax.axvline(t_end, color="#9333ea", ls="--", lw=1.0, alpha=0.85, zorder=1)
+        ax.grid(True, alpha=0.3)
+
+    axes[0].plot(t_min, i_plot, color="C0", lw=1.4, drawstyle="steps-post", label="Charge current")
+    axes[0].set_ylabel(row_labels[0])
+    if rest_spans:
+        axes[0].fill_between([], [], color="#94a3b8", alpha=0.35, label="Rest interval")
+
+    axes[1].plot(t_min, session["voltage_v"], color="C1", lw=1.2)
+    axes[1].axhline(4.2, color="gray", ls="--", lw=0.8, alpha=0.7)
+    axes[1].set_ylabel(row_labels[1])
+
+    axes[2].plot(t_min, session["soc"] * 100.0, color="C2", lw=1.2)
+    axes[2].axhline(soc_target * 100.0, color="gray", ls="--", lw=0.8, alpha=0.7,
+                    label=f"SoC target ({soc_target * 100:.0f}%)")
+    axes[2].axhline(soc_start * 100.0, color="C2", ls=":", lw=0.8, alpha=0.5)
+    axes[2].scatter([t_end], [soc_end_pct], color="#9333ea", s=45, zorder=5, label="Stop")
+    axes[2].annotate(
+        f"Stop\n{metrics.get('end_reason', '')}",
+        (t_end, soc_end_pct),
+        textcoords="offset points",
+        xytext=(-40, 8),
+        fontsize=8,
+        color="#9333ea",
+    )
+    axes[2].set_ylabel(row_labels[2])
+
+    axes[3].plot(t_min, session["temperature_c"], color="C3", lw=1.2)
+    axes[3].axhline(TEMP_LOW_C, color="green", ls="--", lw=0.8, alpha=0.6)
+    axes[3].axhline(TEMP_HIGH_C, color="green", ls="--", lw=0.8, alpha=0.6)
+    axes[3].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color="green", alpha=0.08,
+                    label=f"Optimal band ({TEMP_LOW_C:.0f}–{TEMP_HIGH_C:.0f} °C)")
+    axes[3].set_ylabel(row_labels[3])
+    axes[3].set_xlabel("Time (min)")
+
+    if params and params.get("family_id") == "pulsed":
+        ic = params.get("i_charge", 0.0)
+        on = params.get("pulse_on_min", 0.0)
+        rest = params.get("pulse_rest_min", 0.0)
+        param_note = f"Pulsed: {ic:.2f} A  |  ON {on:.2f} min  |  REST {rest:.2f} min"
+        axes[0].text(
+            0.02, 0.97, param_note, transform=axes[0].transAxes,
+            fontsize=8, va="top", ha="left",
+            bbox=dict(boxstyle="round,pad=0.35", facecolor="#eef4ff", edgecolor="#93b4e8", alpha=0.95),
+        )
+
+    axes[0].legend(loc="upper right", fontsize=8)
+    axes[2].legend(loc="lower right", fontsize=8)
+    axes[3].legend(loc="upper right", fontsize=8)
+    fig.tight_layout()
+
+    if out_path is not None:
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    return fig
+
+
+def _cell_from_results_meta(meta: Dict) -> "CellConfig":
+    from Constrained_BO.config import CellConfig, get_cell_config
+    from Constrained_BO.profile_catalog import ProfileBounds
+
+    cell = get_cell_config(meta["cell"])
+    overrides: Dict = {}
+    if meta.get("constraint_mode") == "energy":
+        overrides["energy_fraction"] = meta.get("energy_fraction")
+        overrides["soc_target"] = meta.get("soc_target")
+    else:
+        overrides["soc_target"] = meta.get("soc_target")
+    if meta.get("max_duration_min") is not None:
+        overrides["max_duration_min"] = meta["max_duration_min"]
+    if meta.get("v_nom") is not None:
+        overrides["v_nom"] = meta["v_nom"]
+    if meta.get("decision_interval_s") is not None:
+        overrides["decision_interval_s"] = meta["decision_interval_s"]
+        overrides["auto_decision_interval"] = False
+    cell = cell.with_run_overrides(**overrides)
+    cell.start_state = dict(meta["start_state"])
+    if meta.get("profile_bounds"):
+        cell.profile_bounds = ProfileBounds(**meta["profile_bounds"])
+    return cell
+
+
+def rebuild_family_results_from_json(
+    payload: Dict,
+    *,
+    device: str = "auto",
+) -> Dict[str, Dict]:
+    """Re-simulate best params per family so trajectories can be plotted from JSON."""
+    from Constrained_BO.config import CellConfig  # noqa: F401
+    from Constrained_BO.profiles import ProfileParams, set_profile_bounds
+    from Constrained_BO.simulator import ChargingSimulator
+
+    meta = payload["meta"]
+    cell = _cell_from_results_meta(meta)
+    if cell.profile_bounds is not None:
+        set_profile_bounds(cell.profile_bounds)
+
+    simulator = ChargingSimulator.from_cell(cell, device=device)
+    simulator.decision_interval_info = meta.get("decision_interval_selection", {})
+
+    rebuilt: Dict[str, Dict] = {}
+    for fid, entry in payload["families"].items():
+        params_dict = entry.get("best_params")
+        if not params_dict:
+            continue
+        family = get_family(fid)
+        vals = {k: v for k, v in params_dict.items() if k != "family_id"}
+        params = ProfileParams(family_id=fid, values=vals)
+        session = simulator.simulate(cell.start_state, params, family=family)
+        rebuilt[fid] = {
+            **entry,
+            "best_session": session,
+            "best_metrics": entry.get("best_metrics", {}),
+        }
+    return rebuilt
+
+
+def plot_best_profiles_from_json(
+    results_path: Path,
+    *,
+    out_path: Optional[Path] = None,
+    device: str = "auto",
+) -> plt.Figure:
+    """Load ``constrained_bo_results.json`` and plot all families with best sessions."""
+    with open(results_path) as f:
+        payload = json.load(f)
+    meta = payload["meta"]
+    family_results = rebuild_family_results_from_json(payload, device=device)
+
+    n_random = meta.get("n_random")
+    method = meta.get("method", "random_search")
+    title = f"{method}"
+    if n_random is not None:
+        title += f", n={n_random}"
+    title += f", max {meta.get('max_duration_min', 150):.0f} min"
+    if meta.get("constraint_mode") == "energy":
+        title += f", energy ≥ {meta.get('energy_fraction', 0):.0%} of pack"
+
+    out_path = out_path or Path(results_path).parent / "best_profiles.png"
+    return plot_best_profiles(
+        family_results,
+        cell_id=meta["cell"],
+        soc_target=float(meta.get("soc_target", 0.95)),
+        soc_start=float(meta.get("soc_start", 0.20)),
+        out_path=out_path,
+        title_suffix=title,
+        family_order=meta.get("families"),
+    )
+
+
 if __name__ == "__main__":
+    import argparse
+
     import matplotlib
     matplotlib.use("Agg")
-    plot_reward_curves()
+
+    parser = argparse.ArgumentParser(description="Plot reward curves or best profiles from JSON")
+    parser.add_argument(
+        "--results",
+        type=Path,
+        help="Regenerate best_profiles.png from constrained_bo_results.json",
+    )
+    parser.add_argument("--out", type=Path, default=None, help="Output PNG path")
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help="Output directory for --rewards-only (default: Constrained_BO/data/rewards)",
+    )
+    parser.add_argument("--device", default="auto")
+    parser.add_argument("--rewards-only", action="store_true", help="Only plot reward curves")
+    args = parser.parse_args()
+
+    if args.results is not None:
+        fig = plot_best_profiles_from_json(
+            args.results, out_path=args.out, device=args.device,
+        )
+        plt.close(fig)
+        out = args.out or args.results.parent / "best_profiles.png"
+        print(f"Wrote {out}")
+    elif args.rewards_only or args.results is None:
+        plot_reward_curves(args.out_dir)

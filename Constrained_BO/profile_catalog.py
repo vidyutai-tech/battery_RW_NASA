@@ -34,7 +34,27 @@ class ProfileBounds:
 
     @classmethod
     def defaults(cls, cell_id: str) -> ProfileBounds:
-        return cls(cell_id=cell_id.upper())
+        return cls.lfp_defaults() if cell_id.upper() == "LFP" else cls(cell_id=cell_id.upper())
+
+    @classmethod
+    def lfp_defaults(cls) -> ProfileBounds:
+        """Search bounds for LFP (~3 V plateau, ~3.65 V ceiling)."""
+        return cls(
+            cell_id="LFP",
+            i_min_a=0.5,
+            i_max_a=3.0,
+            v_cv_min_v=3.40,
+            v_cv_max_v=3.65,
+            soc_switch_min=0.10,
+            soc_switch_max=0.90,
+            seed_cccv={"i_cc": 1.5, "v_cv": 3.60, "i_cutoff": 0.05},
+            seed_pulsed={
+                "i_charge": 1.0,
+                "pulse_on_min": 10.0,
+                "rest_fraction": 2.0,
+                "i_floor": 0.5,
+            },
+        )
 
     def i_bounds(self) -> Tuple[float, float]:
         return self.i_min_a, self.i_max_a

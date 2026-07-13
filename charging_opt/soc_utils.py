@@ -161,12 +161,19 @@ def validate_ocv_curve(
     return out
 
 
-def save_ocv_curve(spline: PchipInterpolator, path: str | Path) -> None:
+def save_ocv_curve(
+    spline: PchipInterpolator,
+    path: str | Path,
+    *,
+    v_min: float = 3.0,
+    v_max: float = 4.3,
+    n_grid: int = 600,
+) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    x = np.linspace(3.0, 4.3, 600)
-    y = np.clip(spline(x), 0.0, None)
-    np.savez(path, ocv=x, soc=y)
+    x = np.linspace(float(v_min), float(v_max), int(n_grid))
+    y = np.clip(spline(x), 0.0, 1.0)
+    np.savez(path, ocv=x, soc=y, v_min=float(v_min), v_max=float(v_max))
     print(f"OCV-SoC curve saved -> {path}")
 
 

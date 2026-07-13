@@ -1,0 +1,165 @@
+{
+  "cell": "RW9",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.4,
+  "soc_target": 0.6000000000000001,
+  "n_random": 80,
+  "seed": 42,
+  "optimized": {
+    "params": {
+      "family_id": "pulsed",
+      "i_charge": 2.0938167254799147,
+      "pulse_on_min": 3.304509446148254,
+      "pulse_rest_min": 1.949069855102767,
+      "rest_fraction": 0.589821238784658,
+      "i_floor": 1.9610688267072791
+    },
+    "metrics": {
+      "feasible": true,
+      "loss": 16.889111525242953,
+      "constraint_mode": "energy",
+      "total_reward": -16.85611152524295,
+      "time_reward": -18.3,
+      "temperature_reward": 1.4438884747570475,
+      "duration_min": 33.0,
+      "duration_s": 1980.0,
+      "soc_start": 0.2,
+      "soc_end": 0.6013148723836457,
+      "soc_target": 0.6000000000000001,
+      "soc_delta": 0.40131487238364566,
+      "end_reason": "SoC target",
+      "peak_voltage": 4.188961505889893,
+      "peak_temperature": 24.076623916625977,
+      "mean_temperature": 23.62099236189717,
+      "dT_peak_charge": 0.07662391662597656,
+      "dT_dt_max_charge": 0.021284103393554688,
+      "stem_charge_per_kj": 0.0926612000600652,
+      "rest_cooling_mean": 0.11714515686035157,
+      "energy_delivered_j": 11853.588020962936,
+      "energy_required_j": 11012.633645387474,
+      "energy_full_j": 27531.58411346868,
+      "energy_fraction": 0.4,
+      "energy_shortfall_j": 0.0
+    }
+  },
+  "random_baseline_label": "feasible median",
+  "random_baseline_case": {
+    "params": {
+      "family_id": "pulsed",
+      "i_charge": 1.4863077172427066,
+      "pulse_on_min": 2.5200603758962097,
+      "pulse_rest_min": 4.648201431064926,
+      "rest_fraction": 1.8444801860796234,
+      "i_floor": 1.1302392809422375
+    },
+    "metrics": {
+      "feasible": true,
+      "loss": 46.92957716751099,
+      "constraint_mode": "energy",
+      "total_reward": -46.84657716751099,
+      "time_reward": -48.300000000000004,
+      "temperature_reward": 1.4534228324890137,
+      "duration_min": 83.0,
+      "duration_s": 4980.0,
+      "soc_start": 0.2,
+      "soc_end": 0.6087346222417322,
+      "soc_target": 0.6000000000000001,
+      "soc_delta": 0.40873462224173224,
+      "end_reason": "SoC target",
+      "peak_voltage": 4.090265274047852,
+      "peak_temperature": 23.95039939880371,
+      "mean_temperature": 22.14478632072847,
+      "dT_peak_charge": -0.04960060119628906,
+      "dT_dt_max_charge": 0.020473480224609375,
+      "stem_charge_per_kj": 0.0,
+      "rest_cooling_mean": 0.23655052185058595,
+      "energy_delivered_j": 11825.588556423281,
+      "energy_required_j": 11012.633645387474,
+      "energy_full_j": 27531.58411346868,
+      "energy_fraction": 0.4,
+      "energy_shortfall_j": 0.0
+    }
+  },
+  "random_temp_baseline_case": {
+    "params": {
+      "family_id": "pulsed",
+      "i_charge": 3.092320446763661,
+      "pulse_on_min": 5.221169248070272,
+      "pulse_rest_min": 9.192208809607791,
+      "rest_fraction": 1.760565186237777,
+      "i_floor": 1.6234227472319267
+    },
+    "metrics": {
+      "feasible": false,
+      "loss": 221.99394983223166,
+      "constraint_mode": "energy",
+      "total_reward": 0.6105925667895231,
+      "time_reward": -0.75,
+      "temperature_reward": 1.3605925667895231,
+      "duration_min": 3.75,
+      "duration_s": 225.0,
+      "soc_start": 0.2,
+      "soc_end": 0.2961141806280312,
+      "soc_target": 0.6000000000000001,
+      "soc_delta": 0.09611418062803118,
+      "end_reason": "V ceiling @ min current",
+      "peak_voltage": 4.204704761505127,
+      "peak_temperature": 24.653676986694336,
+      "mean_temperature": 24.227735578748916,
+      "dT_peak_charge": 0.6536769866943359,
+      "dT_dt_max_charge": 0.030132293701171875,
+      "stem_charge_per_kj": 18.29588790292394,
+      "rest_cooling_mean": 0.0,
+      "energy_delivered_j": 2858.500997457859,
+      "energy_required_j": 11012.633645387474,
+      "energy_full_j": 27531.58411346868,
+      "energy_fraction": 0.4,
+      "energy_shortfall_j": 8154.132647929615
+    }
+  },
+  "random_stats": {
+    "n": 80.0,
+    "n_feasible": 21.0,
+    "mean_total_reward": -14.245728157434021,
+    "median_total_reward": 0.574408725488325,
+    "std_total_reward": 23.61362330122245,
+    "best_total_reward": 2.425491262086279,
+    "worst_total_reward": -87.04833021163941,
+    "mean_duration_min": 28.416041666666665,
+    "mean_peak_temperature": 24.41752095222473,
+    "feasible_mean_total_reward": -46.680785991330914,
+    "feasible_median_total_reward": -46.84657716751099,
+    "feasible_best_total_reward": -16.85611152524295,
+    "feasible_worst_total_reward": -69.04366989135742,
+    "feasible_mean_duration_min": 82.6952380952381
+  },
+  "reward_notes": {
+    "total_reward": "time_reward + temperature_reward (both weighted 1.0 by default)",
+    "time_reward_formula": "1.5 - 0.01 * duration_s (goes negative after 150 s)",
+    "temperature_reward": "BDT-derived composite in [~1.0, 1.5] from charge-phase thermal metrics",
+    "why_total_negative": "A 33 min charge has time_reward = 1.5 - 0.01*1980 = -18.3; temperature_reward (~1.4) cannot offset it."
+  },
+  "bdt_thermal_comparison": {
+    "optimized": {
+      "dT_peak_charge": 0.07662391662597656,
+      "dT_dt_max_charge": 0.021284103393554688,
+      "stem_charge_per_kj": 0.0926612000600652
+    },
+    "random_typical": {
+      "dT_peak_charge": 0.6536769866943359,
+      "dT_dt_max_charge": 0.030132293701171875,
+      "stem_charge_per_kj": 18.29588790292394
+    },
+    "random_feasible_median": {
+      "dT_peak_charge": -0.04960060119628906,
+      "dT_dt_max_charge": 0.020473480224609375,
+      "stem_charge_per_kj": 0.0
+    }
+  },
+  "improvement": {
+    "total_reward_vs_random_baseline": 29.990465642268042,
+    "total_reward_vs_random_feasible_mean": 29.824674466087963,
+    "temperature_reward_vs_random_median": 0.0832959079675244,
+    "duration_min_saved_vs_baseline": 50.0
+  }
+}

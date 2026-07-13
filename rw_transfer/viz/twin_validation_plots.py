@@ -152,6 +152,7 @@ def plot_digital_twin_validation(
     cell_id: str = "RW9",
     seq_len: int = 150,
     title_suffix: str = "",
+    voltage_ylim: Optional[Tuple[float, float]] = None,
 ) -> None:
     """
     2×N grid: voltage (top), temperature (bottom), measured vs digital twin.
@@ -189,7 +190,13 @@ def plot_digital_twin_validation(
         )
         ax.set_ylabel("Voltage (V)" if col == 0 else "")
         ax.legend(fontsize=8, loc="lower right", framealpha=0.85)
-        ax.set_ylim(2.8, 4.5)
+        if voltage_ylim is not None:
+            ax.set_ylim(*voltage_ylim)
+        else:
+            v_lo = min(float(np.min(v_a)), float(np.min(v_p)))
+            v_hi = max(float(np.max(v_a)), float(np.max(v_p)))
+            pad = max(0.05, 0.05 * (v_hi - v_lo))
+            ax.set_ylim(v_lo - pad, v_hi + pad)
 
         t_meas_smooth = _savgol_display(t_a)
         t_pred_smooth = _savgol_display(t_p)

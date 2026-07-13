@@ -22,14 +22,24 @@ V_CEILING = 4.2
 
 
 class FrozenBDT:
-    def __init__(self, checkpoint: str | Path, device: str = "auto"):
+    def __init__(
+        self,
+        checkpoint: str | Path,
+        device: str = "auto",
+        *,
+        current_scale: float = 1.0,
+    ):
         trainer = TwinTrainer.load(Path(checkpoint), device=device)
         self.model = trainer.model
         self.device = trainer.device
         self.seq_len = self.model.seq_len
+        self.current_scale = float(current_scale)
         self.model.eval()
         for p in self.model.parameters():
             p.requires_grad_(False)
+
+    def _to_bdt_current(self, current_a: np.ndarray) -> np.ndarray:
+        return np.asarray(current_a, dtype=np.float32) * self.current_scale
 
     def predict_traj(
         self,
@@ -38,11 +48,12 @@ class FrozenBDT:
         t0: float,
         current_profile: np.ndarray,
     ) -> Tuple[np.ndarray, np.ndarray]:
+        profile = self._to_bdt_current(current_profile)
         return self.model.predict(
             relative_age=float(age),
             v0=float(v0),
             t0=float(t0),
-            current_profile=np.asarray(current_profile, dtype=np.float32),
+            current_profile=profile,
         )
 
     def single_step(
@@ -60,8 +71,9 @@ class FrozenBDT:
             np.full(pad, prev_i, dtype=np.float32),
             np.full(int(n_steps), float(action_a), dtype=np.float32),
         ])
+        profile_bdt = self._to_bdt_current(profile)
         v_pred, t_pred = self.predict_traj(
-            state["age"], state["v0"], state["t0"], profile,
+            state["age"], state["v0"], state["t0"], profile_bdt,
         )
         v_traj, t_traj = v_pred[pad:], t_pred[pad:]
 
@@ -113,7 +125,11 @@ class ChargingSimulator:
 
     @classmethod
     def from_cell(cls, cell: CellConfig, device: str = "auto") -> ChargingSimulator:
-        bdt = FrozenBDT(cell.bdt_ckpt, device=device)
+        bdt = FrozenBDT(
+            cell.bdt_ckpt,
+            device=device,
+            current_scale=cell.bdt_current_scale,
+        )
         interval_info: Dict = {"source": "default", "selected_s": DEFAULT_DECISION_INTERVAL_S}
         interval_s = cell.decision_interval_s
         if interval_s is None and cell.auto_decision_interval:
@@ -146,6 +162,7 @@ class ChargingSimulator:
             energy_fraction=cell.energy_fraction,
             v_nom=cell.v_nom,
             decision_interval_s=interval_s,
+            v_max=cell.v_max,
         )
         sim.decision_interval_info = interval_info
         return sim
@@ -241,5 +258,6 @@ class ChargingSimulator:
             "energy_required_j": self.energy_required_j,
             "energy_full_j": self.energy_full_j,
             "v_nom": self.v_nom,
+            "v_max": self.v_max,
             "decision_interval_s": self.decision_interval_s,
         }

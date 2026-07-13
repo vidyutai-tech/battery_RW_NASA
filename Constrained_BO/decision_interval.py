@@ -173,6 +173,8 @@ def select_decision_interval_s(
         from rw_transfer.config import load_config
         from rw_transfer.data.series import load_battery_series
 
+        if cell_id.upper() == "LFP":
+            raise ValueError("LFP uses default decision interval (no NASA RW mat)")
         cfg = load_config()
         mat_dir = matlab_dir or Path(cfg["data"]["matlab_dir"])
         series = load_battery_series(
