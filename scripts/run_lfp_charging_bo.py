@@ -7,13 +7,21 @@ Steps performed automatically:
   2. Random-search over profile families (CCCV, CC-taper, pulsed, …)
   3. Write ``constrained_bo_results.json`` + ``best_profiles.png``
 
+LFP uses **SoC target** constraint by default (not energy J), because the
+cross-chemistry BDT keeps voltage near the plateau during charge — Coulomb
+SoC reaches the stop target before ∫V·I dt matches an energy budget.
+Use ``--energy-fraction`` only if you explicitly want energy mode.
+
 Usage
 -----
-    # Full run (default: 40% energy window, frac0.40 finetuned BDT)
+    # Full run (default: SoC 20%→45%, frac0.40 finetuned BDT)
     python3 scripts/run_lfp_charging_bo.py
 
     # Quick smoke test
-    python3 scripts/run_lfp_charging_bo.py --n-random 20 --energy-fraction 0.40
+    python3 scripts/run_lfp_charging_bo.py --n-random 20
+
+    # Energy mode (often infeasible until LFP BDT charge dynamics improve)
+    python3 scripts/run_lfp_charging_bo.py --energy-fraction 0.20 --soc-target 0.40
 
     # Use a specific finetune run directory
     python3 scripts/run_lfp_charging_bo.py \\
@@ -65,10 +73,15 @@ def main() -> None:
     p.add_argument(
         "--energy-fraction",
         type=float,
-        default=0.40,
-        help="Fraction of pack energy to deliver (default 0.40)",
+        default=None,
+        help="Fraction of pack energy (J) to deliver; disables --soc-target when set",
     )
-    p.add_argument("--soc-target", type=float, default=None)
+    p.add_argument(
+        "--soc-target",
+        type=float,
+        default=0.45,
+        help="SoC stop target for classic constraint mode (default 0.45 for LFP)",
+    )
     p.add_argument("--max-duration-min", type=float, default=150.0)
     p.add_argument("--device", default="auto")
     p.add_argument("--w-time", type=float, default=1.0)
@@ -94,7 +107,7 @@ def main() -> None:
     ]
     if args.energy_fraction is not None:
         argv.extend(["--energy-fraction", str(args.energy_fraction)])
-    if args.soc_target is not None:
+    elif args.soc_target is not None:
         argv.extend(["--soc-target", str(args.soc_target)])
     if args.out_dir is not None:
         argv.extend(["--out-dir", str(args.out_dir)])
