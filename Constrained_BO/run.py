@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 
-from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config
+from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config, ENERGY_FRACTION_BY_CELL
 from Constrained_BO.objective import energy_required_j, evaluate_session, full_capacity_joules
 from Constrained_BO.ocv import ocv_curve_path
 from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, get_family, set_profile_bounds
@@ -258,11 +258,14 @@ def main() -> None:
     cells = args.cells or [args.cell.upper()]
     for cell_id in cells:
         cell_id = cell_id.upper()
+        energy_fraction = args.energy_fraction
+        if energy_fraction is None and args.soc_delta is None:
+            energy_fraction = ENERGY_FRACTION_BY_CELL.get(cell_id)
         cell = get_cell_config(cell_id, refit_ocv=args.refit_ocv)
         cell = cell.with_run_overrides(
             soc_target=args.soc_target,
             soc_delta=args.soc_delta,
-            energy_fraction=args.energy_fraction,
+            energy_fraction=energy_fraction,
             max_duration_min=args.max_duration_min,
             v_nom=args.v_nom,
             decision_interval_s=args.decision_interval,

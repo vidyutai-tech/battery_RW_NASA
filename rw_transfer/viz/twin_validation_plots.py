@@ -76,6 +76,87 @@ def _predict_chunk(
     return v, t
 
 
+def _chunk_pulse_metrics(
+    v_actual: np.ndarray,
+    i_actual: np.ndarray,
+    *,
+    burn_in: int = 5,
+    current_threshold_a: float = 0.05,
+) -> Tuple[float, float, int]:
+    """Return ``(pulse_score, voltage_range, current_transitions)`` after burn-in."""
+    v = np.asarray(v_actual, dtype=np.float64)[burn_in:]
+    i = np.asarray(i_actual, dtype=np.float64)[burn_in:]
+    if v.size == 0:
+        return 0.0, 0.0, 0
+    v_range = float(np.max(v) - np.min(v))
+    active = np.abs(i) > current_threshold_a
+    transitions = int(np.sum(np.diff(active.astype(int)) != 0)) if active.size > 1 else 0
+    pulse_score = v_range * max(transitions, 1)
+    return pulse_score, v_range, transitions
+
+
+def _build_chunk_sample(
+    trainer: TwinTrainer,
+    base: AuthorChunkDataset,
+    stitched: AuthorStitchedSeries,
+    idx: int,
+    *,
+    burn_in: int,
+    i_actual: np.ndarray,
+) -> Optional[Dict[str, Any]]:
+    """Shared chunk dict for validation plot helpers."""
+    cs = base.chunk_size
+    state, action, next_state = base[idx]
+    rel_age = float(state[0].item())
+    v0 = float(state[1].item())
+    t0 = float(state[2].item())
+    start = int(idx) * cs
+    end = start + cs + 1
+    if end > stitched.voltage_v.size:
+        return None
+
+    v_act = next_state[:, 0].numpy()
+    t_act = next_state[:, 1].numpy()
+    try:
+        v_pred, t_pred = _predict_chunk(trainer, state, action)
+    except Exception:
+        return None
+
+    st = min(max(burn_in, 0), len(v_act) - 1)
+    mape_v = _mape_pct(v_pred[st:], v_act[st:])
+    mape_t = _mape_pct(t_pred[st:], t_act[st:])
+
+    time_win = stitched.non_relative_time_s[start:end]
+    dt = _median_dt_seconds(time_win)
+    t_min = (time_win - time_win[0]) / 60.0
+
+    pulse_score, v_range, transitions = _chunk_pulse_metrics(
+        v_act, i_actual, burn_in=st,
+    )
+    mean_abs_i = float(np.mean(np.abs(i_actual[st:]))) if i_actual.size > st else 0.0
+
+    return {
+        "chunk_idx": int(idx),
+        "rel_age": rel_age,
+        "v0": v0,
+        "t0": t0,
+        "start_sample": start,
+        "burn_in": st,
+        "v_actual": v_act,
+        "t_actual": t_act,
+        "v_pred": v_pred,
+        "t_pred": t_pred,
+        "t_minutes": t_min[1:],
+        "dt_s": dt,
+        "mape_v": mape_v,
+        "mape_t": mape_t,
+        "pulse_score": pulse_score,
+        "v_range": v_range,
+        "current_transitions": transitions,
+        "mean_abs_current_a": mean_abs_i,
+    }
+
+
 def pick_best_validation_chunks(
     trainer: TwinTrainer,
     test_set: Subset,
@@ -93,53 +174,154 @@ def pick_best_validation_chunks(
     scored: List[Tuple[float, Dict[str, Any]]] = []
 
     for idx in test_set.indices:
-        state, action, next_state = base[idx]
+        state, _, _ = base[idx]
         rel_age = float(state[0].item())
         if rel_age < age_min or rel_age > age_max:
             continue
 
-        v0 = float(state[1].item())
-        t0 = float(state[2].item())
         start = int(idx) * cs
         end = start + cs + 1
-        if end > stitched.voltage_v.size:
+        if end > stitched.current_a.size:
             continue
 
-        v_act = next_state[:, 0].numpy()
-        t_act = next_state[:, 1].numpy()
-        try:
-            v_pred, t_pred = _predict_chunk(trainer, state, action)
-        except Exception:
+        i_actual = stitched.current_a[start + 1 : end]
+        sample = _build_chunk_sample(
+            trainer, base, stitched, int(idx), burn_in=burn_in, i_actual=i_actual,
+        )
+        if sample is None:
             continue
 
-        st = min(max(burn_in, 0), len(v_act) - 1)
-        mape_v = _mape_pct(v_pred[st:], v_act[st:])
-        mape_t = _mape_pct(t_pred[st:], t_act[st:])
-        score = mape_v + mape_t
+        scored.append((sample["mape_v"] + sample["mape_t"], sample))
 
-        time_win = stitched.non_relative_time_s[start:end]
-        dt = _median_dt_seconds(time_win)
-        t_min = (time_win - time_win[0]) / 60.0
+    scored.sort(key=lambda x: x[0])
+    return [item[1] for item in scored[:n]]
 
-        scored.append((
-            score,
-            {
-                "chunk_idx": int(idx),
-                "rel_age": rel_age,
-                "v0": v0,
-                "t0": t0,
-                "start_sample": start,
-                "burn_in": st,
-                "v_actual": v_act,
-                "t_actual": t_act,
-                "v_pred": v_pred,
-                "t_pred": t_pred,
-                "t_minutes": t_min[1:],
-                "dt_s": dt,
-                "mape_v": mape_v,
-                "mape_t": mape_t,
-            },
-        ))
+
+def pick_pulsed_validation_chunks(
+    trainer: TwinTrainer,
+    test_set: Subset,
+    stitched: AuthorStitchedSeries,
+    n: int = 3,
+    burn_in: int = 5,
+    age_min: float = 0.25,
+    age_max: float = 0.75,
+    min_voltage_range_v: float = 0.30,
+    min_current_transitions: int = 4,
+) -> List[Dict[str, Any]]:
+    """
+    Select test chunks with pulsed current and visible voltage swings.
+
+    Picks up to ``n`` windows spread across age bins (when possible) so panels
+    cover early/mid/late life within the requested age band.
+    """
+    base: AuthorChunkDataset = test_set.dataset
+    cs = base.chunk_size
+    candidates: List[Dict[str, Any]] = []
+
+    for idx in test_set.indices:
+        state, _, _ = base[idx]
+        rel_age = float(state[0].item())
+        if rel_age < age_min or rel_age > age_max:
+            continue
+
+        start = int(idx) * cs
+        end = start + cs + 1
+        if end > stitched.current_a.size:
+            continue
+
+        i_actual = stitched.current_a[start + 1 : end]
+        sample = _build_chunk_sample(
+            trainer, base, stitched, int(idx), burn_in=burn_in, i_actual=i_actual,
+        )
+        if sample is None:
+            continue
+        if sample["v_range"] < min_voltage_range_v:
+            continue
+        if sample["current_transitions"] < min_current_transitions:
+            continue
+        candidates.append(sample)
+
+    if not candidates:
+        return []
+
+    candidates.sort(key=lambda s: s["pulse_score"], reverse=True)
+
+    if n <= 1 or len(candidates) <= n:
+        return candidates[:n]
+
+    age_lo, age_hi = age_min, age_max
+    bin_edges = np.linspace(age_lo, age_hi, n + 1)
+    picked: List[Dict[str, Any]] = []
+    used_idx: set[int] = set()
+
+    for b in range(n):
+        lo, hi = bin_edges[b], bin_edges[b + 1]
+        bin_cands = [
+            s for s in candidates
+            if lo <= s["rel_age"] < hi or (b == n - 1 and s["rel_age"] <= hi)
+        ]
+        for samp in bin_cands:
+            if samp["chunk_idx"] in used_idx:
+                continue
+            picked.append(samp)
+            used_idx.add(samp["chunk_idx"])
+            break
+
+    for samp in candidates:
+        if len(picked) >= n:
+            break
+        if samp["chunk_idx"] in used_idx:
+            continue
+        picked.append(samp)
+        used_idx.add(samp["chunk_idx"])
+
+    return picked[:n]
+
+
+def pick_active_validation_chunks(
+    trainer: TwinTrainer,
+    test_set: Subset,
+    stitched: AuthorStitchedSeries,
+    n: int = 3,
+    burn_in: int = 5,
+    age_min: float = 0.25,
+    age_max: float = 0.75,
+    min_mean_current_a: float = 0.5,
+    min_voltage_range_v: float = 0.05,
+) -> List[Dict[str, Any]]:
+    """
+    Lowest-MAPE test chunks with non-trivial current (excludes rest / near-idle).
+
+    Useful for cross-chemistry transfer where rest windows yield misleadingly
+    low MAPE while predictions oscillate on flat measured voltage.
+    """
+    base: AuthorChunkDataset = test_set.dataset
+    cs = base.chunk_size
+    scored: List[Tuple[float, Dict[str, Any]]] = []
+
+    for idx in test_set.indices:
+        state, _, _ = base[idx]
+        rel_age = float(state[0].item())
+        if rel_age < age_min or rel_age > age_max:
+            continue
+
+        start = int(idx) * cs
+        end = start + cs + 1
+        if end > stitched.current_a.size:
+            continue
+
+        i_actual = stitched.current_a[start + 1 : end]
+        sample = _build_chunk_sample(
+            trainer, base, stitched, int(idx), burn_in=burn_in, i_actual=i_actual,
+        )
+        if sample is None:
+            continue
+        if sample["mean_abs_current_a"] < min_mean_current_a:
+            continue
+        if sample["v_range"] < min_voltage_range_v:
+            continue
+
+        scored.append((sample["mape_v"] + sample["mape_t"], sample))
 
     scored.sort(key=lambda x: x[0])
     return [item[1] for item in scored[:n]]
@@ -241,6 +423,10 @@ def compute_val_mean_trajectories(
     burn_in: int = 5,
     max_windows: int = 400,
     seed: int = 42,
+    pulsed_only: bool = False,
+    min_voltage_range_v: float = 0.30,
+    min_current_transitions: int = 4,
+    min_mean_current_a: float = 0.0,
 ) -> Optional[Dict[str, np.ndarray]]:
     """Mean measured vs predicted V/T over validation chunks (post burn-in)."""
     base: AuthorChunkDataset = val_set.dataset
@@ -268,12 +454,24 @@ def compute_val_mean_trajectories(
         state, action, next_state = base[idx]
         v_act = next_state[:, 0].numpy()
         t_act = next_state[:, 1].numpy()
+        start = int(idx) * cs
+        end = start + cs + 1
+        i_actual = stitched.current_a[start + 1 : end]
+        if pulsed_only:
+            _, v_range, transitions = _chunk_pulse_metrics(
+                v_act, i_actual, burn_in=st,
+            )
+            if v_range < min_voltage_range_v or transitions < min_current_transitions:
+                continue
+        if min_mean_current_a > 0.0:
+            mean_i = float(np.mean(np.abs(i_actual[st:])))
+            if mean_i < min_mean_current_a:
+                continue
         try:
             v_pred, t_pred = _predict_chunk(trainer, state, action)
         except Exception:
             continue
 
-        start = int(idx) * cs
         time_win = stitched.non_relative_time_s[start : start + cs + 1]
         dt_med = _median_dt_seconds(time_win)
 
@@ -308,6 +506,8 @@ def compute_val_mean_trajectories(
 def plot_digital_twin_validation_val_mean(
     stats: Dict[str, np.ndarray],
     out_path: Path,
+    *,
+    title_suffix: str = "",
 ) -> None:
     """Mean V/T on validation chunks (main-repo figure 1c style)."""
     t_ax = stats["t_axis_minutes"]
@@ -332,9 +532,10 @@ def plot_digital_twin_validation_val_mean(
     axes[1].legend(fontsize=8, loc="upper right")
     axes[1].set_title(f"Temperature MAPE = {stats['pooled_mape_t_pct']:.2f}%", fontsize=9)
 
+    suffix = f"  {title_suffix}" if title_suffix else ""
     fig.suptitle(
         f"Digital Twin — mean measured vs predicted "
-        f"({stats['n_windows_used']} validation chunks)",
+        f"({stats['n_windows_used']} validation chunks){suffix}",
         fontsize=10,
         fontweight="bold",
     )

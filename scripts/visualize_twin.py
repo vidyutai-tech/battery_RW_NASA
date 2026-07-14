@@ -57,6 +57,7 @@ from rw_transfer.viz.plots import (
 from rw_transfer.viz.twin_validation_plots import (
     compute_val_mean_trajectories,
     pick_best_validation_chunks,
+    pick_pulsed_validation_chunks,
     plot_digital_twin_validation,
     plot_digital_twin_validation_val_mean,
     plot_soc_estimation,
@@ -118,19 +119,27 @@ def _plot_twin_validation(
     burn_in: int,
     name_tag: str = "",
     title_suffix: str = "",
+    window: str = "best",
 ) -> None:
     """Shared publication-style twin validation figures."""
     tag = f"_{name_tag}" if name_tag else ""
+    pulsed = window == "pulsed"
+    window_label = "pulsed voltage" if pulsed else "best test"
 
-    print(f"  [1] digital_twin_validation{tag}.png …", flush=True)
-    samples = pick_best_validation_chunks(
-        trainer, test_set, stitched, n=n_panels, burn_in=burn_in,
-        age_min=0.25, age_max=0.75,
-    )
-    if not samples:
-        samples = pick_best_validation_chunks(
+    print(f"  [1] digital_twin_validation{tag}.png ({window_label}) …", flush=True)
+    if pulsed:
+        samples = pick_pulsed_validation_chunks(
             trainer, test_set, stitched, n=n_panels, burn_in=burn_in,
         )
+    else:
+        samples = pick_best_validation_chunks(
+            trainer, test_set, stitched, n=n_panels, burn_in=burn_in,
+            age_min=0.25, age_max=0.75,
+        )
+        if not samples:
+            samples = pick_best_validation_chunks(
+                trainer, test_set, stitched, n=n_panels, burn_in=burn_in,
+            )
     plot_digital_twin_validation(
         samples,
         out_dir / f"digital_twin_validation{tag}.png",
@@ -140,13 +149,16 @@ def _plot_twin_validation(
     )
     print(f"       Saved digital_twin_validation{tag}.png  ({len(samples)} panels)")
 
-    print(f"  [1c] digital_twin_validation_val_mean{tag}.png …", flush=True)
+    print(f"  [1c] digital_twin_validation_val_mean{tag}.png ({window_label}) …", flush=True)
     val_stats = compute_val_mean_trajectories(
-        trainer, val_set, stitched, burn_in=burn_in, seed=seed,
+        trainer, val_set, stitched, burn_in=burn_in, seed=seed, pulsed_only=pulsed,
     )
     if val_stats:
+        val_title_suffix = title_suffix if not pulsed else ""
         plot_digital_twin_validation_val_mean(
-            val_stats, out_dir / f"digital_twin_validation_val_mean{tag}.png",
+            val_stats,
+            out_dir / f"digital_twin_validation_val_mean{tag}.png",
+            title_suffix=val_title_suffix,
         )
         print(f"       Saved digital_twin_validation_val_mean{tag}.png")
 
@@ -289,6 +301,7 @@ def run_visualize_finetune(
     out_dir: Path | None = None,
     n_panels: int = 3,
     burn_in: int = 5,
+    window: str = "best",
 ) -> None:
     """Publication-style twin plots for finetuned checkpoints on a target cell."""
     if run_dir is None:
@@ -306,7 +319,8 @@ def run_visualize_finetune(
 
     run_dir, registry_dir = _resolve_finetune_run_dir(Path(run_dir))
     if out_dir is None:
-        out_dir = run_dir / "plots"
+        base_out = run_dir / "plots"
+        out_dir = base_out / "pulsed" if window == "pulsed" else base_out
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -325,6 +339,7 @@ def run_visualize_finetune(
     print(f"  Run dir    : {run_dir}")
     print(f"  Target     : {target}")
     print(f"  Fractions  : {[f'{f:.0%}' for f in fractions]}")
+    print(f"  Window     : {window}")
     print(f"  Output     : {out_dir}\n")
 
     print("  Loading target stitched series …", flush=True)
@@ -347,6 +362,9 @@ def run_visualize_finetune(
         print(f"  Checkpoint : {ckpt_path}", flush=True)
 
         trainer = TwinTrainer.load(ckpt_path, seq_len=chunk_size)
+        frac_title = f"finetune {frac:.0%} adapt data"
+        if window == "pulsed":
+            frac_title = f"{frac_title} — pulsed voltage windows"
         _plot_twin_validation(
             trainer,
             cell=target,
@@ -360,10 +378,13 @@ def run_visualize_finetune(
             n_panels=n_panels,
             burn_in=burn_in,
             name_tag=frac_tag,
-            title_suffix=f"finetune {frac:.0%} adapt data",
+            title_suffix=frac_title,
+            window=window,
         )
 
         for stage in ("stage1", "stage2"):
+            if window == "pulsed":
+                continue
             log_path = registry_dir / f"train_log_{frac_tag}_{stage}.jsonl"
             out_path = out_dir / f"finetune_curves_{frac_tag}_{stage}.png"
             if log_path.is_file():
@@ -394,6 +415,12 @@ def main() -> None:
     p.add_argument("--out_dir", default=None, help="Output directory for PNGs")
     p.add_argument("--n_panels", type=int, default=3, help="Number of twin validation columns")
     p.add_argument("--burn_in", type=int, default=5, help="Burn-in steps before MAPE / plots")
+    p.add_argument(
+        "--window",
+        choices=["best", "pulsed"],
+        default="best",
+        help="Validation window selection: lowest-error test chunks (best) or pulsed voltage",
+    )
     args = p.parse_args()
 
     if args.mode == "finetune":
@@ -405,6 +432,7 @@ def main() -> None:
             out_dir=Path(args.out_dir) if args.out_dir else None,
             n_panels=args.n_panels,
             burn_in=args.burn_in,
+            window=args.window,
         )
         return
 

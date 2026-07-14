@@ -44,9 +44,21 @@ FINETUNE_FRAC_BY_CELL: Dict[str, str] = {
     "LFP": "0.40",   # cross-chemistry; frac0.40 balances V/T on held-out test
 }
 
+# Per-cell energy window for constrained BO (fraction of pack energy to deliver).
+# RW10's finetuned BDT stays cool under short 40% windows, so CCCV wins; a
+# slightly larger window (20%→75% SoC) makes multi-step profiles competitive.
+DEFAULT_ENERGY_FRACTION = 0.40
+ENERGY_FRACTION_BY_CELL: Dict[str, float] = {
+    "RW10": 0.55,
+}
+
 
 def finetune_frac_for(cell_id: str) -> str:
     return FINETUNE_FRAC_BY_CELL.get(cell_id.upper(), FINETUNE_FRAC)
+
+
+def energy_fraction_for(cell_id: str) -> float:
+    return ENERGY_FRACTION_BY_CELL.get(cell_id.upper(), DEFAULT_ENERGY_FRACTION)
 
 
 @dataclass

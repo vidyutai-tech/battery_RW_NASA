@@ -16,7 +16,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Constrained_BO.config import get_cell_config
+from Constrained_BO.config import energy_fraction_for, get_cell_config
 from Constrained_BO.objective import evaluate_session
 from Constrained_BO.profile_catalog import ProfileBounds
 from Constrained_BO.profiles import ProfileParams, TwoStepFamily, get_family, set_profile_bounds
@@ -283,9 +283,21 @@ def _load_or_run_optimizer(
     return path, payload
 
 
+_FAMILY_TIEBREAK_ORDER = ("pulsed", "three_step", "two_step", "cccv")
+
+
 def _best_optimized(payload: Dict[str, Any]) -> Tuple[str, Dict[str, Any], Dict[str, Any]]:
     families = payload["families"]
-    best_fid = min(families, key=lambda fid: families[fid]["best_loss"])
+    best_loss = min(families[fid]["best_loss"] for fid in families)
+    tied = [
+        fid for fid in families
+        if abs(float(families[fid]["best_loss"]) - float(best_loss)) <= 1e-6
+    ]
+    best_fid = tied[0]
+    for pref in _FAMILY_TIEBREAK_ORDER:
+        if pref in tied:
+            best_fid = pref
+            break
     entry = families[best_fid]
     return best_fid, entry["best_params"], entry["best_metrics"]
 
@@ -386,6 +398,19 @@ def _bar_chart_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return cc + opt
 
 
+def _infeasible_bar_label(row: Dict[str, Any]) -> str:
+    """Short (2–3 word) annotation for hatched infeasible bars."""
+    end = str(row.get("end_reason", "")).lower()
+    if "time" in end:
+        return "Too slow"
+    shortfall = float(row.get("metrics", {}).get("energy_shortfall_j", 0.0) or 0.0)
+    if shortfall > 1.0:
+        return "Low energy"
+    if "voltage" in end or "v_max" in end:
+        return "V limit"
+    return "Infeasible"
+
+
 def _plot_bar_comparison(
     rows: List[Dict[str, Any]],
     *,
@@ -405,6 +430,20 @@ def _plot_bar_comparison(
         if not row["feasible"]:
             bar.set_hatch("//")
             bar.set_alpha(0.55)
+            y = bar.get_height()
+            y_anchor = y + (0.02 * abs(ax.get_ylim()[1] - ax.get_ylim()[0]))
+            if y < 0:
+                y_anchor = y - (0.04 * abs(ax.get_ylim()[1] - ax.get_ylim()[0]))
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                y_anchor,
+                _infeasible_bar_label(row),
+                ha="center",
+                va="bottom" if y >= 0 else "top",
+                fontsize=8,
+                color="#555555",
+                fontweight="bold",
+            )
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=25, ha="right")
     ax.set_ylabel(ylabel)
@@ -431,7 +470,12 @@ def main() -> None:
         description="Compare constant-current baselines vs optimized charging",
     )
     parser.add_argument("--cell", default="RW9")
-    parser.add_argument("--energy-fraction", type=float, default=0.40)
+    parser.add_argument(
+        "--energy-fraction",
+        type=float,
+        default=None,
+        help="Fraction of pack energy to deliver (default: per-cell, usually 0.40)",
+    )
     parser.add_argument(
         "--currents",
         type=float,
@@ -460,9 +504,14 @@ def main() -> None:
     args = parser.parse_args()
 
     cell_id = args.cell.upper()
+    energy_fraction = (
+        args.energy_fraction
+        if args.energy_fraction is not None
+        else energy_fraction_for(cell_id)
+    )
     results_path, payload = _load_or_run_optimizer(
         cell_id=cell_id,
-        energy_fraction=args.energy_fraction,
+        energy_fraction=energy_fraction,
         results_path=args.results,
         run_optimizer=args.run_optimizer,
         device=args.device,
