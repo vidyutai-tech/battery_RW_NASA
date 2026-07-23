@@ -1,14 +1,26 @@
 # NASA RW Battery Digital Twin — Transfer & Charging Optimization
 
-Research codebase for the NASA **Random Walk (RW)** cells (RW9–RW12): train a **Battery Digital Twin (BDT)**, optionally **fine-tune** it to another cell, then search for **lifetime-optimal charging profiles** via Bayesian optimization on the frozen twin.
+Research codebase for the NASA **Random Walk (RW)** cells (RW9–RW12): train a **Battery Digital Twin (BDT)**, optionally **fine-tune** it to another cell, then search for **lifetime-aware charging profiles** on the frozen twin.
 
 | Cell | Role |
 |------|------|
 | RW9 | Source (pretrained twin) |
 | RW10–RW12 | Transfer targets |
+| LFP | Optional cross-chemistry finetune target |
 
 Raw data: `NASA_RW/dataset/` (`.mat` files, gitignored).  
-Generated artifacts: `outputs/` (gitignored).
+Generated artifacts: `outputs/` and `Constrained_BO/results/` (gitignored where configured).
+
+---
+
+## Two charging stacks
+
+| Stack | Role | Objective | Search |
+|-------|------|-----------|--------|
+| **`Constrained_BO/`** (primary) | Closed-loop BDT + hybrid degradation reward | Hybrid Q_loss (calendar + cyclic) | **GP-BO** (default) or random search |
+| **`charging_opt/`** (legacy Stage 3) | Open family benchmark + Pareto tools | SEI proxy / Wang physics / Chebyshev | GP-BO (`scripts/03_…`) |
+
+New work should start from **`Constrained_BO`**. The rest of this README documents that path first.
 
 ---
 
@@ -20,11 +32,11 @@ The twin is a sequence model that predicts **voltage** and **temperature** traje
 
 - **Relative age** (0 = fresh, 1 = end of life in the RW dataset)
 - Initial rest voltage **V₀** and temperature **T₀**
-- A **current profile** I(t) (charge current is negative in NASA convention)
+- A **current profile** I(t) (charge current is **negative** in NASA convention)
 
-Training uses random-walk charge / discharge / rest steps from RW9. The twin learns residual dynamics on top of the initial state; conformal **drift margins** (Stage 1b) tighten voltage limits during open-loop rollout.
+Training uses random-walk charge / discharge / rest steps from RW9. The twin learns residual dynamics on top of the initial state; conformal **drift margins** (Stage 1b in `charging_opt`) can tighten voltage limits during open-loop rollout.
 
-**Transfer learning:** the same architecture is fine-tuned on a target cell (e.g. RW10) with a small fraction of its data. Only the checkpoint path changes in charging optimization—the BO loop is unchanged.
+**Transfer learning:** the same architecture is fine-tuned on a target cell (e.g. RW10). Only the checkpoint path changes in charging optimization—the BO loop is unchanged.
 
 ### State of charge (SoC)
 
@@ -36,66 +48,58 @@ During charging optimization, SoC is **not** inverted from loaded terminal volta
 
 SoC is age-aware through capacity; the OCV curve is treated as age-invariant for RW9.
 
-### Charging optimization pipeline
-
-Three coupled stages:
+### Constrained_BO pipeline (recommended)
 
 ```
-  Profile parameters  →  BDT rollout (V, T, SoC)  →  Lifetime objective  →  GP Bayesian optimization
-       (Stage 1)              (simulator)              (Stage 2)                 (Stage 3)
+  Profile parameters  →  Closed-loop BDT rollout (V, T, SoC)
+       (families)              (re-anchor ~30 s)
+                ↓
+       Hybrid Q_loss reward + feasibility
+                ↓
+       GP Bayesian optimization (per family)
 ```
 
-1. **Simulation** — A parametric **profile family** (CCCV, adaptive taper, …) defines I(t). The frozen BDT predicts V(t) and T(t); the simulator re-anchors every few seconds to limit drift.
+1. **Simulation** — A parametric family (CCCV, 2-step, 3-step, pulsed) defines the commanded current. `FrozenBDT` predicts V(t) and T(t) in short decision intervals and re-anchors to limit open-loop drift. SoC is Coulomb-counted.
 
-2. **Objective** — Hard **feasibility** first, then minimize a **composite loss** among feasible profiles:
-   - Reach **SoC target** (default 95%) within **max duration** (default 105 min)
-   - No temperature violation
-   - Among feasible candidates, minimize:
+2. **Hybrid Q_loss reward** (default `reward_mode=hybrid_qloss`):
 
 ```
-Loss = w_sei · (SEI / ΔSoC)
-     + w_time · duration_min
-     + w_temp · ∫ max(0, T − 35°C)² dt
-     + w_vstress · ∫ max(0, V − 4.0 V)² dt
+R = w_soc · ΔSoC
+  − w_qloss · (Q_calendar + Q_cyclic)
+  − w_time · t_h^z
 ```
 
-Default weights: `w_sei=1`, `w_time=0.02`, `w_temp=0.05`, `w_vstress=0.08`.
+| Term | Meaning |
+|------|---------|
+| **ΔSoC** | SoC gained in the session (reward charge delivered) |
+| **Q_calendar** | Calendar fade: SoC- and T-dependent Arrhenius × t^z (Eq. 2 by default) |
+| **Q_cyclic** | Cyclic fade: Table-7 B(I), Ea(I), z(I) vs C-rate × Ah^z |
+| **t_h^z** | Power-law time penalty (default z = 0.55) |
 
-**SEI proxy** — Arrhenius-weighted integral of charge current × temperature factor; reported as **SEI/ΔSoC** so profiles are comparable regardless of exactly how much SoC was gained. Lower is better (less degradation per % charged).
+Default weights: `w_soc=1`, `w_qloss=1`, `w_time=0.1`, `z=0.55`.
 
-**Voltage stress** — Penalizes time spent above 4.0 V (CV hold near the 4.2 V ceiling hurts lifetime in this objective).
+BO **minimizes** a scalar loss built from this reward:
 
-At room-temperature starts (~25°C), the temperature penalty is usually zero.
+```
+loss = −R
+     + soft SoC / energy shortfall penalties (if infeasible)
+     + soft V-ceiling overshoot penalty
+```
 
-3. **Search** — Gaussian-process Bayesian optimization (scikit-optimize) explores each **profile family** independently (~40 evaluations per family). The best feasible candidate per family is saved.
+Feasibility (SoC target reached, or energy delivered in energy mode) is preferred when selecting the best candidate per family.
 
-### Profile families
+3. **Search** — Gaussian-process BO (`scikit-optimize`, acquisition **PI** by default) explores each family independently (~40 evaluations). Family seeds warm-start the GP; physical ordering constraints (e.g. i₂ ≤ i₁) are enforced by each family’s `from_dict`, identical to random search.
 
-Each family is a low-dimensional parameterization searched by BO:
+Legacy `--reward-mode legacy_temp_time` keeps the older temperature + time shaped rewards for ablation only.
 
-| Family | Idea |
-|--------|------|
-| CCCV | Constant current → constant voltage taper |
-| Reduced-CV CCCV | CCCV with CV capped at 4.05–4.20 V |
-| Adaptive 2-step / 3-step | Step down current at SoC thresholds |
-| Exponential taper | I(SoC) = I₀·exp(−k·SoC) |
-| CC-taper | Step down when voltage hits ceiling |
-| Multi-step taper | Multiple voltage-triggered steps |
-| Pulsed | Charge/rest bursts (rest = fraction of on-time) |
+### Profile families (`Constrained_BO`)
 
-**Interpretation note:** under the current BDT + SEI proxy, **simple CC or CCCV-style profiles** usually beat pulsed or multi-step variants—pulse “recovery” and plating are not modeled, so extra complexity rarely helps.
-
-### Pareto analysis (post-processing)
-
-BO history contains many feasible points, not just the single lowest-loss winner. Pareto analysis extracts **non-dominated** trade-offs on duration, SEI/ΔSoC, voltage stress, and temperature penalty, then tags:
-
-| Tag | Meaning |
-|-----|---------|
-| **Fastest** | Minimum charge time (may sacrifice SEI) |
-| **Lifetime** | Minimum SEI/ΔSoC (may be slower) |
-| **Balanced** | Knee point on the Pareto front |
-
-Use these when a single weighted loss does not match your product goal (speed vs battery care).
+| Family ID | Label | Idea |
+|-----------|-------|------|
+| `cccv` | CCCV | Constant current → CV taper to `v_cv` / `i_cutoff` |
+| `two_step` | 2-step (SoC) | Step down current at a SoC threshold |
+| `three_step` | 3-step (SoC) | Two SoC thresholds, three current levels |
+| `pulsed` | Pulsed charge/rest | Charge / rest bursts (`rest_fraction` of on-time) |
 
 ---
 
@@ -103,8 +107,13 @@ Use these when a single weighted loss does not match your product goal (speed vs
 
 ```bash
 cd battery_RW_NASA
-python3 -m venv venv
+python -m venv venv
+
+# Linux / macOS
 venv/bin/pip install -r requirements.txt
+
+# Windows
+venv\Scripts\pip install -r requirements.txt
 ```
 
 ---
@@ -114,361 +123,189 @@ venv/bin/pip install -r requirements.txt
 ### 1. Train source twin (RW9)
 
 ```bash
+# Linux / macOS
 venv/bin/python scripts/train_twin.py --config configs/default.yaml
-export BDT_CKPT=outputs/twin_source/<TIMESTAMP>/twin_source_RW9.pt
+
+# Windows
+venv\Scripts\python.exe scripts/train_twin.py --config configs/default.yaml
 ```
 
-Optional: `build_source_registry.py`, `visualize_twin.py`, `train_soc.py` (SOC MLPs—not required for charging BO).
+Default RW9 checkpoint path used by `Constrained_BO` is set in `Constrained_BO/config.py` (`TWIN_SOURCE`). Update that path after a new train run, or place / symlink the checkpoint accordingly.
+
+Optional: `build_source_registry.py`, `visualize_twin.py`, `train_soc.py` (SOC MLPs—not required for Constrained_BO).
 
 ### 2. Fine-tune to another cell (optional)
 
 ```bash
 venv/bin/python scripts/finetune_twin.py \
-  --source_ckpt $BDT_CKPT \
+  --source_ckpt outputs/twin_source/<TIMESTAMP>/twin_source_RW9.pt \
   --out outputs/finetune_two_stage_RW10 \
   --targets RW10
-
-export BDT_CKPT=outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.40.pt
 ```
 
-Primary transfer metric: **held-out voltage RMSE**.
+Primary transfer metric: **held-out voltage RMSE**. Finetune fractions per cell are configured in `Constrained_BO/config.py` (`FINETUNE_FRAC_BY_CELL`).
 
-### 3. Charging profile optimization
+### 3. Constrained_BO charging optimization (primary)
 
-One-time prerequisites per BDT checkpoint:
+OCV curves for Constrained_BO are fit/cached under `Constrained_BO/data/<CELL>/` (auto on first run; use `--refit-ocv` to force).
+
+**Default: GP-BO + hybrid Q_loss** (RW9, SoC 20% → 80%, ≤150 min):
+
+```bash
+# Linux / macOS
+venv/bin/python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+
+# Windows
+venv\Scripts\python.exe -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+```
+
+Useful flags:
+
+| Flag | Effect |
+|------|--------|
+| `--method gp_bo` | Gaussian-process BO (default) |
+| `--method random_search` | Uniform / seed baseline (`--n-random`) |
+| `--acq-func PI\|EI\|LCB` | Acquisition (default **PI**) |
+| `--n-calls 40` | Evaluations per family (including seeds) |
+| `--n-initial 10` | Warm-start budget (seeds + extra random) |
+| `--reward-mode hybrid_qloss` | Default hybrid calendar + cyclic reward |
+| `--w-soc --w-qloss --w-time --z` | Hybrid reward weights / exponent |
+| `--soc-target 0.8` | Absolute SoC stop (classic SoC mode) |
+| `--energy-fraction 0.40` | Energy mode: deliver this fraction of pack energy |
+| `--max-duration-min 150` | Simulation horizon |
+| `--decision-interval 30` | Fixed BDT re-anchor interval (seconds) |
+| `--no-auto-decision-interval` | Skip drift-based interval selection |
+| `--families cccv two_step …` | Subset of families |
+| `--out-dir …` | Output directory (default `Constrained_BO/results/<CELL>`) |
+| `--cells RW9 RW10` | Batch multiple cells |
+
+Random-search baseline (same hybrid objective):
+
+```bash
+venv/bin/python -m Constrained_BO.run --cell RW9 --method random_search --n-random 80
+```
+
+Compare scripts (post-hoc, same reward):
+
+- `Constrained_BO/compare_constant_current.py`
+- `Constrained_BO/compare_pulsed.py`
+
+---
+
+## Outputs (`Constrained_BO`)
+
+```
+Constrained_BO/results/<CELL>/
+  constrained_bo_results.json   # meta + per-family best params, metrics, BO history
+  best_profiles.png             # I / V / T / SoC for best profile per family
+```
+
+JSON `meta` records `method` (`gp_bo` | `random_search`), `reward_mode`, weights, `acq_func`, `n_calls`, decision interval, and profile bounds. Per-family metrics include `qloss_calendar`, `qloss_cyclic`, `qloss_total`, `total_reward`, feasibility, and duration.
+
+Twin checkpoints: `outputs/twin_source/` or finetune `registry/`.
+
+---
+
+## Interpreting results (RW9, GP-BO, hybrid Q_loss)
+
+Source: `Constrained_BO/results/RW9/constrained_bo_results.json`  
+Settings: `method=gp_bo`, `acq_func=PI`, `n_calls=40`, `n_initial=10`, SoC 20%→80%, T₀=24°C, age=0, max 150 min.
+
+| Rank | Family | Loss | Reward R | Duration (min) | Q_total | Feasible | Best parameters (approx.) |
+|------|--------|------|----------|----------------|---------|----------|---------------------------|
+| 1 | Pulsed charge/rest | −0.352 | 0.412 | 60.5 | 0.094 | yes | i≈1.98 A, on=1 min, rest_frac=0.5, i_floor≈0.82 A |
+| 2 | 2-step (SoC) | −0.342 | 0.404 | 62.5 | 0.096 | yes | i1≈1.95 A, i2≈0.98 A, soc_switch≈0.48 |
+| 3 | CCCV | −0.340 | 0.406 | 66.0 | 0.092 | yes | i_cc≈1.22 A, v_cv≈4.14 V, i_cutoff≈0.05 A |
+| 4 | 3-step (SoC) | −0.296 | 0.387 | 91.0 | 0.090 | yes | ~0.87 A flat (steps collapsed), slower |
+
+**Takeaways under hybrid Q_loss (this run):**
+
+- **Lowest loss** favors faster feasible charges that still keep Q_loss moderate (pulsed / 2-step win on R).
+- **Q_total** is dominated by the **cyclic** term; calendar fade over a single session is negligible.
+- Rankings **differ** from the older SEI-composite Stage 3 table in `charging_opt`—do not mix the two objectives when comparing papers or plots.
+- Re-run with `--method random_search` for a sample-efficiency baseline against GP-BO.
+
+---
+
+## Code map (`Constrained_BO`)
+
+| Module | Role |
+|--------|------|
+| `Constrained_BO/run.py` | CLI entry: GP-BO or random search, JSON + plots |
+| `Constrained_BO/bayesian_optimizer.py` | Per-family `gp_minimize` → `evaluate_session` |
+| `Constrained_BO/objective.py` | Session loss / reward aggregation + feasibility |
+| `Constrained_BO/hybrid_degradation.py` | Calendar + cyclic Q_loss and hybrid R |
+| `Constrained_BO/simulator.py` | Closed-loop BDT rollout + Coulomb SoC |
+| `Constrained_BO/profiles.py` | Profile families + BO vector helpers |
+| `Constrained_BO/profile_catalog.py` | Per-cell current / V / pulse bounds |
+| `Constrained_BO/config.py` | Cell configs, checkpoints, start states |
+| `Constrained_BO/ocv.py` | OCV–SoC fit / load for RW cells |
+| `Constrained_BO/decision_interval.py` | Re-anchor interval selection |
+| `Constrained_BO/bdt_thermal.py` | Thermal metrics from BDT trajectories |
+| `Constrained_BO/viz.py` | Best-profile figures |
+
+Twin training: `rw_transfer/`, configs in `configs/default.yaml`.
+
+---
+
+## Training & transfer scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/train_twin.py` | Train source BDT on RW9 |
+| `scripts/finetune_twin.py` | Fine-tune to RW10–RW12 (or LFP) |
+| `scripts/evaluate_finetune.py` | Re-evaluate finetune checkpoints |
+| `scripts/01_fit_ocv_curve.py` | OCV–SoC + Q(age) for `charging_opt` |
+| `scripts/00_diagnose_drift.py` | Conformal drift margins (`charging_opt`) |
+
+---
+
+## Legacy Stage 3 (`charging_opt`)
+
+The original eight-family benchmark (SEI composite / Wang physics / Chebyshev Pareto) remains available:
 
 ```bash
 venv/bin/python scripts/01_fit_ocv_curve.py --cell RW9
 venv/bin/python scripts/00_diagnose_drift.py --ckpt $BDT_CKPT --cell RW9
-```
 
-**Main benchmark** — 8 families, composite objective, SoC 15% → 95%, ≤105 min:
-
-```bash
 venv/bin/python scripts/03_optimize_profile_families.py \
   --bdt_ckpt $BDT_CKPT \
+  --acq_func PI \
   --out_dir outputs/charging_opt_user/$USER/stage3_optimization \
   --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
   --n_calls 40 --n_initial 10 \
   --max_duration_min 105 --max_minutes 150
 ```
 
-Use `--out_dir outputs/charging_opt_user/$USER/stage3_optimization` so outputs are **user-owned** (avoid permission errors if an agent ran as root).
-
-Regenerate plots/CSV without re-running BO:
-
-```bash
-venv/bin/python scripts/report_profile_families.py \
-  --out_dir outputs/charging_opt_user/$USER/stage3_optimization
-
-venv/bin/python scripts/report_pareto_profiles.py \
-  --out_dir outputs/charging_opt_user/$USER/stage3_optimization
-```
-
-Legacy single-family CC-taper BO: `scripts/02_optimize_charging_profile.py`.
-
-Objective flags (scripts 02 & 03): `--objective composite|legacy`, `--w_sei`, `--w_time`, `--w_temp`, `--w_vstress`, `--v_ref_stress`, `--t_comfort_c`.
-
----
-
-## Outputs
-
-User benchmark tree (recommended):
-
-```
-outputs/charging_opt_user/<USER>/stage3_optimization/
-  models/
-    family_optimization_results.json   # best params + BO history per family
-    comparison_table.csv
-    pareto_analysis.json
-    pareto_profiles.csv
-  plots/
-    profile_families/
-      best_<family>.png                # I / V / SoC (separate axes)
-      profile_family_comparison.png
-    pareto/
-      pareto_tradeoffs.png             # duration vs SEI / V-stress / temp
-      pareto_reference_profiles.png    # Fastest / Balanced / Lifetime table
-```
-
-Canonical shared layout (may be root-owned): `outputs/charging_opt/models|plots/…`
-
-Twin checkpoints: `outputs/twin_source/` or finetune `registry/`.
-
-Fix permissions once if needed: `sudo bash scripts/fix_output_permissions.sh <username>`
-
----
-
-## Interpreting results (RW9, age=0, composite objective)
-
-Full 8-family benchmark (SoC 15%→95%, ≤105 min, start V=3.711 V, T=24.7°C).  
-Source: `outputs/charging_opt_user/hima/stage3_optimization/models/comparison_table.csv`.
-
-| Rank | Family | Loss | Duration (min) | SEI/ΔSoC | V²·min | Feasible | Best parameters |
-|------|--------|------|----------------|----------|--------|----------|-----------------|
-| 1 | Adaptive 2-step (SoC) | 70.12 | 104.5 | 68.0 | 0.28 | yes | i1=i2=1.05 A, soc_switch=0.80 |
-| 2 | CCCV | 70.44 | 100.5 | 68.4 | 0.55 | yes | i_cc=1.09 A, v_cv=4.18 V, i_cutoff=0.50 A |
-| 3 | Adaptive 3-step (SoC) | 70.55 | 105.0 | 68.4 | 0.42 | yes | i1=1.13, i2=i3=0.99 A, soc1=0.47, soc2=0.57 |
-| 4 | Reduced-CV CCCV | 70.58 | 98.5 | 68.6 | 0.69 | yes | i_cc=1.11 A, v_cv=4.20 V, i_cutoff=0.50 A |
-| 5 | Pulsed charge/rest | 70.62 | 100.5 | 68.6 | 0.00 | yes | i=1.26 A, pulse_on=6 min, rest_frac=0.11 |
-| 6 | CC-taper (2-level) | 71.42 | 98.7 | 69.3 | 1.47 | yes | i_charge=1.25 A, i_floor=0.75 A |
-| 7 | Multi-step taper (voltage) | 74.88 | 91.4 | 72.8 | 2.78 | yes | i_charge=2.0 A, i_floor=0.89 A |
-| 8 | Exponential taper I(SoC) | 209.59 | 112.5 | 69.3 | 1.29 | **no** | i0=1.04 A, k=0.15 — exceeds 105 min limit |
-
-**Loss decomposition (rank 1 example):** SEI term 68.0 + time 2.09 + temp 0.00 + V-stress 0.02 ≈ 70.12.
-
-### Pareto reference profiles (same run, from BO history)
-
-These are **not** the same as the single lowest-loss winner—they show explicit trade-offs:
-
-| Tag | Family | Duration (min) | SEI/ΔSoC | V²·min | Loss | Role |
-|-----|--------|----------------|----------|--------|------|------|
-| Fastest | Pulsed | 50.5 | 81.5 | 0.89 | 82.6 | Minimum time; high degradation |
-| Lifetime | Adaptive 2-step | 104.5 | 68.0 | 0.28 | 70.1 | Minimum SEI/ΔSoC among feasible |
-| Balanced | Pulsed | 81.0 | 73.1 | 0.16 | 74.7 | Knee on Pareto front |
-
-112 feasible BO evaluations → 37 non-dominated Pareto points. See `models/pareto_profiles.csv` and `plots/pareto/pareto_tradeoffs.png`.
-
-**Takeaways:**
-
-- **Winner (lowest loss)** — Adaptive 2-step; best compromise under default weights, not necessarily fastest.
-- **Pareto “Fastest”** — Pulsed at 50.5 min but SEI/ΔSoC ≈ 81.5 vs 68.0 for lifetime mode; do not deploy without accepting that trade-off.
-- **Pulsed (rank 5)** — V²·min = 0 (avoids CV hold at ~4.2 V); competitive composite loss.
-- **Multi-step taper** — Fastest *feasible family optimum* (91.4 min) but worst SEI among feasible families (72.8).
-- **CC-taper** — Good SEI but rank 6 due to V-stress penalty (long hold near 4.2 V).
-- **Exponential taper** — Infeasible under the 105 min constraint; excluded from ranking.
-
-Re-run with `--objective legacy` to reproduce SEI-only ranking (CC-taper tended to win under that mode).
-
----
-
-## Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `train_twin.py` | Train source BDT on RW9 |
-| `finetune_twin.py` | Fine-tune to RW10–RW12 |
-| `evaluate_finetune.py` | Re-evaluate finetune checkpoints |
-| `01_fit_ocv_curve.py` | OCV–SoC + Q(age) |
-| `00_diagnose_drift.py` | Conformal drift margins |
-| `03_optimize_profile_families.py` | **Main:** 8-family BO + Pareto export |
-| `report_profile_families.py` | Regenerate family plots/CSV from JSON |
-| `report_pareto_profiles.py` | Regenerate Pareto plots/CSV from JSON |
-| `02_optimize_charging_profile.py` | Legacy single CC-taper BO |
-| `sweep_cc_profiles.py` | CC sweep sanity check (Stage 2) |
-
----
-
-## Code map (charging)
-
-| Module | Role |
-|--------|------|
-| `charging_opt/profile_simulator.py` | BDT rollout for candidate profiles |
-| `charging_opt/charging_profile_family.py` | Profile family definitions |
-| `charging_opt/lifetime_reward.py` | Feasibility + composite loss |
+| Module / script | Role |
+|-----------------|------|
 | `charging_opt/family_optimizer.py` | Per-family GP-BO |
-| `charging_opt/pareto_analysis.py` | Pareto fronts + profile tags |
-| `charging_opt/family_reporting.py` | Family plots + CSV |
-| `charging_opt/pareto_reporting.py` | Pareto plots + CSV |
-| `charging_opt/io_utils.py` | User-writable output paths |
+| `charging_opt/lifetime_reward.py` | SEI / composite / physics / Chebyshev loss |
+| `charging_opt/physics_degradation.py` | Wang capacity-fade model |
+| `charging_opt/pareto_analysis.py` | Fastest / Lifetime / Balanced tags |
+| `scripts/run_chebyshev_pareto_sweep.py` | Directed Pareto via ω |
+| `scripts/run_physics_thermal_suite.py` | Physics + thermal + ambient suite |
+| `scripts/gen_all_figs.py` | Publication figure bundle |
 
-Twin training: `rw_transfer/`, configs in `configs/default.yaml`.
+Example SEI-composite RW9 ranking (historical, SoC 15%→95%, ≤105 min) lived under `outputs/charging_opt_user/…/stage3_optimization/`—use that tree for SEI/Pareto comparisons, not `Constrained_BO/results/`.
+
+### Notes (legacy Stage 3)
+
+- **`--objective physics`** changes what BO minimizes; SEI/ΔSoC may still be reported.
+- **Thermal derating** changes simulated current; **thermal loss** adds a penalty to the scalar objective.
+- Full 8-family × 40 evals is typically multi-hour on GPU.
 
 ---
 
-## Stage 3 (enhanced): physics degradation, thermal awareness, and figures
-
-This section documents the **updated Stage 3 pipeline** beyond the original SEI-proxy composite benchmark. It adds:
-
-- **Physics-grounded degradation** — Wang et al. (2011) capacity-fade model, calibrated from RW9 measured capacity fade
-- **Temperature-aware optimization** — BDT-predicted current derating + optional temperature penalty in the BO objective
-- **Ambient sensitivity** — repeat BO at T₀ = 15 / 25 / 35 °C to see how optimal profiles shift with environment
-- **Publication figures** — automated plots under `outputs/visualization/`
-
-All commands assume you have already run **§3 prerequisites** (`01_fit_ocv_curve.py`, `00_diagnose_drift.py`) and set `BDT_CKPT`.
-
-### Step 0 — Calibrate the Wang degradation model (one time)
-
-Run after `01_fit_ocv_curve.py` has produced `capacity_fade.npz`:
+## Quick reference
 
 ```bash
-venv/bin/python scripts/calibrate_degradation_model.py
+# Primary path — hybrid Q_loss + GP-BO
+python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+
+# Same objective, random baseline
+python -m Constrained_BO.run --cell RW9 --method random_search --n-random 80
+
+# Transfer cell (uses finetune checkpoint from config)
+python -m Constrained_BO.run --cell RW10 --method gp_bo --n-calls 40 --n-initial 10
 ```
-
-Writes `outputs/charging_opt/models/stage1_state_estimation/degradation_model.npz`.  
-Every feasible BO evaluation now also reports `capacity_fade_pct` and `equiv_cycles_to_eol` in the metrics JSON, even when the objective is still `composite`.
-
-### Step 1 — Baseline enhanced BO (SEI proxy + PI acquisition)
-
-Same 8-family benchmark as §3, but with **Probability of Improvement (PI)** acquisition (recommended over EI):
-
-```bash
-venv/bin/python scripts/03_optimize_profile_families.py \
-  --bdt_ckpt $BDT_CKPT \
-  --acq_func PI \
-  --out_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
-  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
-  --n_calls 40 --n_initial 10 \
-  --max_duration_min 105 --max_minutes 150
-```
-
-Optional flags (can be combined):
-
-| Flag | Effect |
-|------|--------|
-| `--objective physics` | Minimize Wang capacity-fade loss instead of SEI/ΔSoC |
-| `--thermal_derating` | Reduce current in the simulator when BDT T > comfort threshold |
-| `--thermal_loss` | Add temperature penalty on top of the BO loss |
-| `--thermal_derate_comfort_c 33` | Start derating above this °C (default 33) |
-| `--age_conditioning` | Evaluate each candidate at ages 0 / 0.25 / 0.5 / 0.75 |
-| `--chebyshev_omega 0.5` | Directed Pareto scalarization (0=lifetime, 1=fastest) |
-
-Chebyshev sweep across ω (directed Pareto front):
-
-```bash
-venv/bin/python scripts/run_chebyshev_pareto_sweep.py \
-  --bdt_ckpt $BDT_CKPT \
-  --families pulsed cccv adaptive_two_step \
-  --n_calls 30 --n_initial 8 \
-  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
-  --max_duration_min 105 --acq_func PI \
-  --out_dir outputs/charging_opt_user/$USER/chebyshev_sweep
-```
-
-### Step 2 — Physics + thermal combined (recommended “full” single run)
-
-Combines `--objective physics` with thermal derating and thermal loss in **one** BO job:
-
-```bash
-venv/bin/python scripts/03_optimize_profile_families.py \
-  --objective physics \
-  --acq_func PI \
-  --thermal_derating \
-  --thermal_loss \
-  --thermal_derate_comfort_c 33 \
-  --bdt_ckpt $BDT_CKPT \
-  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal \
-  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
-  --n_calls 40 --n_initial 10 \
-  --max_duration_min 105 --max_minutes 150
-```
-
-Or use the suite script (calibration + baseline BO + ambient sweep):
-
-```bash
-venv/bin/python scripts/run_physics_thermal_suite.py \
-  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
-  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal
-```
-
-Use `--skip_ambient` for baseline only, or `--skip_calibration` if `degradation_model.npz` already exists.
-
-### Step 3 — Ambient temperature sensitivity (Level 2)
-
-Runs BO separately at **T₀ = 15, 25, 35 °C** (3× the work of a single temperature). Use a subset of families for speed:
-
-```bash
-venv/bin/python scripts/run_ambient_sensitivity.py \
-  --objective physics \
-  --thermal_derating --thermal_loss --thermal_derate_comfort_c 33 \
-  --bdt_ckpt $BDT_CKPT \
-  --families cccv,pulsed,adaptive_two_step \
-  --ambient_temps 15,25,35 \
-  --n_calls 20 --n_initial 6 \
-  --soc 0.15 --v0 3.711 --t0 24.7 --age 0.0 \
-  --max_duration_min 105 \
-  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal/ambient_sensitivity
-```
-
-Outputs:
-
-```
-ambient_sensitivity/
-  ambient_sensitivity_summary.json       # best family per T0
-  ambient_sensitivity_comparison.png     # cross-T comparison plot
-  T15/models/ …  T15/plots/profile_families/best_*.png
-  T25/ …
-  T35/ …
-```
-
-Regenerate plots from saved JSON (no BO re-run):
-
-```bash
-venv/bin/python scripts/run_ambient_sensitivity.py --plots_only \
-  --objective physics --thermal_derating --thermal_loss \
-  --out_dir outputs/charging_opt_user/$USER/stage3_physics_thermal/ambient_sensitivity \
-  --families cccv,pulsed,adaptive_two_step
-```
-
-### Step 4 — Degradation model validation & publication figures
-
-Compare SEI proxy rankings against the calibrated Wang model (requires GPU for BDT re-scoring):
-
-```bash
-venv/bin/python scripts/compare_degradation_models.py \
-  --enhanced_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
-  --chebyshev_json outputs/charging_opt_user/$USER/chebyshev_sweep/chebyshev_sweep_results.json \
-  --out_dir outputs/visualization
-```
-
-Generate all meeting figures (fig1–fig5 from enhanced + chebyshev results; add `--with_physics` for fig6):
-
-```bash
-venv/bin/python scripts/gen_all_figs.py \
-  --out_dir outputs/visualization \
-  --enhanced_dir outputs/charging_opt_user/$USER/stage3_enhanced_20260614 \
-  --chebyshev_json outputs/charging_opt_user/$USER/chebyshev_sweep/chebyshev_sweep_results.json
-
-# optional: also build fig6 (physics degradation panel)
-venv/bin/python scripts/gen_all_figs.py --with_physics --out_dir outputs/visualization
-```
-
-Figure index:
-
-| File | Content |
-|------|---------|
-| `fig1_pareto_front.png` | Chebyshev pulsed sweep + SEI cost vs CCCV |
-| `fig2_all_families.png` | 8 families × I / V / SoC |
-| `fig3_family_ranking.png` | SEI, duration, composite loss bars |
-| `fig4_reference_profiles.png` | Fast / balanced / lifetime reference profiles |
-| `fig5_methodology_summary.png` | Family optima + EI vs PI convergence |
-| `fig6_physics_degradation.png` | SEI proxy vs Wang model validation |
-
-### Enhanced Stage 3 output layout
-
-```
-outputs/charging_opt_user/<USER>/
-  stage3_enhanced_20260614/          # PI + composite objective (8 families)
-  stage3_physics/                    # physics objective only (optional)
-  stage3_physics_thermal/            # physics + thermal baseline
-    models/ … plots/pareto/ … plots/profile_families/
-    ambient_sensitivity/
-      T15/ T25/ T35/
-  chebyshev_sweep/
-outputs/visualization/               # publication figures + degradation comparison JSON
-outputs/charging_opt/models/stage1_state_estimation/
-  degradation_model.npz              # calibrated Wang model
-```
-
-### New scripts & modules
-
-| Script | Purpose |
-|--------|---------|
-| `calibrate_degradation_model.py` | Fit Wang model → `degradation_model.npz` |
-| `run_chebyshev_pareto_sweep.py` | Directed Pareto via ω sweep |
-| `run_physics_thermal_suite.py` | Calibration + physics/thermal BO + ambient sweep |
-| `run_ambient_sensitivity.py` | BO at multiple T₀ values |
-| `compare_degradation_models.py` | SEI vs Wang validation + fig6 |
-| `gen_all_figs.py` | Publication figure bundle |
-
-| Module | Role |
-|--------|------|
-| `charging_opt/physics_degradation.py` | Wang capacity fade + Paper 1 SEI; `physics_aware_loss()` |
-| `charging_opt/thermal_management.py` | Derating controller, ambient states, lumped thermal (standalone) |
-
-### Notes
-
-- **Physics vs SEI:** `--objective physics` changes what BO minimizes; SEI/ΔSoC is still computed for reporting. Spearman rank correlation between SEI proxy and Wang `equiv_cycles_to_eol` is typically strong (see `outputs/visualization/degradation_model_comparison.json`).
-- **Thermal derating vs thermal loss:** Derating changes the simulated current profile inside the BDT loop; thermal loss adds a penalty term to the scalar BO objective. Use both for temperature-aware optimization.
-- **Lumped thermal model** (`LumpedThermalModel` in `thermal_management.py`) is for **standalone** “what-if cooling” analysis only — do not substitute its temperature into the BDT optimization loop.
-- **Runtime:** Full 8-family × 40 evals ≈ 3–4 h GPU; adding ambient sweep (3 temps × 3 families × 20 evals) adds ≈ 1–2 h.
