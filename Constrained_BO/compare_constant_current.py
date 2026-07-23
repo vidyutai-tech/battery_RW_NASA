@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Constrained_BO.config import energy_fraction_for, get_cell_config
-from Constrained_BO.objective import evaluate_session
+from Constrained_BO.objective import evaluate_session, reward_kwargs_from_meta
 from Constrained_BO.profile_catalog import ProfileBounds
 from Constrained_BO.profiles import ProfileParams, TwoStepFamily, get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
@@ -143,14 +143,16 @@ def _evaluate(
     initial_state: Dict[str, float],
     params: ProfileParams,
     *,
-    w_time: float,
-    w_temperature: float,
+    reward_kwargs: Optional[Dict[str, Any]] = None,
+    w_time: float = 0.1,
+    w_temperature: float = 1.0,
 ) -> Tuple[Dict, Dict]:
     family = get_family(params.family_id)
     session = simulator.simulate(initial_state, params, family=family)
-    _, metrics = evaluate_session(
-        session, w_time=w_time, w_temperature=w_temperature,
-    )
+    kwargs = dict(reward_kwargs or {})
+    if not kwargs:
+        kwargs = {"w_time": w_time, "w_temperature": w_temperature}
+    _, metrics = evaluate_session(session, **kwargs)
     return session, metrics
 
 
@@ -177,8 +179,13 @@ def _metrics_row(
         "duration_s": metrics["duration_s"],
         "peak_temperature": metrics["peak_temperature"],
         "mean_temperature": metrics["mean_temperature"],
-        "temperature_reward": metrics["temperature_reward"],
-        "time_reward": metrics["time_reward"],
+        "temperature_reward": metrics.get("temperature_reward", 0.0),
+        "time_reward": metrics.get("time_reward", 0.0),
+        "soc_reward": metrics.get("soc_reward", 0.0),
+        "qloss_total": metrics.get("qloss_total", 0.0),
+        "qloss_calendar": metrics.get("qloss_calendar", 0.0),
+        "qloss_cyclic": metrics.get("qloss_cyclic", 0.0),
+        "time_penalty": metrics.get("time_penalty", 0.0),
         "total_reward": metrics["total_reward"],
         "feasible": metrics["feasible"],
         "end_reason": metrics["end_reason"],
@@ -523,7 +530,8 @@ def main() -> None:
         set_profile_bounds(cell.profile_bounds)
 
     w_time = float(meta["reward_weights"]["w_time"])
-    w_temperature = float(meta["reward_weights"]["w_temperature"])
+    w_temperature = float(meta["reward_weights"].get("w_temperature", 1.0))
+    reward_kwargs = reward_kwargs_from_meta(meta)
     simulator = ChargingSimulator.from_cell(cell, device=args.device)
     simulator.decision_interval_info = meta.get("decision_interval_selection", {})
 
@@ -535,8 +543,7 @@ def main() -> None:
             simulator,
             cell.start_state,
             params,
-            w_time=w_time,
-            w_temperature=w_temperature,
+            reward_kwargs=reward_kwargs,
         )
         cc_rows.append(_metrics_row(
             "CC",
@@ -556,8 +563,7 @@ def main() -> None:
         simulator,
         cell.start_state,
         opt_params,
-        w_time=w_time,
-        w_temperature=w_temperature,
+        reward_kwargs=reward_kwargs,
     )
     opt_family = get_family(best_fid)
     opt_label = opt_family.label

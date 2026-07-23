@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run constrained charging-profile optimization (random-search baseline)."""
+"""Run constrained charging-profile optimization (GP-BO default; random-search baseline)."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 
+from Constrained_BO.bayesian_optimizer import optimize_all_families_gp_bo
 from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config, ENERGY_FRACTION_BY_CELL
 from Constrained_BO.objective import energy_required_j, evaluate_session, full_capacity_joules
 from Constrained_BO.ocv import ocv_curve_path
@@ -28,15 +29,19 @@ from Constrained_BO.simulator import ChargingSimulator
 from Constrained_BO.viz import plot_best_profiles
 
 
-def _optimize_family(
+def _optimize_family_random(
     simulator: ChargingSimulator,
     initial_state: Dict[str, float],
     family_id: str,
     *,
     n_random: int = 80,
     seed: int = 42,
-    w_time: float = 1.0,
+    reward_mode: str = "hybrid_qloss",
+    w_time: float = 0.1,
     w_temperature: float = 1.0,
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    z: float = 0.55,
 ) -> Dict[str, Any]:
     family = get_family(family_id)
     rng = np.random.default_rng(seed)
@@ -50,26 +55,43 @@ def _optimize_family(
     best_params: Optional[ProfileParams] = None
     best_metrics: Optional[Dict] = None
     best_session: Optional[Dict] = None
+    best_feasible = False
 
     for params in candidates:
         session = simulator.simulate(initial_state, params, family=family)
         loss, metrics = evaluate_session(
-            session, w_time=w_time, w_temperature=w_temperature,
+            session,
+            reward_mode=reward_mode,  # type: ignore[arg-type]
+            w_time=w_time,
+            w_temperature=w_temperature,
+            w_soc=w_soc,
+            w_qloss=w_qloss,
+            z=z,
         )
+        feasible = bool(metrics["feasible"])
         history.append({
             "family_id": family_id,
             "params": params.to_dict(),
             "loss": loss,
-            "feasible": metrics["feasible"],
+            "feasible": feasible,
             "metrics": metrics,
             "end_reason": metrics["end_reason"],
         })
 
-        if loss < best_loss:
+        # Same rule as GP-BO: prefer feasible, then minimum hybrid loss.
+        take = False
+        if best_params is None:
+            take = True
+        elif feasible and not best_feasible:
+            take = True
+        elif feasible == best_feasible and loss < best_loss:
+            take = True
+        if take:
             best_loss = loss
             best_params = params
             best_metrics = metrics
             best_session = session
+            best_feasible = feasible
 
     return {
         "family_id": family_id,
@@ -80,30 +102,39 @@ def _optimize_family(
         "best_session": best_session,
         "history": history,
         "n_evaluated": len(history),
+        "method": "random_search",
     }
 
 
-def _optimize_all_families(
+def _optimize_all_families_random(
     simulator: ChargingSimulator,
     initial_state: Dict[str, float],
     *,
     families: Optional[List[str]] = None,
     n_random: int = 80,
     seed: int = 42,
-    w_time: float = 1.0,
+    reward_mode: str = "hybrid_qloss",
+    w_time: float = 0.1,
     w_temperature: float = 1.0,
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    z: float = 0.55,
 ) -> Dict[str, Any]:
     families = families or DEFAULT_FAMILIES
     results = {}
     for i, fid in enumerate(families):
-        results[fid] = _optimize_family(
+        results[fid] = _optimize_family_random(
             simulator,
             initial_state,
             fid,
             n_random=n_random,
             seed=seed + i * 1000,
+            reward_mode=reward_mode,
             w_time=w_time,
             w_temperature=w_temperature,
+            w_soc=w_soc,
+            w_qloss=w_qloss,
+            z=z,
         )
     return results
 
@@ -194,11 +225,42 @@ def _strip_sessions(results: Dict[str, Dict]) -> Dict[str, Dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Constrained BO — random-search baseline")
+    parser = argparse.ArgumentParser(
+        description="Constrained BO — GP Bayesian optimization (hybrid Q_loss default)",
+    )
     parser.add_argument("--cell", default="RW9", help="Cell ID (RW9–RW12, LFP)")
     parser.add_argument("--cells", nargs="+", default=None, help="Run multiple cells")
     parser.add_argument("--families", nargs="+", default=DEFAULT_FAMILIES)
-    parser.add_argument("--n-random", type=int, default=80, help="Random samples per family")
+    parser.add_argument(
+        "--method",
+        choices=("gp_bo", "random_search"),
+        default="gp_bo",
+        help="gp_bo = Gaussian-process BO (default); random_search = baseline",
+    )
+    parser.add_argument(
+        "--n-calls",
+        type=int,
+        default=40,
+        help="GP-BO evaluations per family (including seeds)",
+    )
+    parser.add_argument(
+        "--n-initial",
+        type=int,
+        default=10,
+        help="GP-BO warm-start budget: family seeds + extra random points",
+    )
+    parser.add_argument(
+        "--acq-func",
+        choices=("PI", "EI", "LCB"),
+        default="PI",
+        help="Acquisition function for gp_minimize (default PI)",
+    )
+    parser.add_argument(
+        "--n-random",
+        type=int,
+        default=80,
+        help="Random samples per family (random_search only)",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--refit-ocv", action="store_true", help="Re-fit OCV curve before run")
     parser.add_argument("--device", default="auto")
@@ -208,8 +270,33 @@ def main() -> None:
         default=None,
         help="Output directory (default: Constrained_BO/results/<cell>)",
     )
-    parser.add_argument("--w-time", type=float, default=1.0)
-    parser.add_argument("--w-temperature", type=float, default=1.0)
+    parser.add_argument(
+        "--reward-mode",
+        choices=("hybrid_qloss", "legacy_temp_time"),
+        default="hybrid_qloss",
+        help="hybrid_qloss = w1*dSoC - w2*Qloss - w3*t^z; "
+             "legacy_temp_time = previous temp+time reward",
+    )
+    parser.add_argument(
+        "--w-soc", type=float, default=1.0,
+        help="Weight on ΔSoC (hybrid mode)",
+    )
+    parser.add_argument(
+        "--w-qloss", type=float, default=1.0,
+        help="Weight on Q_calendar + Q_cyclic (hybrid mode)",
+    )
+    parser.add_argument(
+        "--w-time", type=float, default=0.1,
+        help="Weight on t^z (hybrid) or legacy time reward (legacy mode)",
+    )
+    parser.add_argument(
+        "--w-temperature", type=float, default=1.0,
+        help="Weight on temperature reward (legacy_temp_time only)",
+    )
+    parser.add_argument(
+        "--z", type=float, default=0.55,
+        help="Power-law exponent for time penalty / calendar z (hybrid)",
+    )
     parser.add_argument(
         "--soc-target",
         type=float,
@@ -313,15 +400,49 @@ def main() -> None:
         )
         if dt_info.get("scores"):
             print(f"  calibration scores (V RMSE + 0.01·T RMSE): {dt_info['scores']}")
-        results = _optimize_all_families(
-            simulator,
-            cell.start_state,
-            families=args.families,
-            n_random=args.n_random,
-            seed=args.seed,
-            w_time=args.w_time,
-            w_temperature=args.w_temperature,
-        )
+        # Legacy mode historically used w_time=1.0; keep that if user did not override.
+        w_time = float(args.w_time)
+        if args.reward_mode == "legacy_temp_time" and abs(w_time - 0.1) < 1e-15:
+            w_time = 1.0
+
+        print(f"Method: {args.method}")
+        print(f"Reward mode: {args.reward_mode}")
+        if args.reward_mode == "hybrid_qloss":
+            print(
+                f"  R = {args.w_soc}*dSoC - {args.w_qloss}*Q_loss - "
+                f"{w_time}*t_h^{args.z}"
+            )
+
+        if args.method == "gp_bo":
+            results = optimize_all_families_gp_bo(
+                simulator,
+                cell.start_state,
+                families=args.families,
+                n_calls=args.n_calls,
+                n_initial_points=args.n_initial,
+                seed=args.seed,
+                reward_mode=args.reward_mode,  # type: ignore[arg-type]
+                w_time=w_time,
+                w_temperature=args.w_temperature,
+                w_soc=args.w_soc,
+                w_qloss=args.w_qloss,
+                z=args.z,
+                acq_func=args.acq_func,
+            )
+        else:
+            results = _optimize_all_families_random(
+                simulator,
+                cell.start_state,
+                families=args.families,
+                n_random=args.n_random,
+                seed=args.seed,
+                reward_mode=args.reward_mode,
+                w_time=w_time,
+                w_temperature=args.w_temperature,
+                w_soc=args.w_soc,
+                w_qloss=args.w_qloss,
+                z=args.z,
+            )
 
         for fid, res in results.items():
             m = res["best_metrics"]
@@ -332,10 +453,17 @@ def main() -> None:
                     f"  E={m['energy_delivered_j']:.0f}/"
                     f"{m['energy_required_j']:.0f}J"
                 )
+            qloss_note = ""
+            if m.get("reward_mode") == "hybrid_qloss":
+                qloss_note = (
+                    f"  Q={m.get('qloss_total', 0):.4g} "
+                    f"(cal={m.get('qloss_calendar', 0):.3g},"
+                    f"cyc={m.get('qloss_cyclic', 0):.3g})"
+                )
             print(
                 f"  {res['family_label']:22s}  loss={m['loss']:7.2f}  "
                 f"reward={m['total_reward']:.3f}  "
-                f"time={m['duration_min']:.1f} min{energy_note}  [{status}]"
+                f"time={m['duration_min']:.1f} min{energy_note}{qloss_note}  [{status}]"
             )
 
         meta: Dict[str, Any] = {
@@ -349,16 +477,26 @@ def main() -> None:
             "max_duration_min": cell.max_duration_min,
             "constraint_mode": cell.constraint_mode,
             "v_nom": cell.v_nom,
-            "n_random": args.n_random,
-            "method": "random_search",
+            "method": args.method,
+            "reward_mode": args.reward_mode,
             "reward_weights": {
-                "w_time": args.w_time,
+                "w_soc": args.w_soc,
+                "w_qloss": args.w_qloss,
+                "w_time": w_time,
                 "w_temperature": args.w_temperature,
+                "z": args.z,
             },
             "families": args.families,
             "decision_interval_s": simulator.decision_interval_s,
             "decision_interval_selection": simulator.decision_interval_info,
+            "seed": args.seed,
         }
+        if args.method == "gp_bo":
+            meta["n_calls"] = args.n_calls
+            meta["n_initial"] = args.n_initial
+            meta["acq_func"] = args.acq_func
+        else:
+            meta["n_random"] = args.n_random
         if cell.profile_bounds is not None:
             meta["profile_bounds"] = cell.profile_bounds.to_dict()
         if cell.constraint_mode == "energy":
@@ -377,7 +515,16 @@ def main() -> None:
         _write_json(json_path, payload)
         print(f"Wrote {json_path}")
 
-        title = f"random search, n={args.n_random}, max {cell.max_duration_min:.0f} min"
+        if args.method == "gp_bo":
+            title = (
+                f"GP-BO ({args.acq_func}), n_calls={args.n_calls}, "
+                f"max {cell.max_duration_min:.0f} min, {args.reward_mode}"
+            )
+        else:
+            title = (
+                f"random search, n={args.n_random}, "
+                f"max {cell.max_duration_min:.0f} min, {args.reward_mode}"
+            )
         if cell.constraint_mode == "energy":
             title += f", energy ≥ {cell.energy_fraction:.0%} of pack"
         fig = plot_best_profiles(

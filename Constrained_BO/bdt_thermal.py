@@ -48,7 +48,8 @@ def _energy_delivered_j(voltage_v, current_a, time_s) -> float:
     if t.size <= 1:
         dt = 1.0 if t.size == 0 else float(t[0] if t[0] > 0 else 1.0)
         return float(max(0.0, power_w[0] * dt))
-    return float(max(0.0, np.trapz(power_w, t)))
+    trapz = getattr(np, "trapezoid", None) or getattr(np, "trapz")
+    return float(max(0.0, trapz(power_w, t)))
 
 
 def bdt_thermal_metrics(session: Dict) -> Dict[str, float]:
@@ -73,10 +74,10 @@ def bdt_thermal_metrics(session: Dict) -> Dict[str, float]:
   charge_fraction
         Fraction of session seconds with ``|I| > eps`` (duty cycle).
     """
-    t0 = float(session["initial_state"]["t0"])
     T = np.asarray(session["temperature_c"], dtype=np.float64)
     I = np.asarray(session["current_a"], dtype=np.float64)
     t = np.asarray(session["time_s"], dtype=np.float64)
+    t0 = float(session["initial_state"].get("t0", float(T[0]) if T.size else 25.0))
 
     if T.size == 0:
         return {
@@ -108,7 +109,8 @@ def bdt_thermal_metrics(session: Dict) -> Dict[str, float]:
 
     if charge.sum() > 1:
         t_ch, T_ch = t[charge], T[charge]
-        stem_charge = float(np.trapz(np.maximum(0.0, T_ch - t0), t_ch))
+        trapz = getattr(np, "trapezoid", None) or getattr(np, "trapz")
+        stem_charge = float(trapz(np.maximum(0.0, T_ch - t0), t_ch))
     else:
         stem_charge = float(np.maximum(0.0, T[charge] - t0).sum()) if charge.any() else 0.0
     stem_charge_per_kj = stem_charge / max(energy_j, 1.0) * 1000.0

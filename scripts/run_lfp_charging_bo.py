@@ -84,8 +84,16 @@ def main() -> None:
     )
     p.add_argument("--max-duration-min", type=float, default=150.0)
     p.add_argument("--device", default="auto")
-    p.add_argument("--w-time", type=float, default=1.0)
+    p.add_argument("--w-soc", type=float, default=1.0)
+    p.add_argument("--w-qloss", type=float, default=1.0)
+    p.add_argument("--w-time", type=float, default=0.1)
     p.add_argument("--w-temperature", type=float, default=1.0)
+    p.add_argument("--z", type=float, default=0.55)
+    p.add_argument(
+        "--reward-mode",
+        choices=("hybrid_qloss", "legacy_temp_time"),
+        default="hybrid_qloss",
+    )
     args, extra = p.parse_known_args()
 
     bo_config.LFP_MAT = Path(args.mat)
@@ -101,8 +109,12 @@ def main() -> None:
         "--n-random", str(args.n_random),
         "--seed", str(args.seed),
         "--device", args.device,
+        "--reward-mode", args.reward_mode,
+        "--w-soc", str(args.w_soc),
+        "--w-qloss", str(args.w_qloss),
         "--w-time", str(args.w_time),
         "--w-temperature", str(args.w_temperature),
+        "--z", str(args.z),
         "--max-duration-min", str(args.max_duration_min),
     ]
     if args.energy_fraction is not None:

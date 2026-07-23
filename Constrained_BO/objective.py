@@ -2,24 +2,47 @@
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from typing import Dict, Literal, Optional, Tuple
 
 import numpy as np
-TEMP_PLATEAU   = 1.5
-TEMP_FLOOR     = -2.2
-TEMP_LOW_C = 20.0   # optimal band lower bound (°C)
+
+from Constrained_BO.hybrid_degradation import (
+    HybridDegradationParameters,
+    compute_session_reward,
+)
+
+TEMP_PLATEAU = 1.5
+TEMP_FLOOR = -2.2
+TEMP_LOW_C = 20.0  # optimal band lower bound (°C)
 TEMP_HIGH_C = 30.0  # optimal band upper bound (°C)
 TEMP_MAX_C = 50.0
 
 TIME_MAX_REWARD = 1.5
 TIME_DECAY_PER_S = 0.01
 TIME_ZERO_AT_S = 150.0
-    
+
 V_NOM_FALLBACK = 3.7
 
 SOC_PENALTY_SCALE = 300.0
 ENERGY_PENALTY_SCALE = 300.0
 VOLTAGE_PENALTY_SCALE = 100.0
+
+RewardMode = Literal["legacy_temp_time", "hybrid_qloss"]
+DEFAULT_REWARD_MODE: RewardMode = "hybrid_qloss"
+
+
+def reward_kwargs_from_meta(meta: Dict) -> Dict:
+    """Build evaluate_session reward kwargs from results JSON meta."""
+    rw = meta.get("reward_weights", {}) or {}
+    mode = meta.get("reward_mode", rw.get("reward_mode", DEFAULT_REWARD_MODE))
+    return {
+        "reward_mode": mode,
+        "w_soc": float(rw.get("w_soc", 1.0)),
+        "w_qloss": float(rw.get("w_qloss", 1.0)),
+        "w_time": float(rw.get("w_time", 0.1 if mode == "hybrid_qloss" else 1.0)),
+        "w_temperature": float(rw.get("w_temperature", 1.0)),
+        "z": float(rw.get("z", rw.get("z_time", 0.55))),
+    }
 
 
 def full_capacity_joules(q_rated_as: float, v_nom: float = V_NOM_FALLBACK) -> float:
@@ -51,7 +74,8 @@ def energy_delivered_j(
     if t.size <= 1:
         dt = 1.0 if t.size == 0 else float(t[0] if t[0] > 0 else 1.0)
         return float(max(0.0, power_w[0] * dt))
-    return float(max(0.0, np.trapz(power_w, t)))
+    trapz = getattr(np, "trapezoid", None) or getattr(np, "trapz")
+    return float(max(0.0, trapz(power_w, t)))
 
 
 def temperature_reward(t_c: float) -> float:
@@ -76,33 +100,97 @@ def mean_temperature_reward(temperature_c: np.ndarray) -> float:
     return float(np.mean([temperature_reward(t) for t in temperature_c]))
 
 
+def make_hybrid_params(
+    *,
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    w_time: float = 0.1,
+    z: float = 0.55,
+    calendar_model: str = "eq2",
+) -> HybridDegradationParameters:
+    return HybridDegradationParameters(
+        w_soc=float(w_soc),
+        w_qloss=float(w_qloss),
+        w_time=float(w_time),
+        z_time=float(z),
+        z_cal=float(z),
+        calendar_model=calendar_model,  # type: ignore[arg-type]
+    )
+
+
 def aggregate_reward(
     session: Dict,
     duration_s: float,
     *,
-    w_time: float = 1.0,
+    reward_mode: RewardMode = DEFAULT_REWARD_MODE,
+    w_time: float = 0.1,
     w_temperature: float = 1.0,
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    z: float = 0.55,
+    hybrid_params: Optional[HybridDegradationParameters] = None,
 ) -> dict:
     from Constrained_BO.bdt_thermal import bdt_thermal_metrics
 
-    tr = mean_temperature_reward(session["temperature_c"])
     thermal = bdt_thermal_metrics(session)
-    tim = time_reward(duration_s)
-    total = w_time * tim + w_temperature * tr
+
+    if reward_mode == "legacy_temp_time":
+        tr = mean_temperature_reward(session["temperature_c"])
+        tim = time_reward(duration_s)
+        total = float(w_time) * tim + float(w_temperature) * tr
+        return {
+            "reward_mode": reward_mode,
+            "temperature_reward": tr,
+            "time_reward": tim,
+            "soc_reward": 0.0,
+            "qloss_calendar": 0.0,
+            "qloss_cyclic": 0.0,
+            "qloss_total": 0.0,
+            "qloss_penalty": 0.0,
+            "time_penalty": 0.0,
+            "total_reward": total,
+            "thermal_metrics": thermal,
+            "reward_weights": {
+                "w_time": float(w_time),
+                "w_temperature": float(w_temperature),
+            },
+        }
+
+    params = hybrid_params or make_hybrid_params(
+        w_soc=w_soc, w_qloss=w_qloss, w_time=w_time, z=z,
+    )
+    hybrid = compute_session_reward(session, params=params)
+    # Legacy keys kept for compare scripts that still read them.
     return {
-        "temperature_reward": tr,
-        "time_reward": tim,
-        "total_reward": total,
+        "reward_mode": reward_mode,
+        "temperature_reward": 0.0,
+        "time_reward": -hybrid["time_penalty"],
+        "soc_reward": hybrid["soc_reward"],
+        "qloss_calendar": hybrid["qloss_calendar"],
+        "qloss_cyclic": hybrid["qloss_cyclic"],
+        "qloss_total": hybrid["qloss_total"],
+        "qloss_penalty": hybrid["qloss_penalty"],
+        "time_penalty": hybrid["time_penalty"],
+        "ah_throughput": hybrid["ah_throughput"],
+        "nominal_c_rate": hybrid["nominal_c_rate"],
+        "total_reward": hybrid["total_reward"],
         "thermal_metrics": thermal,
-        "reward_weights": {"w_time": w_time, "w_temperature": w_temperature},
+        "reward_weights": hybrid["reward_weights"],
+        "degradation_params": hybrid.get("degradation_params"),
+        "hybrid_metrics": hybrid,
     }
 
 
 def evaluate_session(
     session: Dict,
     *,
-    w_time: float = 1.0,
+    reward_mode: RewardMode = DEFAULT_REWARD_MODE,
+    w_time: float = 0.1,
     w_temperature: float = 1.0,
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    z: float = 0.55,
+    hybrid_params: Optional[HybridDegradationParameters] = None,
 ) -> Tuple[float, Dict]:
     duration_s = float(session["current_a"].size)
     duration_min = duration_s / 60.0
@@ -128,8 +216,13 @@ def evaluate_session(
     rewards = aggregate_reward(
         session,
         duration_s,
+        reward_mode=reward_mode,
         w_time=w_time,
         w_temperature=w_temperature,
+        w_soc=w_soc,
+        w_qloss=w_qloss,
+        z=z,
+        hybrid_params=hybrid_params,
     )
     thermal = rewards.get("thermal_metrics", {})
 
@@ -159,9 +252,18 @@ def evaluate_session(
         "feasible": feasible,
         "loss": float(loss),
         "constraint_mode": constraint_mode,
+        "reward_mode": rewards.get("reward_mode", reward_mode),
         "total_reward": rewards["total_reward"],
         "time_reward": rewards["time_reward"],
         "temperature_reward": rewards["temperature_reward"],
+        "soc_reward": rewards.get("soc_reward", 0.0),
+        "qloss_calendar": rewards.get("qloss_calendar", 0.0),
+        "qloss_cyclic": rewards.get("qloss_cyclic", 0.0),
+        "qloss_total": rewards.get("qloss_total", 0.0),
+        "qloss_penalty": rewards.get("qloss_penalty", 0.0),
+        "time_penalty": rewards.get("time_penalty", 0.0),
+        "ah_throughput": rewards.get("ah_throughput"),
+        "nominal_c_rate": rewards.get("nominal_c_rate"),
         "duration_min": duration_min,
         "duration_s": duration_s,
         "soc_start": soc_start,
@@ -182,5 +284,6 @@ def evaluate_session(
         "energy_fraction": session.get("energy_fraction"),
         "energy_shortfall_j": energy_shortfall_j,
         "reward_weights": rewards["reward_weights"],
+        "degradation_params": rewards.get("degradation_params"),
     }
     return loss, metrics

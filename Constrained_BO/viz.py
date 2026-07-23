@@ -123,6 +123,56 @@ def plot_rewards_combined(out_path: Path | None = None) -> plt.Figure:
     return fig
 
 
+def plot_hybrid_reward_components(
+    out_path: Path | None = None,
+    metrics: Optional[Dict] = None,
+) -> plt.Figure:
+    """Bar chart of hybrid reward components (SoC, Qloss parts, time, total)."""
+    if metrics is None:
+        # Illustrative synthetic breakdown for --rewards-only
+        components = {
+            "SoC reward": 0.60,
+            "Calendar Qloss": -0.02,
+            "Cyclic Qloss": -0.15,
+            "Time penalty": -0.08,
+            "Total reward": 0.35,
+        }
+    else:
+        w_q = float(metrics.get("reward_weights", {}).get("w_qloss", 1.0))
+        components = {
+            "SoC reward": float(metrics.get("soc_reward", 0.0)),
+            "Calendar Qloss": -float(metrics.get("qloss_calendar", 0.0)) * w_q,
+            "Cyclic Qloss": -float(metrics.get("qloss_cyclic", 0.0)) * w_q,
+            "Time penalty": -float(metrics.get("time_penalty", 0.0)),
+            "Total reward": float(metrics.get("total_reward", 0.0)),
+        }
+
+    labels = list(components.keys())
+    values = list(components.values())
+    colors = ["#2563eb", "#f59e0b", "#ef4444", "#8b5cf6", "#16a34a"]
+
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    bars = ax.bar(labels, values, color=colors, edgecolor="#1f2937", lw=0.6)
+    ax.axhline(0.0, color="gray", lw=0.9)
+    ax.set_ylabel("Reward contribution")
+    ax.set_title("Hybrid degradation reward components", fontweight="bold")
+    ax.grid(True, axis="y", alpha=0.35)
+    for bar, val in zip(bars, values):
+        ax.annotate(
+            f"{val:.3f}",
+            xy=(bar.get_x() + bar.get_width() / 2, val),
+            xytext=(0, 4 if val >= 0 else -12),
+            textcoords="offset points",
+            ha="center",
+            fontsize=9,
+        )
+    fig.tight_layout()
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    return fig
+
+
 def plot_reward_curves(out_dir: Path | None = None) -> None:
     out_dir = out_dir or REWARDS_OUT_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -130,6 +180,7 @@ def plot_reward_curves(out_dir: Path | None = None) -> None:
         ("temperature_reward.png", plot_temperature_reward),
         ("time_reward.png", plot_time_reward),
         ("rewards_combined.png", plot_rewards_combined),
+        ("hybrid_reward_components.png", plot_hybrid_reward_components),
     ]:
         fig = fn(out_dir / name)
         plt.close(fig)
@@ -259,14 +310,26 @@ def plot_optimized_profile(
     row_labels = ["Current (A)", "Voltage (V)", "SoC (%)", "Temperature (°C)"]
 
     feasible = metrics.get("feasible", False)
-    header = (
-        f"Optimized charging profile\n"
-        f"Family: {family_label}\n"
-        f"Reward = {metrics['total_reward']:.1f}  |  "
-        f"Time = {metrics['duration_min']:.0f} min  |  "
-        f"Peak T = {metrics['peak_temperature']:.1f}°C\n"
-        f"{'Feasible' if feasible else 'Infeasible'}"
-    )
+    if metrics.get("reward_mode") == "hybrid_qloss":
+        header = (
+            f"Optimized charging profile\n"
+            f"Family: {family_label}\n"
+            f"Reward = {metrics['total_reward']:.3f}  |  "
+            f"ΔSoC = {metrics.get('soc_delta', 0):.3f}  |  "
+            f"Qloss = {metrics.get('qloss_total', 0):.4g}  |  "
+            f"Time = {metrics['duration_min']:.0f} min  |  "
+            f"Peak T = {metrics['peak_temperature']:.1f}°C\n"
+            f"{'Feasible' if feasible else 'Infeasible'}"
+        )
+    else:
+        header = (
+            f"Optimized charging profile\n"
+            f"Family: {family_label}\n"
+            f"Reward = {metrics['total_reward']:.1f}  |  "
+            f"Time = {metrics['duration_min']:.0f} min  |  "
+            f"Peak T = {metrics['peak_temperature']:.1f}°C\n"
+            f"{'Feasible' if feasible else 'Infeasible'}"
+        )
     if metrics.get("constraint_mode") == "energy":
         header += (
             f"  |  E={metrics.get('energy_delivered_j', 0):.0f}/"

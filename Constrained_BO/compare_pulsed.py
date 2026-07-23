@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib
 matplotlib.use("Agg")
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Constrained_BO.config import CellConfig, get_cell_config
-from Constrained_BO.objective import evaluate_session
+from Constrained_BO.objective import evaluate_session, reward_kwargs_from_meta
 from Constrained_BO.profile_catalog import ProfileBounds
 from Constrained_BO.profiles import PulsedFamily, ProfileParams, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
@@ -127,14 +127,16 @@ def _evaluate(
     initial_state: Dict[str, float],
     params: ProfileParams,
     *,
-    w_time: float,
-    w_temperature: float,
+    reward_kwargs: Optional[Dict[str, Any]] = None,
+    w_time: float = 0.1,
+    w_temperature: float = 1.0,
 ) -> Tuple[Dict, Dict]:
     family = PulsedFamily()
     session = simulator.simulate(initial_state, params, family=family)
-    _, metrics = evaluate_session(
-        session, w_time=w_time, w_temperature=w_temperature,
-    )
+    kwargs = dict(reward_kwargs or {})
+    if not kwargs:
+        kwargs = {"w_time": w_time, "w_temperature": w_temperature}
+    _, metrics = evaluate_session(session, **kwargs)
     return session, metrics
 
 
@@ -153,14 +155,31 @@ def _plot_comparison(
     # Reward bar chart
     ax_bar = fig.add_subplot(gs[0, :])
     labels = ["Optimized pulsed", f"Random pulsed ({baseline_label})"]
-    totals = [optimized["metrics"]["total_reward"], random_pick["metrics"]["total_reward"]]
-    times = [optimized["metrics"]["time_reward"], random_pick["metrics"]["time_reward"]]
-    temps = [optimized["metrics"]["temperature_reward"], random_pick["metrics"]["temperature_reward"]]
+    mode = optimized["metrics"].get("reward_mode", "legacy_temp_time")
     x = np.arange(len(labels))
-    w = 0.25
-    ax_bar.bar(x - w, totals, w, label="Total reward", color="#2563eb")
-    ax_bar.bar(x, times, w, label="Time reward", color="#f59e0b")
-    ax_bar.bar(x + w, temps, w, label="Temperature reward", color="#22c55e")
+    w = 0.2
+    if mode == "hybrid_qloss":
+        totals = [optimized["metrics"]["total_reward"], random_pick["metrics"]["total_reward"]]
+        socs = [optimized["metrics"].get("soc_reward", 0.0), random_pick["metrics"].get("soc_reward", 0.0)]
+        qloss = [
+            -optimized["metrics"].get("qloss_penalty", 0.0),
+            -random_pick["metrics"].get("qloss_penalty", 0.0),
+        ]
+        times = [
+            -optimized["metrics"].get("time_penalty", 0.0),
+            -random_pick["metrics"].get("time_penalty", 0.0),
+        ]
+        ax_bar.bar(x - 1.5 * w, totals, w, label="Total reward", color="#2563eb")
+        ax_bar.bar(x - 0.5 * w, socs, w, label="SoC reward", color="#16a34a")
+        ax_bar.bar(x + 0.5 * w, qloss, w, label="−Qloss penalty", color="#ef4444")
+        ax_bar.bar(x + 1.5 * w, times, w, label="−Time penalty", color="#f59e0b")
+    else:
+        totals = [optimized["metrics"]["total_reward"], random_pick["metrics"]["total_reward"]]
+        times = [optimized["metrics"]["time_reward"], random_pick["metrics"]["time_reward"]]
+        temps = [optimized["metrics"]["temperature_reward"], random_pick["metrics"]["temperature_reward"]]
+        ax_bar.bar(x - w, totals, w, label="Total reward", color="#2563eb")
+        ax_bar.bar(x, times, w, label="Time reward", color="#f59e0b")
+        ax_bar.bar(x + w, temps, w, label="Temperature reward", color="#22c55e")
     ax_bar.axhline(0, color="gray", lw=0.8)
     ax_bar.set_xticks(x)
     ax_bar.set_xticklabels(labels)
@@ -246,7 +265,8 @@ def main() -> None:
         set_profile_bounds(cell.profile_bounds)
 
     w_time = float(meta["reward_weights"]["w_time"])
-    w_temperature = float(meta["reward_weights"]["w_temperature"])
+    w_temperature = float(meta["reward_weights"].get("w_temperature", 1.0))
+    reward_kwargs = reward_kwargs_from_meta(meta)
     simulator = ChargingSimulator.from_cell(cell, device=args.device)
     simulator.decision_interval_info = meta.get("decision_interval_selection", {})
 
@@ -259,8 +279,7 @@ def main() -> None:
             simulator,
             cell.start_state,
             params,
-            w_time=w_time,
-            w_temperature=w_temperature,
+            reward_kwargs=reward_kwargs,
         )
         random_results.append({
             "params": params.to_dict(),
@@ -272,8 +291,7 @@ def main() -> None:
         simulator,
         cell.start_state,
         optimized_params,
-        w_time=w_time,
-        w_temperature=w_temperature,
+        reward_kwargs=reward_kwargs,
     )
     optimized = {
         "params": optimized_params.to_dict(),

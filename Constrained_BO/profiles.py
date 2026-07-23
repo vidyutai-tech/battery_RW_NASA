@@ -77,6 +77,41 @@ class ProfileFamily(ABC):
     def seed_params(cls) -> List[ProfileParams]:
         return []
 
+    @classmethod
+    def param_names(cls) -> List[str]:
+        """Stable BO dimension order (dict insertion order of ``param_bounds``)."""
+        return list(cls.param_bounds().keys())
+
+    @classmethod
+    def search_space(cls):
+        """scikit-optimize ``Real`` dimensions matching ``param_bounds``."""
+        from skopt.space import Real
+
+        return [
+            Real(float(lo), float(hi), name=name)
+            for name, (lo, hi) in cls.param_bounds().items()
+        ]
+
+    @classmethod
+    def from_vector(cls, x: List[float]) -> ProfileParams:
+        """Map a BO vector to params; ``from_dict`` enforces physical constraints."""
+        names = cls.param_names()
+        if len(x) != len(names):
+            raise ValueError(
+                f"{cls.family_id}: expected {len(names)} params {names}, got {len(x)}"
+            )
+        return cls.from_dict({k: float(v) for k, v in zip(names, x)})
+
+    @classmethod
+    def to_vector(cls, params: ProfileParams) -> List[float]:
+        """Extract BO vector keys only (ignores derived fields like pulse_rest_min)."""
+        return [float(params.values[k]) for k in cls.param_names()]
+
+    @classmethod
+    def seed_points(cls) -> List[List[float]]:
+        """Deterministic seed vectors for GP warm-start (via ``seed_params``)."""
+        return [cls.to_vector(p) for p in cls.seed_params()]
+
     def init_context(self, params: ProfileParams) -> SimulationContext:
         return SimulationContext(phase="cc", i_level=self._bulk_current(params))
 
