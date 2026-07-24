@@ -9,6 +9,7 @@ import numpy as np
 from Constrained_BO.hybrid_degradation import (
     HybridDegradationParameters,
     compute_session_reward,
+    session_throughput_metrics,
 )
 
 TEMP_PLATEAU = 1.5
@@ -29,6 +30,61 @@ VOLTAGE_PENALTY_SCALE = 100.0
 
 RewardMode = Literal["legacy_temp_time", "hybrid_qloss"]
 DEFAULT_REWARD_MODE: RewardMode = "hybrid_qloss"
+
+# Terminology note (Phase 1 hybrid degradation model): qloss_calendar / qloss_cyclic
+# / qloss_total are a **Relative Capacity-Loss Index**, not a calibrated "Capacity
+# Fade (%)". The underlying coefficients (hybrid_degradation.py) are literature
+# values for other cells/chemistries and have not been fit to NASA RW9-RW12 or LFP
+# aging data. Use these values only to *rank* charging strategies against each other
+# under the same model; do not report them as an absolute percent capacity loss.
+QLOSS_TERMINOLOGY = "relative_capacity_loss_index"
+QLOSS_TERMINOLOGY_NOTE = (
+    "qloss_calendar/qloss_cyclic/qloss_total are a dimensionless Relative "
+    "Capacity-Loss Index (ranking signal), not a calibrated Capacity Fade (%). "
+    "See README 'Hybrid degradation methodology' for details."
+)
+
+# Units for every metric exported in evaluate_session()/aggregate_reward() output.
+# Kept alongside the code (not just docs) so results JSON can embed this table via
+# run.py's meta, and so it stays in sync with the fields actually produced.
+RESULT_METRIC_UNITS: Dict[str, str] = {
+    "loss": "dimensionless (scalar BO objective)",
+    "total_reward": "dimensionless",
+    "time_reward": "dimensionless",
+    "temperature_reward": "dimensionless",
+    "soc_reward": "dimensionless",
+    "qloss_calendar": "relative capacity-loss index (dimensionless, NOT % fade)",
+    "qloss_cyclic": "relative capacity-loss index (dimensionless, NOT % fade)",
+    "qloss_total": "relative capacity-loss index (dimensionless, NOT % fade)",
+    "qloss_penalty": "dimensionless",
+    "time_penalty": "dimensionless",
+    "ah_throughput": "Ah (ampere-hours)",
+    "nominal_c_rate": "C-rate (dimensionless, multiples of 1C)",
+    "max_c_rate": "C-rate (dimensionless, multiples of 1C)",
+    "mean_soc": "fraction [0, 1]",
+    "efc": "equivalent full cycles (dimensionless)",
+    "duration_min": "minutes",
+    "duration_s": "seconds",
+    "soc_start": "fraction [0, 1]",
+    "soc_end": "fraction [0, 1]",
+    "soc_target": "fraction [0, 1]",
+    "soc_delta": "fraction [0, 1]",
+    "peak_voltage": "V",
+    "peak_temperature": "degC",
+    "mean_temperature": "degC",
+    "dT_peak_charge": "degC",
+    "dT_dt_max_charge": "degC/s",
+    "stem_charge_per_kj": "degC/kJ",
+    "rest_cooling_mean": "degC/s",
+    "energy_delivered_j": "J (joules)",
+    "energy_required_j": "J (joules)",
+    "energy_full_j": "J (joules)",
+    "energy_fraction": "fraction [0, 1]",
+    "energy_shortfall_j": "J (joules)",
+    "voltage_margin_v": "V (v_max - peak_voltage; negative = ceiling exceeded)",
+    "energy_margin_j": "J (energy_delivered_j - energy_required_j; energy mode)",
+    "soc_margin": "fraction [0, 1] (soc_end - soc_target; SoC mode)",
+}
 
 
 def reward_kwargs_from_meta(meta: Dict) -> Dict:
@@ -133,6 +189,10 @@ def aggregate_reward(
     from Constrained_BO.bdt_thermal import bdt_thermal_metrics
 
     thermal = bdt_thermal_metrics(session)
+    # Physical throughput/SoC descriptors (Ah, C-rate, EFC, mean SoC) are properties
+    # of the session trajectory, independent of which reward_mode is scored — so
+    # they are always computed and reported, even under legacy_temp_time.
+    phys = session_throughput_metrics(session)
 
     if reward_mode == "legacy_temp_time":
         tr = mean_temperature_reward(session["temperature_c"])
@@ -150,6 +210,11 @@ def aggregate_reward(
             "time_penalty": 0.0,
             "total_reward": total,
             "thermal_metrics": thermal,
+            "ah_throughput": phys["ah_throughput"],
+            "nominal_c_rate": phys["nominal_c_rate"],
+            "max_c_rate": phys["max_c_rate"],
+            "mean_soc": phys["mean_soc"],
+            "efc": phys["efc"],
             "reward_weights": {
                 "w_time": float(w_time),
                 "w_temperature": float(w_temperature),
@@ -171,6 +236,9 @@ def aggregate_reward(
         "qloss_total": hybrid["qloss_total"],
         "qloss_penalty": hybrid["qloss_penalty"],
         "time_penalty": hybrid["time_penalty"],
+        "mean_soc": phys["mean_soc"],
+        "max_c_rate": phys["max_c_rate"],
+        "efc": phys["efc"],
         "ah_throughput": hybrid["ah_throughput"],
         "nominal_c_rate": hybrid["nominal_c_rate"],
         "total_reward": hybrid["total_reward"],
@@ -248,6 +316,15 @@ def evaluate_session(
     if peak_v > v_ceiling + 1e-4:
         loss += VOLTAGE_PENALTY_SCALE * (peak_v - v_ceiling)
 
+    # Constraint margins: positive = headroom to the limit, negative = violated.
+    constraint_margins: Dict[str, float] = {
+        "voltage_margin_v": v_ceiling - peak_v,
+    }
+    if constraint_mode == "energy":
+        constraint_margins["energy_margin_j"] = energy_delivered - energy_required
+    else:
+        constraint_margins["soc_margin"] = soc_end - soc_target
+
     metrics = {
         "feasible": feasible,
         "loss": float(loss),
@@ -264,6 +341,9 @@ def evaluate_session(
         "time_penalty": rewards.get("time_penalty", 0.0),
         "ah_throughput": rewards.get("ah_throughput"),
         "nominal_c_rate": rewards.get("nominal_c_rate"),
+        "max_c_rate": rewards.get("max_c_rate"),
+        "mean_soc": rewards.get("mean_soc"),
+        "efc": rewards.get("efc"),
         "duration_min": duration_min,
         "duration_s": duration_s,
         "soc_start": soc_start,
@@ -283,7 +363,9 @@ def evaluate_session(
         "energy_full_j": energy_full_j,
         "energy_fraction": session.get("energy_fraction"),
         "energy_shortfall_j": energy_shortfall_j,
+        "constraint_margins": constraint_margins,
         "reward_weights": rewards["reward_weights"],
         "degradation_params": rewards.get("degradation_params"),
+        "qloss_terminology": QLOSS_TERMINOLOGY_NOTE,
     }
     return loss, metrics

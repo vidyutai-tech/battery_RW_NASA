@@ -72,11 +72,15 @@ R = w_soc · ΔSoC
 | Term | Meaning |
 |------|---------|
 | **ΔSoC** | SoC gained in the session (reward charge delivered) |
-| **Q_calendar** | Calendar fade: SoC- and T-dependent Arrhenius × t^z (Eq. 2 by default) |
-| **Q_cyclic** | Cyclic fade: Table-7 B(I), Ea(I), z(I) vs C-rate × Ah^z |
+| **Q_calendar** | Calendar loss index: SoC- and T-dependent Arrhenius × t^z (Eq. 2 by default) |
+| **Q_cyclic** | Cyclic loss index: Table-7 B(I), Ea(I), z(I) vs C-rate × Ah^z (Eq. 7 by default) |
 | **t_h^z** | Power-law time penalty (default z = 0.55) |
 
 Default weights: `w_soc=1`, `w_qloss=1`, `w_time=0.1`, `z=0.55`.
+
+**Q_calendar and Q_cyclic are a *Relative Capacity-Loss Index*, not a calibrated
+"Capacity Fade (%)"** — see [Hybrid degradation methodology](#hybrid-degradation-methodology)
+below for the full model, units, and limitations.
 
 BO **minimizes** a scalar loss built from this reward:
 
@@ -91,6 +95,125 @@ Feasibility (SoC target reached, or energy delivered in energy mode) is preferre
 3. **Search** — Gaussian-process BO (`scikit-optimize`, acquisition **PI** by default) explores each family independently (~40 evaluations). Family seeds warm-start the GP; physical ordering constraints (e.g. i₂ ≤ i₁) are enforced by each family’s `from_dict`, identical to random search.
 
 Legacy `--reward-mode legacy_temp_time` keeps the older temperature + time shaped rewards for ablation only.
+
+### Hybrid degradation methodology
+
+Source: Sinha, S. S., Lehman, B., and Bharadwaj, P. (2026). *"Life Extension of
+Lithium-Ion Battery: Degradation Comprehension, Modeling, Characterization, and
+Mitigation Strategies."* IEEE Open Journal of Power Electronics, vol. 7.
+DOI: 10.1109/OJPEL.2025.3639205. Implementation: [`Constrained_BO/hybrid_degradation.py`](Constrained_BO/hybrid_degradation.py).
+
+The hybrid model treats calendar and cyclic stress as two **independent**
+degradation components (`Q_calendar` and `Q_cyclic`), summed only at the
+top-level reward — never mixed inside either sub-model.
+
+#### Default equations
+
+| Component | Default equation | Formula | Inputs |
+|-----------|-------------------|---------|--------|
+| Calendar  | **Eq. (2)** (Arrhenius SoC–Temperature–Time) | `Q_cal = A·exp(B·SoC)·exp(-(Ea + C·SoC)/(R·T_K))·t_h^z` | mean SoC, mean T (K), elapsed time (h) |
+| Cyclic    | **Eq. (7) / Table 7** (C-rate–Temperature–Ah throughput) | `Q_cyc = B(I)·exp(-Ea(I)/(R·T_K))·Ah^z(I)` | C-rate (via `B`, `Ea`, `z` looked up/interpolated from Table 7 at C/2, 2C, 6C, 10C), mean T (K), Ah throughput |
+
+Both use absolute temperature in **Kelvin** internally; calendar time is in
+**hours**; Ah is **ampere-hours**; SoC is a **fraction** in `[0, 1]`.
+
+#### Alternative equations (selectable, never summed with the defaults)
+
+| Equation | Role | How to select |
+|----------|------|----------------|
+| **Eq. (3)** | Alternative empirical calendar model (storage time in days, T in °C) | `HybridDegradationParameters(calendar_model="eq3")` |
+| **Eq. (5)** | Alternative Arrhenius calendar model (`α=2.14e4`, `Ea=36.36 kJ/mol`) | `HybridDegradationParameters(calendar_model="eq5")` |
+| **Eq. (8)** | Continuous current-dependent cyclic model (`Ea` linear in `\|I\|` via `alpha_I`) | `HybridDegradationParameters(use_alpha_current=True, alpha_I=...)` — **off by default**: `alpha_I=0.0` is an un-calibrated placeholder, so this path is only meaningful after fitting `alpha_I` to real data |
+
+`calendar_model` is a `Literal["eq2", "eq3", "eq5"]` field on
+`HybridDegradationParameters`; pass it through `make_hybrid_params(calendar_model=...)`
+in `objective.py`, or construct `HybridDegradationParameters` directly for
+custom scripts (e.g. `degradation_report.py`).
+
+#### Interpreting `Q_calendar` / `Q_cyclic` / `Q_total`
+
+**None of the coefficients above have been calibrated against NASA RW9–RW12 or
+LFP aging data.** They are semi-empirical fits taken from other cells and test
+conditions in the cited literature. Every exported `qloss_*` value is therefore
+a **Relative Capacity-Loss Index** — a dimensionless, physically-motivated
+stress score useful for *ranking* charging strategies against each other under
+the *same* model — and must **not** be reported or read as an absolute
+`"Capacity Fade (%)"` for any specific cell. This terminology is used
+consistently in the exported JSON (`meta.qloss_terminology_note`), the code
+comments in `hybrid_degradation.py`/`objective.py`, and the report figures
+below.
+
+A related literature quirk worth knowing when reading Figure 2 / the cyclic
+curves: Table 7's published `(B, Ea)` coefficients are **not monotonic across
+the full C-rate grid** — at matched Ah and temperature, `Q_cyclic(C/2)` is
+slightly *higher* than `Q_cyclic(2C)`, before the expected "higher C-rate is
+worse" trend resumes and holds monotonically from 2C through 10C. This is a
+property of the published curve fits, not a bug in this implementation —
+see the `TABLE7_B`/`TABLE7_EA` note in `hybrid_degradation.py` and the
+corresponding test in `Constrained_BO/tests/test_hybrid_degradation.py`.
+
+#### Units of exported metrics
+
+Every metric produced by `evaluate_session()` has a documented unit in
+`Constrained_BO.objective.RESULT_METRIC_UNITS` (also embedded in each run's
+`constrained_bo_results.json` under `meta.metric_units`). Highlights:
+
+| Metric | Unit |
+|--------|------|
+| `ah_throughput` | Ah |
+| `nominal_c_rate`, `max_c_rate` | dimensionless (multiples of 1C) |
+| `efc` | equivalent full cycles (dimensionless; `Ah / (2 × Q_rated_Ah)` — a charge-only session contributes at most 0.5 EFC) |
+| `mean_soc`, `soc_start`, `soc_end`, `soc_delta` | fraction `[0, 1]` |
+| `energy_delivered_j`, `energy_required_j`, `energy_full_j` | J |
+| `peak_voltage` | V |
+| `peak_temperature`, `mean_temperature` | °C |
+| `qloss_calendar`, `qloss_cyclic`, `qloss_total` | Relative Capacity-Loss Index (dimensionless, **not** % fade) |
+| `constraint_margins.voltage_margin_v` | V (`v_max - peak_voltage`; negative = ceiling exceeded) |
+| `constraint_margins.energy_margin_j` | J (energy mode only) |
+| `constraint_margins.soc_margin` | fraction `[0, 1]` (SoC mode only) |
+
+#### Report figures
+
+```bash
+# Fig 1 (calendar contour) + Fig 2 (cyclic curves) — no BDT/checkpoint needed
+venv/bin/python -m Constrained_BO.degradation_report --out-dir Constrained_BO/results/degradation_report
+
+# + Fig 3 (cumulative degradation per profile) and Fig 4 (equal-energy table),
+# sourced from an existing optimization run
+venv/bin/python -m Constrained_BO.degradation_report \
+  --results Constrained_BO/results/RW9/constrained_bo_results.json \
+  --out-dir Constrained_BO/results/degradation_report
+```
+
+Figure 3 re-simulates each family's best profile through the run's original BDT
+checkpoint (trajectories aren't persisted in the results JSON); if that
+checkpoint isn't available in the current environment, Figure 3 is skipped
+with a clear message and Figures 1, 2, and 4 still complete (Figure 4 only
+needs the scalar `best_metrics` already stored in the results JSON).
+
+#### Tests
+
+`Constrained_BO/tests/test_hybrid_degradation.py` checks deterministic,
+physically-expected monotonic behaviour: calendar loss increases with SoC,
+temperature, and time; cyclic loss increases with Ah throughput and (within
+the monotonic 2C–10C region) with C-rate. Run with:
+
+```bash
+venv/bin/python -m pytest Constrained_BO/tests/test_hybrid_degradation.py -v
+```
+
+#### Limitations
+
+- **No chemistry-specific calibration.** All coefficients are literature
+  values for other cells; a NASA RW9–RW12 / LFP aging campaign would be
+  required before any absolute capacity-fade claim could be made.
+- **Eq. 2's `A`, `B`, `C`, `Ea` are illustrative stubs**, not fit to any
+  dataset — only Eq. 7/Table 7's coefficients come from a specific cited
+  fit ([112]).
+- **Eq. 8 (`alpha_I`) is not calibrated** (`alpha_I=0.0` by default), so it
+  is provided for future use only, not as an active alternative today.
+- Calendar and cyclic terms are **summed, not coupled** — no interaction
+  term between simultaneous calendar and cyclic stress is modeled.
 
 ### Profile families (`Constrained_BO`)
 
@@ -200,7 +323,7 @@ Constrained_BO/results/<CELL>/
   best_profiles.png             # I / V / T / SoC for best profile per family
 ```
 
-JSON `meta` records `method` (`gp_bo` | `random_search`), `reward_mode`, weights, `acq_func`, `n_calls`, decision interval, and profile bounds. Per-family metrics include `qloss_calendar`, `qloss_cyclic`, `qloss_total`, `total_reward`, feasibility, and duration.
+JSON `meta` records `method` (`gp_bo` | `random_search`), `reward_mode`, weights, `acq_func`, `n_calls`, decision interval, profile bounds, and (since the Phase-1 hybrid degradation work) `qloss_terminology_note` and a full `metric_units` table. Per-family `best_metrics` include `qloss_calendar`, `qloss_cyclic`, `qloss_total` (Relative Capacity-Loss Index — see [Hybrid degradation methodology](#hybrid-degradation-methodology)), `efc`, `mean_soc`, `nominal_c_rate`/`max_c_rate`, `ah_throughput`, `energy_delivered_j`/`energy_required_j`, `peak_voltage`, `peak_temperature`, `constraint_margins`, `total_reward`, feasibility, and duration.
 
 Twin checkpoints: `outputs/twin_source/` or finetune `registry/`.
 
@@ -220,8 +343,8 @@ Settings: `method=gp_bo`, `acq_func=PI`, `n_calls=40`, `n_initial=10`, SoC 20%�
 
 **Takeaways under hybrid Q_loss (this run):**
 
-- **Lowest loss** favors faster feasible charges that still keep Q_loss moderate (pulsed / 2-step win on R).
-- **Q_total** is dominated by the **cyclic** term; calendar fade over a single session is negligible.
+- **Lowest loss** favors faster feasible charges that still keep the loss index moderate (pulsed / 2-step win on R).
+- **Q_total** is dominated by the **cyclic** term; the calendar loss index over a single session is negligible (calendar aging accumulates over weeks/months, not minutes).
 - Rankings **differ** from the older SEI-composite Stage 3 table in `charging_opt`—do not mix the two objectives when comparing papers or plots.
 - Re-run with `--method random_search` for a sample-efficiency baseline against GP-BO.
 
@@ -243,6 +366,8 @@ Settings: `method=gp_bo`, `acq_func=PI`, `n_calls=40`, `n_initial=10`, SoC 20%�
 | `Constrained_BO/decision_interval.py` | Re-anchor interval selection |
 | `Constrained_BO/bdt_thermal.py` | Thermal metrics from BDT trajectories |
 | `Constrained_BO/viz.py` | Best-profile figures |
+| `Constrained_BO/degradation_report.py` | Hybrid-degradation report figures (calendar contour, cyclic curves, cumulative degradation, equal-energy table) |
+| `Constrained_BO/tests/test_hybrid_degradation.py` | Deterministic monotonicity tests for the hybrid degradation model |
 
 Twin training: `rw_transfer/`, configs in `configs/default.yaml`.
 

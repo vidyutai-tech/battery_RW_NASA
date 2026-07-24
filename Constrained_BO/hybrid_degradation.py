@@ -1,18 +1,39 @@
 """
-Hybrid calendar + cyclic capacity-fade models for Constrained_BO rewards.
+Hybrid calendar + cyclic degradation models for Constrained_BO rewards.
 
-Default cyclic model: review Table 7 — interpolate B(I), Ea(I), z(I) vs C-rate,
+Terminology note (IMPORTANT): none of the coefficients below have been calibrated
+against NASA RW9-RW12 (or LFP) aging data. They are semi-empirical fits taken from
+other cells/chemistries in the cited literature. Consequently every Q_loss produced
+by this module is a **Relative Capacity-Loss Index** — a dimensionless, physically
+motivated stress score useful for *ranking* charging strategies against one another
+under the *same* model — and must NOT be reported or interpreted as an absolute
+"Capacity Fade (%)" of any specific cell. See README "Hybrid degradation
+methodology" section for the full caveat.
+
+Reference: Sinha, S. S., Lehman, B., and Bharadwaj, P. (2026). "Life Extension of
+Lithium-Ion Battery: Degradation Comprehension, Modeling, Characterization, and
+Mitigation Strategies." IEEE Open Journal of Power Electronics, vol. 7.
+DOI: 10.1109/OJPEL.2025.3639205.
+
+Default cyclic model: Eq. (7) / Table 7 — interpolate B(I), Ea(I), z(I) vs C-rate,
 then
     Q_cyclic = B(I) * exp(-Ea / (R * T_K)) * Ah^z
 
 Default calendar model: Eq. (2)
     Q_calendar = A * exp(B * SoC) * exp(-(Ea + C * SoC) / (R * T_K)) * t_h^z
 
-Optional calendar models: Eq. (3), Eq. (5).
+Optional calendar models: Eq. (3), Eq. (5) (selectable via
+``HybridDegradationParameters.calendar_model``; alternatives for sensitivity
+analysis only — never summed with Eq. (2)).
+
+Optional cyclic model: Eq. (8) (continuous current-dependent form, gated behind
+``use_alpha_current``; off by default because its α coefficient is not
+chemistry-calibrated here — see README limitations).
 
 Arrhenius uses absolute temperature in Kelvin (physically consistent). Time for
 power-law aging is in **hours**. Ah is absolute ampere-hour throughput.
-SoC is fractional [0, 1].
+SoC is fractional [0, 1]. See ``RESULT_METRIC_UNITS`` in objective.py for the
+full units table of every exported metric.
 """
 
 from __future__ import annotations
@@ -29,12 +50,20 @@ CHARGE_I_EPS_A = 0.01
 
 CalendarModel = Literal["eq2", "eq3", "eq5"]
 
-# Review Table 7 (C/2, 2C, 6C, 10C). Mid row labeled "46C" in notes → 6C
-# (B≈12000 aligns with Wang/Paper-4 6C scale).
+# Table 7, Sinha et al. (2026), "Life Extension of Lithium-Ion Battery: Degradation
+# Comprehension, Modeling, Characterization, and Mitigation Strategies," IEEE Open
+# Journal of Power Electronics, vol. 7 (citing [112]). Verbatim per-C-rate fits of
+# Eq. (7): Q_loss = B * exp(-Ea / (R*T)) * Ah^z.
+#
+# NOTE (known literature non-monotonicity): the published B, Ea pairs trade off such
+# that, at fixed Ah and T, Q_cyclic(C/2) > Q_cyclic(2C) — i.e. the interpolated curve
+# dips between C/2 and 2C before rising monotonically from 2C through 10C. This is a
+# property of the source curve fits (not a bug in this implementation); see
+# Constrained_BO/tests/test_hybrid_degradation.py for the monotonic region tested.
 TABLE7_C_RATES = np.array([0.5, 2.0, 6.0, 10.0], dtype=np.float64)
 TABLE7_B = np.array([30330.0, 19300.0, 12000.0, 11500.0], dtype=np.float64)
 TABLE7_EA = np.array([31500.0, 31000.0, 29500.0, 28000.0], dtype=np.float64)
-TABLE7_Z = np.array([0.55, 0.55, 0.560, 0.560], dtype=np.float64)
+TABLE7_Z = np.array([0.552, 0.554, 0.560, 0.560], dtype=np.float64)
 
 
 def _interp_crate(c_rate: float, y: np.ndarray) -> float:
@@ -194,7 +223,14 @@ def _session_arrays(session: Dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
 
 
 def session_throughput_metrics(session: Dict) -> Dict[str, float]:
-    """Ah, mean charge C-rate, mean SoC/T, duration hours from a session dict."""
+    """Ah, mean/max charge C-rate, EFC, mean SoC/T, duration hours from a session dict.
+
+    Units: duration_s [s], duration_h [h], ah_throughput [Ah],
+    mean_charge_current_a [A], nominal_c_rate / max_c_rate [dimensionless, 1/h
+    convention i.e. multiples of the rated 1C current], mean_temperature_c [degC],
+    mean_soc / soc_start / soc_end / delta_soc [fraction, 0-1], q_rated_ah [Ah],
+    efc [equivalent full cycles, dimensionless].
+    """
     i, t_c, soc, q_as = _session_arrays(session)
     n = int(i.size)
     duration_s = float(n)
@@ -207,28 +243,38 @@ def session_throughput_metrics(session: Dict) -> Dict[str, float]:
 
     if charge_mask.any():
         mean_i = float(abs_i[charge_mask].mean())
+        max_i = float(abs_i[charge_mask].max())
         mean_t = float(t_c[charge_mask].mean()) if t_c.size else 25.0
         mean_soc = float(soc[charge_mask].mean()) if soc.size else 0.5
     else:
         mean_i = 0.0
+        max_i = 0.0
         mean_t = float(t_c.mean()) if t_c.size else 25.0
         mean_soc = float(soc.mean()) if soc.size else 0.5
 
     c_rate = mean_i / q_ah if q_ah > 0 else 0.0
+    max_c_rate = max_i / q_ah if q_ah > 0 else 0.0
     soc_start = float(session.get("initial_state", {}).get("soc", soc[0] if soc.size else 0.0))
     soc_end = float(soc[-1]) if soc.size else soc_start
+    # EFC convention: one Equivalent Full Cycle = a full charge + full discharge
+    # (2 x rated Ah of throughput). A charge-only session therefore contributes at
+    # most 0.5 EFC when it moves the cell across its entire rated capacity.
+    efc = ah / (2.0 * q_ah) if q_ah > 0 else 0.0
     return {
         "duration_s": duration_s,
         "duration_h": duration_h,
         "ah_throughput": ah,
         "mean_charge_current_a": mean_i,
+        "max_charge_current_a": max_i,
         "nominal_c_rate": c_rate,
+        "max_c_rate": max_c_rate,
         "mean_temperature_c": mean_t,
         "mean_soc": mean_soc,
         "soc_start": soc_start,
         "soc_end": soc_end,
         "delta_soc": soc_end - soc_start,
         "q_rated_ah": q_ah,
+        "efc": efc,
     }
 
 

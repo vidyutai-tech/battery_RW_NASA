@@ -127,13 +127,13 @@ def plot_hybrid_reward_components(
     out_path: Path | None = None,
     metrics: Optional[Dict] = None,
 ) -> plt.Figure:
-    """Bar chart of hybrid reward components (SoC, Qloss parts, time, total)."""
+    """Bar chart of hybrid reward components (SoC, capacity-loss index parts, time, total)."""
     if metrics is None:
         # Illustrative synthetic breakdown for --rewards-only
         components = {
             "SoC reward": 0.60,
-            "Calendar Qloss": -0.02,
-            "Cyclic Qloss": -0.15,
+            "Calendar loss index": -0.02,
+            "Cyclic loss index": -0.15,
             "Time penalty": -0.08,
             "Total reward": 0.35,
         }
@@ -141,8 +141,8 @@ def plot_hybrid_reward_components(
         w_q = float(metrics.get("reward_weights", {}).get("w_qloss", 1.0))
         components = {
             "SoC reward": float(metrics.get("soc_reward", 0.0)),
-            "Calendar Qloss": -float(metrics.get("qloss_calendar", 0.0)) * w_q,
-            "Cyclic Qloss": -float(metrics.get("qloss_cyclic", 0.0)) * w_q,
+            "Calendar loss index": -float(metrics.get("qloss_calendar", 0.0)) * w_q,
+            "Cyclic loss index": -float(metrics.get("qloss_cyclic", 0.0)) * w_q,
             "Time penalty": -float(metrics.get("time_penalty", 0.0)),
             "Total reward": float(metrics.get("total_reward", 0.0)),
         }
@@ -156,6 +156,11 @@ def plot_hybrid_reward_components(
     ax.axhline(0.0, color="gray", lw=0.9)
     ax.set_ylabel("Reward contribution")
     ax.set_title("Hybrid degradation reward components", fontweight="bold")
+    ax.text(
+        0.5, -0.22,
+        "Loss index = Relative Capacity-Loss Index (dimensionless ranking signal, not calibrated % capacity fade)",
+        transform=ax.transAxes, fontsize=7.5, ha="center", color="#5b6573", style="italic",
+    )
     ax.grid(True, axis="y", alpha=0.35)
     for bar, val in zip(bars, values):
         ax.annotate(
@@ -316,7 +321,7 @@ def plot_optimized_profile(
             f"Family: {family_label}\n"
             f"Reward = {metrics['total_reward']:.3f}  |  "
             f"ΔSoC = {metrics.get('soc_delta', 0):.3f}  |  "
-            f"Qloss = {metrics.get('qloss_total', 0):.4g}  |  "
+            f"Loss index = {metrics.get('qloss_total', 0):.4g}  |  "
             f"Time = {metrics['duration_min']:.0f} min  |  "
             f"Peak T = {metrics['peak_temperature']:.1f}°C\n"
             f"{'Feasible' if feasible else 'Infeasible'}"

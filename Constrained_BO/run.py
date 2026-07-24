@@ -22,7 +22,14 @@ import numpy as np
 
 from Constrained_BO.bayesian_optimizer import optimize_all_families_gp_bo
 from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config, ENERGY_FRACTION_BY_CELL
-from Constrained_BO.objective import energy_required_j, evaluate_session, full_capacity_joules
+from Constrained_BO.objective import (
+    QLOSS_TERMINOLOGY,
+    QLOSS_TERMINOLOGY_NOTE,
+    RESULT_METRIC_UNITS,
+    energy_required_j,
+    evaluate_session,
+    full_capacity_joules,
+)
 from Constrained_BO.ocv import ocv_curve_path
 from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
@@ -456,7 +463,7 @@ def main() -> None:
             qloss_note = ""
             if m.get("reward_mode") == "hybrid_qloss":
                 qloss_note = (
-                    f"  Q={m.get('qloss_total', 0):.4g} "
+                    f"  LossIdx={m.get('qloss_total', 0):.4g} "
                     f"(cal={m.get('qloss_calendar', 0):.3g},"
                     f"cyc={m.get('qloss_cyclic', 0):.3g})"
                 )
@@ -490,6 +497,9 @@ def main() -> None:
             "decision_interval_s": simulator.decision_interval_s,
             "decision_interval_selection": simulator.decision_interval_info,
             "seed": args.seed,
+            "qloss_terminology": QLOSS_TERMINOLOGY,
+            "qloss_terminology_note": QLOSS_TERMINOLOGY_NOTE,
+            "metric_units": RESULT_METRIC_UNITS,
         }
         if args.method == "gp_bo":
             meta["n_calls"] = args.n_calls
