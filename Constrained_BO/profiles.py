@@ -8,10 +8,18 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import numpy as np
 
+from Constrained_BO.config import SOC_START
 from Constrained_BO.profile_catalog import ProfileBounds
 
 CV_STEP_A = 0.25
 MIN_CHARGE_A = 0.05
+
+# Soft staircase structure: keep full i_max range, require visible SoC stages + mild ΔI.
+# Avoids "spike-then-crawl" / flat i1≈i2≈i3 without harshly shrinking current bounds.
+MIN_STEP_DI_A = 0.25
+MIN_STAGE_DSOC = 0.12       # 2-step: soc_switch ≥ SOC_START + this
+MIN_STAGE1_DSOC = 0.10      # 3-step: soc1 ≥ SOC_START + this
+MIN_STAGE_GAP_DSOC = 0.12   # 3-step: soc2 ≥ soc1 + this
 
 _active_bounds: Optional[ProfileBounds] = None
 
@@ -30,6 +38,33 @@ def active_bounds() -> ProfileBounds:
     if _active_bounds is None:
         return ProfileBounds.defaults("RW9")
     return _active_bounds
+
+
+def _soc_start() -> float:
+    """Session start SoC used to place multi-step switch points."""
+    return float(SOC_START)
+
+
+def _two_step_soc_bounds() -> Tuple[float, float]:
+    """Search range for soc_switch so stage-1 always covers a meaningful ΔSoC."""
+    b = active_bounds()
+    _, soc_hi = b.soc_bounds()
+    lo = min(_soc_start() + MIN_STAGE_DSOC, soc_hi - 1e-3)
+    hi = max(lo + 1e-3, soc_hi)
+    return lo, hi
+
+
+def _three_step_soc_bounds() -> Tuple[Tuple[float, float], Tuple[float, float]]:
+    """(soc1_bounds, soc2_bounds) with min stage widths after start SoC."""
+    b = active_bounds()
+    _, soc_hi = b.soc_bounds()
+    start = _soc_start()
+    soc1_lo = min(start + MIN_STAGE1_DSOC, soc_hi - MIN_STAGE_GAP_DSOC - 1e-3)
+    soc1_hi = min(0.55, soc_hi - MIN_STAGE_GAP_DSOC)
+    soc1_hi = max(soc1_lo + 1e-3, soc1_hi)
+    soc2_lo = soc1_lo + MIN_STAGE_GAP_DSOC
+    soc2_hi = max(soc2_lo + 1e-3, soc_hi)
+    return (soc1_lo, soc1_hi), (soc2_lo, soc2_hi)
 
 
 @dataclass
@@ -245,9 +280,11 @@ class TwoStepFamily(ProfileFamily):
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
+        # Leave headroom for i2 ≤ i1 - MIN_STEP_DI_A
+        i1_lo = min(i_lo + MIN_STEP_DI_A, i_hi)
+        soc_lo, soc_hi = _two_step_soc_bounds()
         return {
-            "i1": (i_lo, i_hi),
+            "i1": (i1_lo, i_hi),
             "i2": (i_lo, i_hi),
             "soc_switch": (soc_lo, soc_hi),
         }
@@ -256,10 +293,21 @@ class TwoStepFamily(ProfileFamily):
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        i1 = float(np.clip(values["i1"], i_lo, i_hi))
-        i2 = float(np.clip(values["i2"], i_lo, min(i1, i_hi)))
-        soc_sw = float(np.clip(values["soc_switch"], soc_lo, soc_hi))
+        soc_lo, soc_hi = _two_step_soc_bounds()
+        i1_raw = float(values["i1"])
+        i2_raw = float(values["i2"])
+        # Flat i1==i2 kept for CC baselines via two_step; otherwise enforce ΔI.
+        want_flat = abs(i1_raw - i2_raw) < 1e-9
+        if want_flat:
+            i1 = float(np.clip(i1_raw, i_lo, i_hi))
+            i2 = i1
+            # Switch unused when flat; keep in-bounds for logging.
+            soc_sw = float(np.clip(values.get("soc_switch", soc_lo), soc_lo, soc_hi))
+        else:
+            i1 = float(np.clip(i1_raw, i_lo + MIN_STEP_DI_A, i_hi))
+            i2_hi = max(i_lo, i1 - MIN_STEP_DI_A)
+            i2 = float(np.clip(i2_raw, i_lo, i2_hi))
+            soc_sw = float(np.clip(values["soc_switch"], soc_lo, soc_hi))
         return ProfileParams(family_id=cls.family_id, values={
             "i1": i1, "i2": i2, "soc_switch": soc_sw,
         })
@@ -268,9 +316,9 @@ class TwoStepFamily(ProfileFamily):
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        i1 = float(rng.uniform(i_lo, i_hi))
-        i2 = float(rng.uniform(i_lo, i1))
+        soc_lo, soc_hi = _two_step_soc_bounds()
+        i1 = float(rng.uniform(i_lo + MIN_STEP_DI_A, i_hi))
+        i2 = float(rng.uniform(i_lo, max(i_lo, i1 - MIN_STEP_DI_A)))
         return cls.from_dict({
             "i1": i1,
             "i2": i2,
@@ -279,15 +327,20 @@ class TwoStepFamily(ProfileFamily):
 
     @classmethod
     def seed_params(cls) -> List[ProfileParams]:
+        """Include explicit staircases so BO sees proper 2-step structure early."""
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        ref_i = b.seed_cccv["i_cc"]
-        seeds = []
-        for soc in (soc_lo, (soc_lo + soc_hi) / 2, soc_hi):
-            for i1 in (i_hi, ref_i, (i_lo + i_hi) / 2):
-                i2 = max(i_lo, i1 * 0.5)
-                seeds.append({"i1": i1, "i2": i2, "soc_switch": soc})
+        soc_lo, soc_hi = _two_step_soc_bounds()
+        mid_soc = 0.5 * (soc_lo + soc_hi)
+        seeds = [
+            # Classic descending stairs
+            {"i1": min(3.0, i_hi), "i2": max(i_lo, 1.5), "soc_switch": mid_soc},
+            {"i1": min(2.0, i_hi), "i2": max(i_lo, 1.0), "soc_switch": mid_soc},
+            {"i1": min(4.0, i_hi), "i2": max(i_lo, 2.0), "soc_switch": soc_lo},
+            {"i1": i_hi, "i2": max(i_lo, 0.5 * (i_lo + i_hi)), "soc_switch": soc_hi},
+            {"i1": max(i_lo + MIN_STEP_DI_A, b.seed_cccv["i_cc"]),
+             "i2": i_lo, "soc_switch": mid_soc},
+        ]
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]
 
@@ -301,7 +354,7 @@ class TwoStepFamily(ProfileFamily):
 
     def init_context(self, params):
         ctx = super().init_context(params)
-        ctx.i_level = self._commanded({"soc": 0.0}, params)
+        ctx.i_level = self._commanded({"soc": _soc_start()}, params)
         return ctx
 
     def target_current(self, state, ctx, params):
@@ -322,25 +375,39 @@ class ThreeStepFamily(ProfileFamily):
     def param_bounds(cls) -> Dict[str, Tuple[float, float]]:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
+        i1_lo = min(i_lo + 2.0 * MIN_STEP_DI_A, i_hi)
+        (soc1_lo, soc1_hi), (soc2_lo, soc2_hi) = _three_step_soc_bounds()
         return {
-            "i1": (i_lo, i_hi),
+            "i1": (i1_lo, i_hi),
             "i2": (i_lo, i_hi),
             "i3": (i_lo, i_hi),
-            "soc1": (soc_lo, min(0.55, soc_hi)),
-            "soc2": (max(0.35, soc_lo), soc_hi),
+            "soc1": (soc1_lo, soc1_hi),
+            "soc2": (soc2_lo, soc2_hi),
         }
 
     @classmethod
     def from_dict(cls, values: Dict[str, float]) -> ProfileParams:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        i1 = float(np.clip(values["i1"], i_lo, i_hi))
-        i2 = float(np.clip(values["i2"], i_lo, min(i1, i_hi)))
-        i3 = float(np.clip(values["i3"], i_lo, min(i2, i_hi)))
-        soc1 = float(np.clip(values["soc1"], soc_lo, min(0.55, soc_hi)))
-        soc2 = float(np.clip(values["soc2"], max(0.35, soc1 + 0.05), soc_hi))
+        (soc1_lo, soc1_hi), (soc2_lo, soc2_hi) = _three_step_soc_bounds()
+        i1_raw = float(values["i1"])
+        i2_raw = float(values["i2"])
+        i3_raw = float(values["i3"])
+        want_flat = (
+            abs(i1_raw - i2_raw) < 1e-9 and abs(i2_raw - i3_raw) < 1e-9
+        )
+        if want_flat:
+            i1 = float(np.clip(i1_raw, i_lo, i_hi))
+            i2 = i3 = i1
+        else:
+            i1 = float(np.clip(i1_raw, i_lo + 2.0 * MIN_STEP_DI_A, i_hi))
+            i2_hi = max(i_lo + MIN_STEP_DI_A, i1 - MIN_STEP_DI_A)
+            i2 = float(np.clip(i2_raw, i_lo + MIN_STEP_DI_A, i2_hi))
+            i3_hi = max(i_lo, i2 - MIN_STEP_DI_A)
+            i3 = float(np.clip(i3_raw, i_lo, i3_hi))
+        soc1 = float(np.clip(values["soc1"], soc1_lo, soc1_hi))
+        soc2_floor = max(soc2_lo, soc1 + MIN_STAGE_GAP_DSOC)
+        soc2 = float(np.clip(values["soc2"], soc2_floor, soc2_hi))
         return ProfileParams(family_id=cls.family_id, values={
             "i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2,
         })
@@ -349,12 +416,13 @@ class ThreeStepFamily(ProfileFamily):
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        i1 = float(rng.uniform(i_lo, i_hi))
-        i2 = float(rng.uniform(i_lo, i1))
-        i3 = float(rng.uniform(i_lo, i2))
-        soc1 = float(rng.uniform(soc_lo, min(0.55, soc_hi)))
-        soc2 = float(rng.uniform(max(soc1 + 0.05, 0.35), soc_hi))
+        (soc1_lo, soc1_hi), (soc2_lo, soc2_hi) = _three_step_soc_bounds()
+        i1 = float(rng.uniform(i_lo + 2.0 * MIN_STEP_DI_A, i_hi))
+        i2 = float(rng.uniform(i_lo + MIN_STEP_DI_A, max(i_lo + MIN_STEP_DI_A, i1 - MIN_STEP_DI_A)))
+        i3 = float(rng.uniform(i_lo, max(i_lo, i2 - MIN_STEP_DI_A)))
+        soc1 = float(rng.uniform(soc1_lo, soc1_hi))
+        soc2_floor = max(soc2_lo, soc1 + MIN_STAGE_GAP_DSOC)
+        soc2 = float(rng.uniform(soc2_floor, max(soc2_floor + 1e-6, soc2_hi)))
         return cls.from_dict({
             "i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2,
         })
@@ -363,12 +431,18 @@ class ThreeStepFamily(ProfileFamily):
     def seed_params(cls) -> List[ProfileParams]:
         b = active_bounds()
         i_lo, i_hi = b.i_bounds()
-        soc_lo, soc_hi = b.soc_bounds()
-        mid = (i_lo + i_hi) / 2
+        (soc1_lo, soc1_hi), (_, soc2_hi) = _three_step_soc_bounds()
+        mid1 = 0.5 * (soc1_lo + soc1_hi)
         seeds = [
-            {"i1": i_hi, "i2": mid, "i3": i_lo, "soc1": soc_lo, "soc2": soc_hi},
-            {"i1": mid, "i2": (i_lo + mid) / 2, "i3": i_lo,
-             "soc1": (soc_lo + soc_hi) / 2, "soc2": soc_hi},
+            # 3 → 2 → 1 A style stairs
+            {"i1": min(3.0, i_hi), "i2": min(2.0, i_hi), "i3": max(i_lo, 1.0),
+             "soc1": mid1, "soc2": mid1 + MIN_STAGE_GAP_DSOC},
+            {"i1": min(4.0, i_hi), "i2": min(2.5, i_hi), "i3": max(i_lo, 1.25),
+             "soc1": soc1_lo, "soc2": soc1_lo + MIN_STAGE_GAP_DSOC},
+            {"i1": i_hi, "i2": max(i_lo + MIN_STEP_DI_A, 0.6 * i_hi),
+             "i3": i_lo, "soc1": mid1, "soc2": min(soc2_hi, mid1 + 0.20)},
+            {"i1": max(i_lo + 2 * MIN_STEP_DI_A, 2.0), "i2": max(i_lo + MIN_STEP_DI_A, 1.25),
+             "i3": i_lo, "soc1": mid1, "soc2": soc2_hi},
         ]
         unique = {tuple(sorted(s.items())) for s in seeds}
         return [cls.from_dict(dict(t)) for t in unique]
@@ -387,7 +461,7 @@ class ThreeStepFamily(ProfileFamily):
 
     def init_context(self, params):
         ctx = super().init_context(params)
-        ctx.i_level = params.values["i1"]
+        ctx.i_level = self._commanded({"soc": _soc_start()}, params)
         return ctx
 
     def target_current(self, state, ctx, params):

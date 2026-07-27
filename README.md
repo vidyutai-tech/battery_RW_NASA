@@ -272,14 +272,17 @@ Primary transfer metric: **held-out voltage RMSE**. Finetune fractions per cell 
 
 OCV curves for Constrained_BO are fit/cached under `Constrained_BO/data/<CELL>/` (auto on first run; use `--refit-ocv` to force).
 
-**Default: GP-BO + hybrid Q_loss** (RW9, SoC 20% → 80%, ≤150 min):
+**Default: GP-BO + hybrid Q_loss** under **energy mode** (deliver
+`energy_fraction_for(cell)` of pack energy — usually 40%; RW10 = 55%).
+Sessions stop when ∫V·I dt meets the target (not on a SoC proxy).
+Default acquisition is **EI** (better exploration than PI).
 
 ```bash
 # Linux / macOS
-venv/bin/python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+venv/bin/python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func EI --n-calls 40 --n-initial 10
 
 # Windows
-venv\Scripts\python.exe -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+venv\Scripts\python.exe -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func EI --n-calls 40 --n-initial 10
 ```
 
 Useful flags:
@@ -288,13 +291,14 @@ Useful flags:
 |------|--------|
 | `--method gp_bo` | Gaussian-process BO (default) |
 | `--method random_search` | Uniform / seed baseline (`--n-random`) |
-| `--acq-func PI\|EI\|LCB` | Acquisition (default **PI**) |
+| `--acq-func PI\|EI\|LCB` | Acquisition (default **EI**) |
 | `--n-calls 40` | Evaluations per family (including seeds) |
 | `--n-initial 10` | Warm-start budget (seeds + extra random) |
 | `--reward-mode hybrid_qloss` | Default hybrid calendar + cyclic reward |
 | `--w-soc --w-qloss --w-time --z` | Hybrid reward weights / exponent |
-| `--soc-target 0.8` | Absolute SoC stop (classic SoC mode) |
-| `--energy-fraction 0.40` | Energy mode: deliver this fraction of pack energy |
+| `--energy-fraction 0.40` | Energy mode: fraction of pack energy (default via `energy_fraction_for`) |
+| `--soc-mode` | Classic SoC-target constraint instead of energy |
+| `--soc-target 0.8` | Absolute SoC stop (with `--soc-mode`; default 0.80) |
 | `--max-duration-min 150` | Simulation horizon |
 | `--decision-interval 30` | Fixed BDT re-anchor interval (seconds) |
 | `--no-auto-decision-interval` | Skip drift-based interval selection |
@@ -308,7 +312,23 @@ Random-search baseline (same hybrid objective):
 venv/bin/python -m Constrained_BO.run --cell RW9 --method random_search --n-random 80
 ```
 
-Compare scripts (post-hoc, same reward):
+**Streamlit UI** (constraints → GP-BO + random → CC baselines → degradation report):
+
+```bash
+venv/bin/pip install streamlit openpyxl   # once, if needed
+venv/bin/streamlit run Constrained_BO/streamlit_app.py
+```
+
+UI highlights:
+
+- Primary metrics: **Total reward**, duration, peak T, energy delivered (not Q_total).
+- Hybrid reward shown as \(R = w_{\mathrm{soc}}\Delta\mathrm{SoC} - w_{\mathrm{qloss}}Q_{\mathrm{total}} - w_{\mathrm{time}}t^{z}\).
+- **Paper defaults** preset: EI, `n_calls=n_random=120`, inject top random elites into GP-BO warm-start.
+- Hima-style **CC vs optimized** reward / time / temperature bars + table.
+- **Degradation report** Figs 1–4 (calendar, cyclic, cumulative, equal-energy table) with PNG/Excel downloads.
+- Under equal-energy, energy/Q_total bars look similar by design — claim reward, duration, and vs-CC wins.
+
+Compare scripts (post-hoc, same reward / energy defaults):
 
 - `Constrained_BO/compare_constant_current.py`
 - `Constrained_BO/compare_pulsed.py`
@@ -355,10 +375,12 @@ Settings: `method=gp_bo`, `acq_func=PI`, `n_calls=40`, `n_initial=10`, SoC 20%�
 | Module | Role |
 |--------|------|
 | `Constrained_BO/run.py` | CLI entry: GP-BO or random search, JSON + plots |
+| `Constrained_BO/streamlit_app.py` | Interactive UI: constraints → BO + random → PNG/Excel downloads |
+| `Constrained_BO/optimize_api.py` | Shared runner for CLI / Streamlit |
 | `Constrained_BO/bayesian_optimizer.py` | Per-family `gp_minimize` → `evaluate_session` |
 | `Constrained_BO/objective.py` | Session loss / reward aggregation + feasibility |
 | `Constrained_BO/hybrid_degradation.py` | Calendar + cyclic Q_loss and hybrid R |
-| `Constrained_BO/simulator.py` | Closed-loop BDT rollout + Coulomb SoC |
+| `Constrained_BO/simulator.py` | Closed-loop BDT rollout + Coulomb SoC + energy stop |
 | `Constrained_BO/profiles.py` | Profile families + BO vector helpers |
 | `Constrained_BO/profile_catalog.py` | Per-cell current / V / pulse bounds |
 | `Constrained_BO/config.py` | Cell configs, checkpoints, start states |
@@ -426,11 +448,14 @@ Example SEI-composite RW9 ranking (historical, SoC 15%→95%, ≤105 min) lived 
 
 ```bash
 # Primary path — hybrid Q_loss + GP-BO
-python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func PI --n-calls 40 --n-initial 10
+python -m Constrained_BO.run --cell RW9 --method gp_bo --acq-func EI --n-calls 40 --n-initial 10
 
 # Same objective, random baseline
 python -m Constrained_BO.run --cell RW9 --method random_search --n-random 80
 
 # Transfer cell (uses finetune checkpoint from config)
 python -m Constrained_BO.run --cell RW10 --method gp_bo --n-calls 40 --n-initial 10
+
+# Interactive UI
+streamlit run Constrained_BO/streamlit_app.py
 ```

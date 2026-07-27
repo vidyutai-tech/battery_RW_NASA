@@ -45,12 +45,9 @@ FINETUNE_FRAC_BY_CELL: Dict[str, str] = {
 }
 
 # Per-cell energy window for constrained BO (fraction of pack energy to deliver).
-# RW10's finetuned BDT stays cool under short 40% windows, so CCCV wins; a
-# slightly larger window (20%→75% SoC) makes multi-step profiles competitive.
+# Same energy target for all NASA RW cells in paper/final comparison.
 DEFAULT_ENERGY_FRACTION = 0.40
-ENERGY_FRACTION_BY_CELL: Dict[str, float] = {
-    "RW10": 0.55,
-}
+ENERGY_FRACTION_BY_CELL: Dict[str, float] = {}
 
 
 def finetune_frac_for(cell_id: str) -> str:

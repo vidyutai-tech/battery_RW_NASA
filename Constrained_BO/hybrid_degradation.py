@@ -230,6 +230,13 @@ def session_throughput_metrics(session: Dict) -> Dict[str, float]:
     convention i.e. multiples of the rated 1C current], mean_temperature_c [degC],
     mean_soc / soc_start / soc_end / delta_soc [fraction, 0-1], q_rated_ah [Ah],
     efc [equivalent full cycles, dimensionless].
+
+    Conventions (aligned with ``compute_step_degradation``):
+      - duration covers the **full** session (charge + rest).
+      - mean_soc / mean_temperature_c are full-session means (calendar aging
+        continues during rest, so these must match the duration window).
+      - ah_throughput / C-rate statistics use **charge-only** samples
+        (I < -CHARGE_I_EPS_A); rest does not add Ah.
     """
     i, t_c, soc, q_as = _session_arrays(session)
     n = int(i.size)
@@ -244,13 +251,13 @@ def session_throughput_metrics(session: Dict) -> Dict[str, float]:
     if charge_mask.any():
         mean_i = float(abs_i[charge_mask].mean())
         max_i = float(abs_i[charge_mask].max())
-        mean_t = float(t_c[charge_mask].mean()) if t_c.size else 25.0
-        mean_soc = float(soc[charge_mask].mean()) if soc.size else 0.5
     else:
         mean_i = 0.0
         max_i = 0.0
-        mean_t = float(t_c.mean()) if t_c.size else 25.0
-        mean_soc = float(soc.mean()) if soc.size else 0.5
+
+    # Full-session means — same window as duration_h used by calendar Q_loss.
+    mean_t = float(t_c.mean()) if t_c.size else 25.0
+    mean_soc = float(soc.mean()) if soc.size else 0.5
 
     c_rate = mean_i / q_ah if q_ah > 0 else 0.0
     max_c_rate = max_i / q_ah if q_ah > 0 else 0.0
@@ -323,6 +330,16 @@ def compute_step_degradation(
         ΔQ_cyc[k] = Q_cyc(Ah_k) - Q_cyc(Ah_{k-1})
 
     with local SoC / T / C-rate at step k (avoids summing t^z independently).
+
+    Conventions (aligned with ``session_throughput_metrics`` / session closed form):
+      - Calendar advances every sample (rest ages the cell too).
+      - Cyclic Ah increments only on charge samples (I < -CHARGE_I_EPS_A);
+        rest/discharge do not add throughput.
+      - Scalar ``qloss_*`` totals are the **session closed-form** values (same as
+        BO / ``compute_session_degradation``). Per-step arrays remain the local
+        incremental trajectories for plotting; their raw sums can differ slightly
+        from the closed form when SoC/T/C-rate vary, because Q ∝ t^z and Ah^z
+        are nonlinear. Use ``qloss_*`` for ranking; use cumsum(delta_*) for viz.
     """
     params = params or HybridDegradationParameters()
     model = model or HybridDegradation(params)
@@ -341,19 +358,28 @@ def compute_step_degradation(
         t_k = float(t_c[k]) if t_c.size else 25.0
         d_q_cal[k] = model.calendar.incremental(soc_k, t_k, t_prev, t_next)
 
-        di_ah = abs(float(i[k])) / SECONDS_PER_HOUR
+        i_k = float(i[k])
+        charging = i_k < -CHARGE_I_EPS_A
+        di_ah = (abs(i_k) / SECONDS_PER_HOUR) if charging else 0.0
         ah_prev = ah_cum
         ah_cum = ah_prev + di_ah
-        c_rate = (abs(float(i[k])) / q_ah) if q_ah > 0 else 0.0
+        c_rate = (abs(i_k) / q_ah) if (charging and q_ah > 0) else 0.0
         d_q_cyc[k] = model.cyclic.incremental(ah_prev, ah_cum, t_k, c_rate)
+
+    # Headline totals = session closed form (matches BO objective / JSON metrics).
+    session_deg = compute_session_degradation(session, params=params, model=model)
 
     return {
         "delta_qloss_calendar": d_q_cal,
         "delta_qloss_cyclic": d_q_cyc,
         "delta_qloss_total": d_q_cal + d_q_cyc,
-        "qloss_calendar": float(np.sum(d_q_cal)),
-        "qloss_cyclic": float(np.sum(d_q_cyc)),
-        "qloss_total": float(np.sum(d_q_cal) + np.sum(d_q_cyc)),
+        "qloss_calendar": session_deg["qloss_calendar"],
+        "qloss_cyclic": session_deg["qloss_cyclic"],
+        "qloss_total": session_deg["qloss_total"],
+        "qloss_calendar_step_sum": float(np.sum(d_q_cal)),
+        "qloss_cyclic_step_sum": float(np.sum(d_q_cyc)),
+        "qloss_total_step_sum": float(np.sum(d_q_cal) + np.sum(d_q_cyc)),
+        "ah_throughput": session_deg["ah_throughput"],
     }
 
 

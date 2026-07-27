@@ -16,7 +16,7 @@ class ProfileBounds:
     i_max_a: float = 6.0
     v_cv_min_v: float = 4.05
     v_cv_max_v: float = 4.20
-    soc_switch_min: float = 0.10
+    soc_switch_min: float = 0.32  # ≥ SOC_START(0.20)+0.12 for visible 2-step stage-1
     soc_switch_max: float = 0.90
     pulse_on_min_min: float = 1.0
     pulse_on_max_min: float = 15.0

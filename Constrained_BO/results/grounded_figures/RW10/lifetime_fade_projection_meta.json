@@ -1,0 +1,8 @@
+{
+  "cell": "RW10",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.55,
+  "q_rated_ah": 2.2,
+  "bdt_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+  "scale": 8.213643109875669
+}

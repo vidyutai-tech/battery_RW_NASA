@@ -1,0 +1,8 @@
+{
+  "cell": "RW10",
+  "ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+  "mape_v": 0.5326344631612301,
+  "mape_t": 0.40319073013961315,
+  "n_val_windows": 400,
+  "title_suffix": "finetune 60% adapt data"
+}

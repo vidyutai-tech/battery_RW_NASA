@@ -1,0 +1,27 @@
+{
+  "cell": "RW10",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.55,
+  "soc_target": 0.75,
+  "q_rated_ah": 2.2,
+  "c_rates": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "currents_a": [
+    1.1,
+    2.2,
+    4.4
+  ],
+  "reward_mode": "hybrid_qloss",
+  "start_state": {
+    "soc": 0.2,
+    "v0": 3.735837913143397,
+    "t0": 24.0,
+    "age": 0.0,
+    "prev_i": 0.0
+  },
+  "bdt_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+  "optimizer_selection": "reward"
+}

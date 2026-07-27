@@ -1,0 +1,34 @@
+[
+  {
+    "cell": "RW9",
+    "ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "mape_v": 0.4763020668178797,
+    "mape_t": 0.5066738929599524,
+    "n_val_windows": 400,
+    "title_suffix": "source twin"
+  },
+  {
+    "cell": "RW10",
+    "ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+    "mape_v": 0.5326344631612301,
+    "mape_t": 0.40319073013961315,
+    "n_val_windows": 400,
+    "title_suffix": "finetune 60% adapt data"
+  },
+  {
+    "cell": "RW11",
+    "ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+    "mape_v": 1.0475781746208668,
+    "mape_t": 0.38784488569945097,
+    "n_val_windows": 400,
+    "title_suffix": "finetune 60% adapt data"
+  },
+  {
+    "cell": "RW12",
+    "ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+    "mape_v": 1.2719802558422089,
+    "mape_t": 0.7111613638699055,
+    "n_val_windows": 400,
+    "title_suffix": "finetune 60% adapt data"
+  }
+]

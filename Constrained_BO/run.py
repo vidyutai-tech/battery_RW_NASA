@@ -21,7 +21,13 @@ matplotlib.use("Agg")
 import numpy as np
 
 from Constrained_BO.bayesian_optimizer import optimize_all_families_gp_bo
-from Constrained_BO.config import SOC_START, finetune_frac_for, get_cell_config, ENERGY_FRACTION_BY_CELL
+from Constrained_BO.config import (
+    SOC_START,
+    SOC_TARGET,
+    energy_fraction_for,
+    finetune_frac_for,
+    get_cell_config,
+)
 from Constrained_BO.objective import (
     QLOSS_TERMINOLOGY,
     QLOSS_TERMINOLOGY_NOTE,
@@ -49,6 +55,9 @@ def _optimize_family_random(
     w_soc: float = 1.0,
     w_qloss: float = 1.0,
     z: float = 0.55,
+    qloss_cap: Optional[float] = None,
+    qloss_cap_scale: float = 80.0,
+    duration_loss_weight: float = 1e-3,
 ) -> Dict[str, Any]:
     family = get_family(family_id)
     rng = np.random.default_rng(seed)
@@ -74,6 +83,9 @@ def _optimize_family_random(
             w_soc=w_soc,
             w_qloss=w_qloss,
             z=z,
+            qloss_cap=qloss_cap,
+            qloss_cap_scale=qloss_cap_scale,
+            duration_loss_weight=duration_loss_weight,
         )
         feasible = bool(metrics["feasible"])
         history.append({
@@ -126,6 +138,9 @@ def _optimize_all_families_random(
     w_soc: float = 1.0,
     w_qloss: float = 1.0,
     z: float = 0.55,
+    qloss_cap: Optional[float] = None,
+    qloss_cap_scale: float = 80.0,
+    duration_loss_weight: float = 1e-3,
 ) -> Dict[str, Any]:
     families = families or DEFAULT_FAMILIES
     results = {}
@@ -142,6 +157,9 @@ def _optimize_all_families_random(
             w_soc=w_soc,
             w_qloss=w_qloss,
             z=z,
+            qloss_cap=qloss_cap,
+            qloss_cap_scale=qloss_cap_scale,
+            duration_loss_weight=duration_loss_weight,
         )
     return results
 
@@ -259,8 +277,8 @@ def main() -> None:
     parser.add_argument(
         "--acq-func",
         choices=("PI", "EI", "LCB"),
-        default="PI",
-        help="Acquisition function for gp_minimize (default PI)",
+        default="EI",
+        help="Acquisition function for gp_minimize (default EI)",
     )
     parser.add_argument(
         "--n-random",
@@ -308,7 +326,13 @@ def main() -> None:
         "--soc-target",
         type=float,
         default=None,
-        help="Absolute SoC target (classic mode, default 0.95)",
+        help=f"Absolute SoC target for --soc-mode (default {SOC_TARGET})",
+    )
+    parser.add_argument(
+        "--soc-mode",
+        action="store_true",
+        help="Use SoC-target constraint instead of energy delivery "
+             "(default is energy mode via energy_fraction_for)",
     )
     parser.add_argument(
         "--soc-delta",
@@ -320,7 +344,8 @@ def main() -> None:
         "--energy-fraction",
         type=float,
         default=None,
-        help="Deliver this fraction of full pack energy in J (e.g. 0.40 = 40%% of Q×V_nom)",
+        help="Deliver this fraction of full pack energy in J "
+             "(default: per-cell via energy_fraction_for, usually 0.40; RW10=0.55)",
     )
     parser.add_argument(
         "--max-duration-min",
@@ -352,9 +377,13 @@ def main() -> None:
     cells = args.cells or [args.cell.upper()]
     for cell_id in cells:
         cell_id = cell_id.upper()
-        energy_fraction = args.energy_fraction
-        if energy_fraction is None and args.soc_delta is None:
-            energy_fraction = ENERGY_FRACTION_BY_CELL.get(cell_id)
+        if args.soc_mode:
+            energy_fraction = None
+        else:
+            energy_fraction = args.energy_fraction
+            if energy_fraction is None and args.soc_delta is None:
+                # Same default as compare_constant_current / energy_fraction_for
+                energy_fraction = energy_fraction_for(cell_id)
         cell = get_cell_config(cell_id, refit_ocv=args.refit_ocv)
         cell = cell.with_run_overrides(
             soc_target=args.soc_target,
@@ -386,7 +415,7 @@ def main() -> None:
             e_req = energy_required_j(cell.q_rated_as, cell.energy_fraction, cell.v_nom)
             print(
                 f"Energy target: {cell.energy_fraction:.0%} of {e_full:.0f} J "
-                f"→ {e_req:.0f} J required  (SoC stop ≈ {cell.soc_target:.0%})"
+                f"→ {e_req:.0f} J required  (stop on ∫V·I dt; SoC safety≈{cell.soc_target:.0%})"
             )
         else:
             print(f"SoC target: {cell.soc_target:.0%}")

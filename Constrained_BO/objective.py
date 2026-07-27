@@ -27,6 +27,8 @@ V_NOM_FALLBACK = 3.7
 SOC_PENALTY_SCALE = 300.0
 ENERGY_PENALTY_SCALE = 300.0
 VOLTAGE_PENALTY_SCALE = 100.0
+QLOSS_CAP_PENALTY_SCALE = 80.0
+DEFAULT_DURATION_LOSS_WEIGHT = 1e-3
 
 RewardMode = Literal["legacy_temp_time", "hybrid_qloss"]
 DEFAULT_REWARD_MODE: RewardMode = "hybrid_qloss"
@@ -75,7 +77,7 @@ RESULT_METRIC_UNITS: Dict[str, str] = {
     "dT_peak_charge": "degC",
     "dT_dt_max_charge": "degC/s",
     "stem_charge_per_kj": "degC/kJ",
-    "rest_cooling_mean": "degC/s",
+    "rest_cooling_mean": "degC (mean T_start_rest - T_end_rest across rest intervals)",
     "energy_delivered_j": "J (joules)",
     "energy_required_j": "J (joules)",
     "energy_full_j": "J (joules)",
@@ -259,7 +261,15 @@ def evaluate_session(
     w_qloss: float = 1.0,
     z: float = 0.55,
     hybrid_params: Optional[HybridDegradationParameters] = None,
+    qloss_cap: Optional[float] = None,
+    qloss_cap_scale: float = QLOSS_CAP_PENALTY_SCALE,
+    duration_loss_weight: float = DEFAULT_DURATION_LOSS_WEIGHT,
 ) -> Tuple[float, Dict]:
+    """Evaluate one simulated session.
+
+    Optional ``qloss_cap`` adds a soft penalty when session Q_loss exceeds the
+    cap (typical use: Random-search best Q so GP-BO must match or beat it).
+    """
     duration_s = float(session["current_a"].size)
     duration_min = duration_s / 60.0
     soc_end = float(session["soc"][-1]) if session["soc"].size else 0.0
@@ -304,8 +314,18 @@ def evaluate_session(
             and soc_end >= soc_target - 1e-4
         )
 
+    q_tot = float(rewards.get("qloss_total", 0.0) or 0.0)
+    qloss_cap_penalty = 0.0
+    if qloss_cap is not None and np.isfinite(float(qloss_cap)):
+        excess = max(0.0, q_tot - float(qloss_cap))
+        if excess > 0.0:
+            # Relative excess so the penalty scale is comparable across cells.
+            rel = excess / max(float(qloss_cap), 1e-9)
+            qloss_cap_penalty = float(qloss_cap_scale) * rel
+
     loss = -rewards["total_reward"]
-    loss += 1e-3 * duration_min
+    loss += float(duration_loss_weight) * duration_min
+    loss += qloss_cap_penalty
     if not feasible:
         if constraint_mode == "energy":
             rel_shortfall = energy_shortfall_j / max(energy_required, 1e-6)
@@ -324,6 +344,8 @@ def evaluate_session(
         constraint_margins["energy_margin_j"] = energy_delivered - energy_required
     else:
         constraint_margins["soc_margin"] = soc_end - soc_target
+    if qloss_cap is not None and np.isfinite(float(qloss_cap)):
+        constraint_margins["qloss_margin"] = float(qloss_cap) - q_tot
 
     metrics = {
         "feasible": feasible,
@@ -338,6 +360,8 @@ def evaluate_session(
         "qloss_cyclic": rewards.get("qloss_cyclic", 0.0),
         "qloss_total": rewards.get("qloss_total", 0.0),
         "qloss_penalty": rewards.get("qloss_penalty", 0.0),
+        "qloss_cap": None if qloss_cap is None else float(qloss_cap),
+        "qloss_cap_penalty": float(qloss_cap_penalty),
         "time_penalty": rewards.get("time_penalty", 0.0),
         "ah_throughput": rewards.get("ah_throughput"),
         "nominal_c_rate": rewards.get("nominal_c_rate"),
@@ -366,6 +390,7 @@ def evaluate_session(
         "constraint_margins": constraint_margins,
         "reward_weights": rewards["reward_weights"],
         "degradation_params": rewards.get("degradation_params"),
+        "duration_loss_weight": float(duration_loss_weight),
         "qloss_terminology": QLOSS_TERMINOLOGY_NOTE,
     }
     return loss, metrics

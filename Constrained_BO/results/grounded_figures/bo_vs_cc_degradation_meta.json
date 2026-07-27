@@ -1,0 +1,27 @@
+{
+  "cell": "RW9",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.4,
+  "soc_target": 0.6000000000000001,
+  "q_rated_ah": 2.2,
+  "c_rates": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "currents_a": [
+    1.1,
+    2.2,
+    4.4
+  ],
+  "reward_mode": "hybrid_qloss",
+  "start_state": {
+    "soc": 0.2,
+    "v0": 3.7373055650901823,
+    "t0": 24.0,
+    "age": 0.0,
+    "prev_i": 0.0
+  },
+  "bdt_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "optimizer_selection": "reward"
+}

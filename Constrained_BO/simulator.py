@@ -13,6 +13,7 @@ from Constrained_BO.config import CellConfig, DEFAULT_DECISION_INTERVAL_S
 from Constrained_BO.decision_interval import select_decision_interval_s
 from Constrained_BO.objective import (
     V_NOM_FALLBACK,
+    energy_delivered_j,
     energy_required_j,
     full_capacity_joules,
 )
@@ -71,9 +72,10 @@ class FrozenBDT:
             np.full(pad, prev_i, dtype=np.float32),
             np.full(int(n_steps), float(action_a), dtype=np.float32),
         ])
-        profile_bdt = self._to_bdt_current(profile)
+        # predict_traj applies current_scale once — do not pre-scale here
+        # (double-scaling would cancel LFP's -1 sign flip and any other ≠1 scale).
         v_pred, t_pred = self.predict_traj(
-            state["age"], state["v0"], state["t0"], profile_bdt,
+            state["age"], state["v0"], state["t0"], profile,
         )
         v_traj, t_traj = v_pred[pad:], t_pred[pad:]
 
@@ -187,6 +189,7 @@ class ChargingSimulator:
         v_all: List[float] = []
         t_all: List[float] = []
         end_reason = "time budget"
+        energy_mode = self.constraint_mode == "energy" and self.energy_required_j > 0.0
 
         for _ in range(n_decisions):
             target_i = family.target_current(state, ctx, params)
@@ -212,6 +215,44 @@ class ChargingSimulator:
             t_all.extend(t_traj.tolist())
             state = next_state
 
+            # Energy mode: stop when ∫ V·I dt reaches the required joules.
+            # Truncate the last decision chunk so we do not overshoot the target.
+            if energy_mode and n > 0:
+                i_arr_tmp = np.asarray(i_all, dtype=np.float64)
+                v_arr_tmp = np.asarray(v_all, dtype=np.float64)
+                t_arr_tmp = np.arange(i_arr_tmp.size, dtype=np.float64)
+                e_del = energy_delivered_j(v_arr_tmp, i_arr_tmp, t_arr_tmp)
+                if e_del >= self.energy_required_j - 1e-3:
+                    # Binary-search earliest cut in the last chunk that meets target
+                    # using the same integrator as evaluate_session.
+                    lo = max(1, i_arr_tmp.size - n)
+                    hi = i_arr_tmp.size
+                    cut = hi
+                    while lo < hi:
+                        mid = (lo + hi) // 2
+                        e_mid = energy_delivered_j(
+                            v_arr_tmp[:mid], i_arr_tmp[:mid], t_arr_tmp[:mid],
+                        )
+                        if e_mid >= self.energy_required_j - 1e-3:
+                            cut = mid
+                            hi = mid
+                        else:
+                            lo = mid + 1
+                    i_all = i_all[:cut]
+                    v_all = v_all[:cut]
+                    t_all = t_all[:cut]
+                    i_cut = np.asarray(i_all, dtype=np.float64)
+                    state["soc"] = float(np.clip(
+                        float(initial_state.get("soc", 0.0))
+                        + float(np.sum(-i_cut)) / self.q_rated_as,
+                        0.0, 1.0,
+                    ))
+                    if v_all:
+                        state["v0"] = float(v_all[-1])
+                        state["t0"] = float(t_all[-1])
+                    end_reason = "energy target"
+                    break
+
             ctx, early = family.after_step(
                 state, ctx, params,
                 ceiling_hit=ceiling_hit,
@@ -222,7 +263,13 @@ class ChargingSimulator:
                 end_reason = early
                 break
 
-            if state["soc"] >= self.soc_target:
+            # SoC stop only in SoC-constraint mode. In energy mode the energy
+            # check above is authoritative; SoC=1.0 remains a hard safety stop.
+            if energy_mode:
+                if state["soc"] >= 1.0 - 1e-6:
+                    end_reason = "SoC full"
+                    break
+            elif state["soc"] >= self.soc_target:
                 end_reason = "SoC target"
                 break
 

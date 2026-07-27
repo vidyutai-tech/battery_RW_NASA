@@ -453,7 +453,8 @@ def rebuild_family_results_from_json(
             continue
         family = get_family(fid)
         vals = {k: v for k, v in params_dict.items() if k != "family_id"}
-        params = ProfileParams(family_id=fid, values=vals)
+        # Always go through from_dict so multi-step ΔI / SoC gaps stay enforced.
+        params = family.from_dict({k: float(v) for k, v in vals.items()})
         session = simulator.simulate(cell.start_state, params, family=family)
         rebuilt[fid] = {
             **entry,

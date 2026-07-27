@@ -1,0 +1,9 @@
+{
+  "cell": "RW9",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.4,
+  "q_rated_ah": 2.2,
+  "bdt_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "gpbo_select": "reward",
+  "scale": 9.919042661974316
+}

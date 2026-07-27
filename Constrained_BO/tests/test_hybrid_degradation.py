@@ -175,3 +175,54 @@ def test_max_c_rate_geq_mean_c_rate():
     }
     m = session_throughput_metrics(session)
     assert m["max_c_rate"] >= m["nominal_c_rate"]
+
+
+def test_session_step_ah_and_closed_form_totals_agree_on_pulsed():
+    """Charge-only Ah and headline qloss_* must match session closed form."""
+    from Constrained_BO.hybrid_degradation import (
+        compute_session_degradation,
+        compute_step_degradation,
+    )
+
+    parts = []
+    for _ in range(5):
+        parts.append(np.full(60, -2.0))
+        parts.append(np.zeros(60))
+    i = np.concatenate(parts)
+    n = i.size
+    q = 7560.0
+    session = {
+        "current_a": i,
+        "temperature_c": np.full(n, 30.0),
+        "soc": np.clip(0.2 + np.cumsum(-i) / q, 0.0, 1.0),
+        "q_rated_as": q,
+        "initial_state": {"soc": 0.2},
+    }
+    sess = compute_session_degradation(session)
+    step = compute_step_degradation(session)
+    assert np.isclose(sess["ah_throughput"], step["ah_throughput"])
+    assert np.isclose(sess["qloss_calendar"], step["qloss_calendar"])
+    assert np.isclose(sess["qloss_cyclic"], step["qloss_cyclic"])
+    assert np.isclose(sess["qloss_total"], step["qloss_total"])
+    # Constant T/SoC → step calendar sum matches closed form; cyclic uses
+    # charge-only Ah so step cyclic sum matches session for constant C-rate.
+    assert np.isclose(step["qloss_calendar_step_sum"], step["qloss_calendar"], rtol=1e-5)
+    assert np.isclose(step["qloss_cyclic_step_sum"], step["qloss_cyclic"], rtol=1e-5)
+
+
+def test_mean_soc_uses_full_session_including_rest():
+    from Constrained_BO.hybrid_degradation import session_throughput_metrics
+
+    i = np.concatenate([np.full(100, -2.0), np.zeros(100)])
+    q = 7560.0
+    soc = np.clip(0.2 + np.cumsum(-i) / q, 0.0, 1.0)
+    session = {
+        "current_a": i,
+        "temperature_c": np.full(i.size, 25.0),
+        "soc": soc,
+        "q_rated_as": q,
+        "initial_state": {"soc": 0.2},
+    }
+    m = session_throughput_metrics(session)
+    assert np.isclose(m["mean_soc"], float(soc.mean()))
+    assert np.isclose(m["duration_h"], i.size / 3600.0)

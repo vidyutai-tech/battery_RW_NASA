@@ -206,15 +206,20 @@ def plot_cumulative_degradation(
         cum_tot = cum_cal + cum_cyc
 
         ax = axes[col]
-        ax.plot(t_min, cum_cal, label="Calendar", color="#2563eb", lw=1.6)
-        ax.plot(t_min, cum_cyc, label="Cyclic", color="#ef4444", lw=1.6)
-        ax.plot(t_min, cum_tot, label="Total", color="#16a34a", lw=2.2, ls="--")
+        ax.plot(t_min, cum_cal, label="Calendar (step)", color="#2563eb", lw=1.6)
+        ax.plot(t_min, cum_cyc, label="Cyclic (step)", color="#ef4444", lw=1.6)
+        ax.plot(t_min, cum_tot, label="Total (step)", color="#16a34a", lw=2.2, ls="--")
+        # Closed-form session totals (same numbers BO / JSON metrics use).
+        ax.axhline(
+            step["qloss_total"], color="#16a34a", lw=1.0, alpha=0.7,
+            label=f"Session total={step['qloss_total']:.4g}",
+        )
         ax.set_title(get_family(fid).label, fontsize=10, fontweight="bold")
         ax.set_xlabel("Time (min)")
         ax.grid(True, alpha=0.3)
         if col == 0:
             ax.set_ylabel("Cumulative Q_loss\n(Relative Capacity-Loss Index)")
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=7)
 
     fig.suptitle(
         f"Figure 3 — Cumulative degradation per optimized profile — {payload['meta'].get('cell', '?')}",

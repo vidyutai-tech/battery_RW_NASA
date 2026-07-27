@@ -1,0 +1,9 @@
+{
+  "cell": "RW12",
+  "constraint_mode": "energy",
+  "energy_fraction": 0.4,
+  "q_rated_ah": 2.2,
+  "bdt_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+  "gpbo_select": "reward",
+  "scale": 10.379288289821401
+}
