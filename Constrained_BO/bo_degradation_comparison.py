@@ -1,8 +1,9 @@
-"""One-plot degradation comparison: CC (½C / 1C / 2C) vs GP-BO vs Random.
+"""One-plot degradation comparison: CCCV (½C / 1C / 2C) vs GP-BO vs Random.
 
-Uses the same energy/SoC constraint and hybrid Q_loss index as the optimizer
-runs. Q_loss is a Relative Capacity-Loss Index for one charging session — not
-a multi-year measured % fade.
+Baselines use classic constant-current → constant-voltage (CCCV) profiles, not
+flat CC-only charges. Uses the same energy/SoC constraint and hybrid Q_loss
+index as the optimizer runs. Q_loss is a Relative Capacity-Loss Index for one
+charging session — not a multi-year measured % fade.
 
 Usage
 -----
@@ -26,7 +27,7 @@ import numpy as np
 from Constrained_BO.compare_constant_current import _format_profile, _metrics_row
 from Constrained_BO.config import Q_RATED_AH, energy_fraction_for
 from Constrained_BO.objective import evaluate_session
-from Constrained_BO.optimize_api import build_cell, evaluate_cc_baselines
+from Constrained_BO.optimize_api import build_cell, evaluate_cccv_baselines
 from Constrained_BO.profiles import get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
 
@@ -36,15 +37,20 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_C_RATES = (0.5, 1.0, 2.0)
 
 COLORS = {
+    "CCCV ½C": "#64748b",
+    "CCCV 1C": "#2563eb",
+    "CCCV 2C": "#1e40af",
+    "Random": "#f59e0b",
+    "GP-BO": "#16a34a",
+    # Legacy CC keys (older CSVs / optional dual plots)
     "CC ½C": "#64748b",
     "CC 1C": "#2563eb",
     "CC 2C": "#1e40af",
-    "Random": "#f59e0b",
-    "GP-BO": "#16a34a",
 }
 
 
 def _c_rate_label(c_rate: float) -> str:
+    """Legacy flat-CC label (kept for older scripts)."""
     if abs(c_rate - 0.5) < 1e-9:
         return "CC ½C"
     if abs(c_rate - 1.0) < 1e-9:
@@ -52,6 +58,17 @@ def _c_rate_label(c_rate: float) -> str:
     if abs(c_rate - 2.0) < 1e-9:
         return "CC 2C"
     return f"CC {c_rate:g}C"
+
+
+def _cccv_rate_label(c_rate: float) -> str:
+    """Classic CCCV baseline label at the given CC-phase C-rate."""
+    if abs(c_rate - 0.5) < 1e-9:
+        return "CCCV ½C"
+    if abs(c_rate - 1.0) < 1e-9:
+        return "CCCV 1C"
+    if abs(c_rate - 2.0) < 1e-9:
+        return "CCCV 2C"
+    return f"CCCV {c_rate:g}C"
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
@@ -227,14 +244,14 @@ def build_comparison_rows(
     simulator = ChargingSimulator.from_cell(cell, device=device)
 
     currents = [float(c) * float(q_rated_ah) for c in c_rates]
-    cc_rows = evaluate_cc_baselines(cell, simulator, currents_a=currents, **rw)
+    cccv_rows = evaluate_cccv_baselines(cell, simulator, currents_a=currents, **rw)
 
     rows: List[Dict[str, Any]] = []
-    for c_rate, row in zip(c_rates, cc_rows):
+    for c_rate, row in zip(c_rates, cccv_rows):
         amps = float(c_rate) * float(q_rated_ah)
-        short = _c_rate_label(float(c_rate))
+        short = _cccv_rate_label(float(c_rate))
         row = dict(row)
-        row["axis_label"] = f"{short}\n({amps:g} A)"
+        row["axis_label"] = f"{short}\n({amps:g} A CC)"
         row["group"] = short
         row["c_rate"] = float(c_rate)
         rows.append(row)
@@ -323,18 +340,23 @@ def plot_simple_one_axis(
                 ha="center", va="bottom", fontsize=8, color="#0f172a",
             )
 
-    # % vs feasible CC ½C
+    # % vs best feasible CCCV (½C / 1C / 2C)
     base_q = None
-    for r, q, ok in zip(rows, q_tot, feasible):
-        if r["group"] == "CC ½C" and ok:
-            base_q = q
-            break
+    base_name = None
+    cccv_feas = [
+        (r["group"], q)
+        for r, q, ok in zip(rows, q_tot, feasible)
+        if ok and str(r["group"]).startswith("CCCV")
+    ]
+    if cccv_feas:
+        # lowest Q among feasible CCCV
+        base_name, base_q = min(cccv_feas, key=lambda t: t[1])
     if base_q and base_q > 0:
         for i, (r, q, ok) in enumerate(zip(rows, q_tot, feasible)):
             if r["group"] in ("GP-BO", "Random") and ok:
                 red = 100.0 * (base_q - q) / base_q
                 ax.annotate(
-                    f"{red:+.1f}% vs ½C",
+                    f"{red:+.1f}% vs {base_name}",
                     xy=(i, q),
                     xytext=(0, 22),
                     textcoords="offset points",
@@ -355,7 +377,7 @@ def plot_simple_one_axis(
         constraint = f"SoC → {info.get('soc_target')}"
     ax.set_title(
         f"Charging policy vs degradation — {cell}\n"
-        f"CC ½C / 1C / 2C   vs   Random best   vs   GP-BO best\n"
+        f"CCCV ½C / 1C / 2C   vs   Random best   vs   GP-BO best\n"
         f"({constraint}; same BDT twin + hybrid calendar/cyclic model)"
     )
     ax.set_ylim(0, ymax * 1.35)
@@ -363,9 +385,9 @@ def plot_simple_one_axis(
 
     from matplotlib.patches import Patch
     legend_items = [
-        Patch(facecolor=COLORS["CC ½C"], edgecolor="k", label="CC ½C (1.1 A)"),
-        Patch(facecolor=COLORS["CC 1C"], edgecolor="k", label="CC 1C (2.2 A)"),
-        Patch(facecolor=COLORS["CC 2C"], edgecolor="k", label="CC 2C (4.4 A)"),
+        Patch(facecolor=COLORS["CCCV ½C"], edgecolor="k", label="CCCV ½C (1.1 A CC→CV)"),
+        Patch(facecolor=COLORS["CCCV 1C"], edgecolor="k", label="CCCV 1C (2.2 A CC→CV)"),
+        Patch(facecolor=COLORS["CCCV 2C"], edgecolor="k", label="CCCV 2C (4.4 A CC→CV)"),
         Patch(facecolor=COLORS["Random"], edgecolor="k", label="Random best"),
         Patch(facecolor=COLORS["GP-BO"], edgecolor="k", label="GP-BO best"),
         Patch(facecolor="#94a3b8", edgecolor="k", hatch="//", label="Infeasible (energy)"),
@@ -374,8 +396,8 @@ def plot_simple_one_axis(
 
     fig.text(
         0.5, -0.06,
+        "Baselines = classic CCCV (CC at ½C/1C/2C then CV at Vmax). "
         "NASA RW Q_rated = 2.2 Ah → ½C=1.1 A, 1C=2.2 A, 2C=4.4 A. "
-        "1C/2C hit Vmax before delivering the energy target (hatched). "
         "Q_loss = Relative Capacity-Loss Index for one session (not multi-year % fade).",
         ha="center", fontsize=7.5, color="#475569", style="italic",
     )
@@ -535,8 +557,8 @@ def plot_pareto_cloud(
     ax.legend(*zip(*uniq), fontsize=8, loc="best", framealpha=0.95)
     fig.text(
         0.5, -0.03,
-        "Stars = optimizer winners; squares = CC ½C/1C/2C. "
-        "Infeasible CC still plotted at their truncated session Q_loss (do not deliver full energy).",
+        "Stars = optimizer winners; squares = CCCV ½C/1C/2C baselines. "
+        "Infeasible CCCV still plotted at truncated session Q_loss (do not deliver full energy).",
         ha="center", fontsize=7.5, color="#475569", style="italic",
     )
     fig.tight_layout()

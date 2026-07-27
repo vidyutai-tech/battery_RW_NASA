@@ -299,7 +299,7 @@ def _plot_lifetime_fair(
         ax.plot(
             c["cycles"], c["remaining_pct"],
             color="#94a3b8", ls=":", lw=1.3, alpha=0.7,
-            label=f"{name} (infeasible ghost)",
+            label=f"{name} (infeasible)",
         )
 
     ax.axhline(80.0, color="#475569", ls="--", lw=0.9, alpha=0.7)
@@ -321,6 +321,24 @@ def _plot_lifetime_fair(
     plt.close(fig)
 
 
+def _pick_best_cccv_baseline(by_pol: Dict[str, Dict[str, Any]]) -> str:
+    """Best feasible CCCV among ½C/1C/2C: lowest Q, then shortest time."""
+    candidates = []
+    for name in ("CCCV ½C", "CCCV 1C", "CCCV 2C"):
+        p = by_pol.get(name)
+        if not p or not p.get("feasible"):
+            continue
+        q = float(p.get("qloss_total") or 1e9)
+        t = float(p.get("duration_min") or 1e9)
+        candidates.append((q, t, name))
+    if candidates:
+        candidates.sort()
+        return candidates[0][2]
+    if by_pol.get("CC ½C", {}).get("feasible"):
+        return "CC ½C"
+    return "Random"
+
+
 def _comparison_table(
     session_rows: List[Dict[str, Any]],
     policies: List[Dict[str, Any]],
@@ -331,8 +349,26 @@ def _comparison_table(
 ) -> List[Dict[str, Any]]:
     """Build the all_cells-style comparison rows from lifetime curves + session metrics."""
     by_pol = {p["name"]: p for p in policies}
-    # Baseline: prefer feasible CC ½C, else Random.
-    base_name = "CC ½C" if by_pol.get("CC ½C", {}).get("feasible") else "Random"
+    # Also merge feasibility/Q/time from session_rows for CCCV baselines.
+    for r in session_rows:
+        g = str(r.get("group") or "")
+        if not g:
+            continue
+        if g not in by_pol:
+            by_pol[g] = {
+                "name": g,
+                "feasible": bool(r.get("feasible")),
+                "qloss_total": float(r.get("qloss_total") or np.nan),
+                "duration_min": float(r.get("duration_min") or 0.0),
+            }
+        else:
+            by_pol[g]["feasible"] = bool(r.get("feasible", by_pol[g].get("feasible")))
+            if r.get("qloss_total") is not None:
+                by_pol[g]["qloss_total"] = float(r["qloss_total"])
+            if r.get("duration_min") is not None:
+                by_pol[g]["duration_min"] = float(r["duration_min"])
+
+    base_name = _pick_best_cccv_baseline(by_pol)
     if base_name not in by_pol and "Random" in by_pol:
         base_name = "Random"
     base_q = float(by_pol[base_name]["qloss_total"]) if base_name in by_pol else None
@@ -351,13 +387,21 @@ def _comparison_table(
         if name:
             sess_by[str(name).replace("\n", " ").strip()] = r
 
-    order = ["CC ½C", "CC 1C", "CC 2C", "Random", "GP-BO", "GP-BO (min Q)"]
+    order = ["CCCV ½C", "CCCV 1C", "CCCV 2C", "Random", "GP-BO", "GP-BO (min Q)"]
     # Map session row labels → canonical names
     alias = {}
     for r in session_rows:
         g = str(r.get("group") or "")
         lab = str(r.get("label") or "")
-        if "½C" in g or "0.5C" in g or "½C" in lab:
+        text = g + " " + lab
+        if "CCCV" in text:
+            if "½C" in text or "0.5" in text:
+                alias[g] = "CCCV ½C"
+            elif "1C" in text or "1.0" in text:
+                alias[g] = "CCCV 1C"
+            elif "2C" in text or "2.0" in text:
+                alias[g] = "CCCV 2C"
+        elif "½C" in g or "0.5C" in g or "½C" in lab:
             alias[g] = "CC ½C"
         elif g.startswith("CC") and ("1C" in g or "1.0" in g):
             alias[g] = "CC 1C"
@@ -566,9 +610,9 @@ def export_cell(
         print(f"  (min-Q row skipped: {exc})")
 
     COLORS = {
-        "CC ½C": "#64748b",
-        "CC 1C": "#2563eb",
-        "CC 2C": "#1e40af",
+        "CCCV ½C": "#64748b",
+        "CCCV 1C": "#2563eb",
+        "CCCV 2C": "#1e40af",
         "Random": "#f59e0b",
         "GP-BO": "#16a34a",
         "GP-BO (min Q)": "#86efac",
@@ -633,24 +677,24 @@ def export_cell(
     except Exception as exc:
         print(f"  (comparison xlsx skipped: {exc})")
 
-    # Profile PNGs (rebuild from JSON so from_dict keeps step structure)
-    try:
-        bo_results = rebuild_family_results_from_json(bo, device=device)
-        rnd_results = rebuild_family_results_from_json(rnd, device=device)
-        _assert_family_structure(bo_results)
-        _assert_family_structure(rnd_results)
-        png = plot_profiles_png(
-            bo_results, cell,
-            title_suffix=f"GP-BO improved (w_qloss={IMPROVED_W_QLOSS}, qloss_cap)",
-        )
-        (out_dir / "gp_bo_best_profiles.png").write_bytes(png)
-        png = plot_profiles_png(
-            rnd_results, cell,
-            title_suffix=f"random search (w_qloss={IMPROVED_W_QLOSS}, w_time=0)",
-        )
-        (out_dir / "random_best_profiles.png").write_bytes(png)
-    except Exception as exc:
-        print(f"  (profile plots: {exc})")
+    # Profile PNGs: never overwrite existing GP-BO / Random best-profile grids.
+    for name in ("gp_bo_best_profiles.png", "random_best_profiles.png"):
+        if (out_dir / name).is_file():
+            print(f"  Keeping existing {name}")
+        else:
+            try:
+                payload = bo if name.startswith("gp_bo") else rnd
+                results = rebuild_family_results_from_json(payload, device=device)
+                _assert_family_structure(results)
+                suffix = (
+                    f"GP-BO improved (w_qloss={IMPROVED_W_QLOSS}, qloss_cap)"
+                    if name.startswith("gp_bo")
+                    else f"random search (w_qloss={IMPROVED_W_QLOSS}, w_time={IMPROVED_W_TIME})"
+                )
+                png = plot_profiles_png(results, cell, title_suffix=suffix)
+                (out_dir / name).write_bytes(png)
+            except Exception as exc:
+                print(f"  (profile plot {name}: {exc})")
 
     _export_ui(cell, out_dir, bo, rnd, {}, {}, device)
     print(f"  Wrote → {out_dir}")
@@ -669,7 +713,7 @@ def _plot_summary_table(all_rows: List[Dict[str, Any]], out_path: Path) -> None:
         rnd = next((r for r in subset if r["Method"] == "Random"), None)
         if gp is None:
             continue
-        base = gp.get("Baseline for %") or "CC ½C"
+        base = gp.get("Baseline for %") or "CCCV ½C"
         base_row = next((r for r in subset if r["Method"] == base), None)
         e = gp.get("Energy Delivered (%)")
         t_vs_base = gp.get("Time Saved (%)")
@@ -709,7 +753,7 @@ def _plot_summary_table(all_rows: List[Dict[str, Any]], out_path: Path) -> None:
     table.set_fontsize(8)
     table.scale(1.0, 1.4)
     ax.set_title(
-        "GP-BO vs CCCV / Random — energy target, time saved, degradation improvement",
+        "GP-BO vs best CCCV / Random — energy target, time saved, degradation improvement",
         fontsize=10, pad=12,
     )
     fig.tight_layout()
@@ -773,9 +817,10 @@ def main() -> None:
         "* Same energy target for all cells (default ``--energy-fraction 0.40``).\n"
         f"* w_qloss={IMPROVED_W_QLOSS}, w_time={IMPROVED_W_TIME}.\n"
         "* Soft qloss_cap = Random reward-best Q (GP-BO must match/beat Random on Q).\n"
-        "* Tiny duration_loss_weight keeps a speed preference among equal-Q profiles.\n"
-        "* Profile families keep structural constraints (2-/3-step ΔI, pulsed pulses).\n"
-        "* Lifetime fig9 uses reward-best GP-BO (aligned with the constrained objective).\n"
+        "* Baselines = classic CCCV (CC→CV at Vmax) at ½C / 1C / 2C; all three shown.\n"
+        "* Paper % columns use the **best feasible CCCV** (lowest Q, then shortest time).\n"
+        "* Hitting 4.2 V enters CV (not infeasible); energy target still applies.\n"
+        "* GP-BO / Random best-profile PNGs are preserved unless missing.\n"
         "\n"
         "UI mirrors: Constrained_BO/results/ui_runs/{cell}/\n"
         "Regenerate:\n"

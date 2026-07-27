@@ -205,6 +205,9 @@ def _format_profile(
 ) -> str:
     if method == "CC" and current_a is not None:
         return f"CC {current_a:g} A"
+    if method == "CCCV" and current_a is not None:
+        v_cv = float((params or {}).get("v_cv", 4.2)) if params else 4.2
+        return f"CCCV {current_a:g} A → {v_cv:.2f} V"
 
     params = params or {}
     if family_id == "pulsed":
@@ -217,7 +220,10 @@ def _format_profile(
 
     if family_id == "cccv":
         ic = float(params.get("i_cc", 0.0))
-        return f"CCCV ({ic:.2f} A)" if short else f"CCCV — {ic:.2f} A CC"
+        v_cv = float(params.get("v_cv", 4.2))
+        if short:
+            return f"CCCV ({ic:.2f} A)"
+        return f"CCCV — {ic:.2f} A CC → {v_cv:.2f} V CV"
     if family_id == "two_step":
         i1 = float(params.get("i1", 0.0))
         i2 = float(params.get("i2", 0.0))

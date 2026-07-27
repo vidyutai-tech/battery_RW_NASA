@@ -1,15 +1,18 @@
 # GP-BO comparison table
 
-| Cell | Energy charged | GP-BO time (min) | Time ↓ vs CC | Deg. ↓ vs CC | Time ↓ vs Random | Deg. ↓ vs Random | CC baseline |
-|------|----------------|------------------|--------------|--------------|------------------|------------------|-------------|
-| RW9 | 40% | 40.3 | 12.0% | -1.2% | -24.9% | -5.5% | CC ½C |
-| RW10 | 55% | 34.2 | — | — | 10.2% | 1.2% | none (all CC infeasible) |
-| RW11 | 40% | 11.8 | 75.8% | 7.8% | 2.6% | 0.9% | CC ½C |
-| RW12 | 40% | 28.6 | 38.9% | -5.0% | 3.9% | -0.4% | CC ½C |
+Baselines are classic **CCCV (CC→CV at Vmax)** at ½C / 1C / 2C (all shown).
+Percent columns use the **best feasible CCCV** per cell (lowest session Q, then shortest time).
+
+| Cell | Energy | GP-BO time (min) | Time ↓ vs best CCCV | Deg. ↓ vs best CCCV | Time ↓ vs Random | Deg. ↓ vs Random | Best CCCV baseline |
+|------|--------|------------------|---------------------|---------------------|------------------|------------------|--------------------|
+| RW9 | 40% | 34.2 | -78.1% | 4.9% | -6.0% | 1.2% | CCCV 2C |
+| RW10 | 40% | 24.8 | 46.3% | 3.2% | -0.7% | 3.7% | CCCV ½C |
+| RW11 | 40% | 11.6 | 12.4% | 3.9% | 3.3% | 1.3% | CCCV 2C |
+| RW12 | 40% | 29.8 | 36.5% | -4.6% | 0.0% | 0.0% | CCCV ½C |
 
 **Reading guide**
 
-- **Energy charged**: fraction of full pack energy delivered in the session (vehicle battery %).
+- **Energy**: delivered fraction of full pack (same 40% target on all cells).
 - **Time ↓**: \((t_{\mathrm{base}}-t_{\mathrm{GPBO}})/t_{\mathrm{base}}\). Positive = faster than baseline.
 - **Deg. ↓**: \((Q_{\mathrm{base}}-Q_{\mathrm{GPBO}})/Q_{\mathrm{base}}\). Positive = *less* session degradation than baseline.
-- Fig. 8/9 do **not** imply GP-BO always has the most degradation. On RW9, reward-best GP-BO is close to CC ½C; Random is slightly better on Q. On RW11, GP-BO improves both time and degradation vs CC ½C. CC 1C/2C can show lower Q only when they fail the energy target (infeasible).
+- Hitting 4.2 V enters the CV phase; it does not mark the baseline infeasible.

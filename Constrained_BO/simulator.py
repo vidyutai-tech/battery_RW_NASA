@@ -193,6 +193,22 @@ class ChargingSimulator:
 
         for _ in range(n_decisions):
             target_i = family.target_current(state, ctx, params)
+            # Energy-constrained CCCV: do not crawl at i_cutoff before the
+            # energy target — hold a minimum CV current (≥0.1·I_cc, ≥0.1 A)
+            # until the energy check stops the session.
+            if (
+                energy_mode
+                and getattr(ctx, "phase", None) == "cv"
+                and params.family_id == "cccv"
+                and target_i != 0.0
+            ):
+                i_cc = float(params.values.get("i_cc", abs(target_i)))
+                i_cut = float(params.values.get("i_cutoff", 0.01))
+                i_hold = max(i_cut, 0.1, 0.1 * i_cc)
+                if abs(target_i) + 1e-9 < i_hold:
+                    target_i = -float(i_hold)
+                    ctx.i_level = float(i_hold)
+
             step_ceiling = family.cv_ceiling(params, v_ceiling, ctx)
 
             next_state, v_traj, t_traj, ceiling_hit = self.bdt.single_step(
@@ -202,6 +218,31 @@ class ChargingSimulator:
                 v_ceiling=step_ceiling,
             )
             n = int(v_traj.size)
+
+            # CV hold: once in constant-voltage phase, a commanded current that
+            # still kisses the ceiling would otherwise truncate each BDT step to
+            # ~1 sample, tapering to i_cutoff before the energy target is met.
+            # Extend the remainder of the decision interval at V clamped to the
+            # CV ceiling so CC→CV baselines can finish the energy window.
+            if (
+                getattr(ctx, "phase", None) == "cv"
+                and target_i != 0.0
+                and n > 0
+                and n < self.decision_interval_s
+            ):
+                need = int(self.decision_interval_s) - n
+                v_hold = float(min(float(v_traj[-1]), step_ceiling))
+                t_hold = float(t_traj[-1])
+                v_traj = np.concatenate([v_traj, np.full(need, v_hold, dtype=v_traj.dtype)])
+                t_traj = np.concatenate([t_traj, np.full(need, t_hold, dtype=t_traj.dtype)])
+                next_state = dict(next_state)
+                next_state["v0"] = v_hold
+                next_state["t0"] = t_hold
+                next_state["prev_i"] = float(target_i)
+                n = int(v_traj.size)
+                # Still at the voltage limit — CV taper should continue next step.
+                ceiling_hit = True
+
             profile = np.full(n, target_i, dtype=np.float64)
             delta_soc = float(np.sum(-profile)) / self.q_rated_as
             next_state = dict(next_state)
@@ -279,6 +320,11 @@ class ChargingSimulator:
                 step_samples=n,
                 target_i=target_i,
             )
+            # Energy-constrained sessions: CV cutoff is not a failure — keep
+            # charging until the energy target (or time budget / SoC full).
+            if family_end:
+                if energy_mode and family_end == "CV cutoff current":
+                    family_end = None
             if family_end:
                 end_reason = family_end
                 break

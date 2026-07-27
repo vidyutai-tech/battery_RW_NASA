@@ -26,7 +26,14 @@ from Constrained_BO.objective import (
     full_capacity_joules,
 )
 from Constrained_BO.ocv import ocv_curve_path
-from Constrained_BO.profiles import DEFAULT_FAMILIES, ProfileParams, TwoStepFamily, get_family, set_profile_bounds
+from Constrained_BO.profiles import (
+    DEFAULT_FAMILIES,
+    CCCVFamily,
+    ProfileParams,
+    TwoStepFamily,
+    get_family,
+    set_profile_bounds,
+)
 from Constrained_BO.simulator import ChargingSimulator
 from Constrained_BO.viz import plot_best_profiles
 
@@ -440,6 +447,20 @@ def _cc_params(current_a: float) -> ProfileParams:
     )
 
 
+def _cccv_params(
+    current_a: float,
+    *,
+    v_cv: float = 4.2,
+    i_cutoff: float = 0.01,
+) -> ProfileParams:
+    """Classic CCCV: constant current ``current_a`` then CV hold at ``v_cv``."""
+    return CCCVFamily.from_dict({
+        "i_cc": float(current_a),
+        "v_cv": float(v_cv),
+        "i_cutoff": float(i_cutoff),
+    })
+
+
 def evaluate_cc_baselines(
     cell,
     simulator: ChargingSimulator,
@@ -474,6 +495,65 @@ def evaluate_cc_baselines(
             f"CC {current_a:g}",
             metrics,
             profile=_format_profile(method="CC", current_a=float(current_a)),
+            current_a=float(current_a),
+            family_id=family.family_id,
+            family_label=family.label,
+            params=params.to_dict(),
+        )
+        rows.append(row)
+    return rows
+
+
+def evaluate_cccv_baselines(
+    cell,
+    simulator: ChargingSimulator,
+    *,
+    currents_a: Sequence[float] = DEFAULT_CC_CURRENTS_A,
+    v_cv: Optional[float] = None,
+    i_cutoff: float = 0.01,
+    reward_mode: str = "hybrid_qloss",
+    w_soc: float = 1.0,
+    w_qloss: float = 1.0,
+    w_time: float = 0.1,
+    w_temperature: float = 1.0,
+    z: float = 0.55,
+) -> List[Dict[str, Any]]:
+    """Evaluate classic CCCV baselines (CC phase then CV taper) under the same constraint/reward.
+
+    Unlike ``evaluate_cc_baselines`` (flat current only), this uses ``CCCVFamily``:
+    charge at ``i_cc`` until ``v_cv``, then hold voltage while current steps down to
+    ``i_cutoff``.
+    """
+    from Constrained_BO.compare_constant_current import _format_profile, _metrics_row
+
+    if cell.profile_bounds is not None:
+        set_profile_bounds(cell.profile_bounds)
+    v_hold = float(v_cv) if v_cv is not None else float(getattr(cell, "v_max", 4.2))
+    rows: List[Dict[str, Any]] = []
+    family = CCCVFamily()
+    for current_a in currents_a:
+        params = _cccv_params(float(current_a), v_cv=v_hold, i_cutoff=float(i_cutoff))
+        session = simulator.simulate(cell.start_state, params, family=family)
+        _, metrics = evaluate_session(
+            session,
+            reward_mode=reward_mode,  # type: ignore[arg-type]
+            w_soc=w_soc,
+            w_qloss=w_qloss,
+            w_time=w_time,
+            w_temperature=w_temperature,
+            z=z,
+        )
+        row = _metrics_row(
+            "CCCV",
+            f"CCCV {current_a:g}",
+            metrics,
+            profile=_format_profile(
+                method="CCCV",
+                current_a=float(current_a),
+                family_id=family.family_id,
+                family_label=family.label,
+                params=params.to_dict(),
+            ),
             current_a=float(current_a),
             family_id=family.family_id,
             family_label=family.label,
@@ -531,11 +611,10 @@ def build_baseline_comparison_rows(
     random_payload: Optional[Dict[str, Any]] = None,
     currents_a: Sequence[float] = DEFAULT_CC_CURRENTS_A,
     reward_kwargs: Optional[Dict[str, Any]] = None,
+    use_cccv: bool = True,
 ) -> List[Dict[str, Any]]:
     rw = reward_kwargs or {}
-    rows = evaluate_cc_baselines(
-        cell,
-        simulator,
+    eval_kw = dict(
         currents_a=currents_a,
         reward_mode=rw.get("reward_mode", "hybrid_qloss"),
         w_soc=float(rw.get("w_soc", 1.0)),
@@ -543,6 +622,11 @@ def build_baseline_comparison_rows(
         w_time=float(rw.get("w_time", 0.1)),
         w_temperature=float(rw.get("w_temperature", 1.0)),
         z=float(rw.get("z", 0.55)),
+    )
+    rows = (
+        evaluate_cccv_baselines(cell, simulator, **eval_kw)
+        if use_cccv
+        else evaluate_cc_baselines(cell, simulator, **eval_kw)
     )
     if bo_payload is not None:
         opt = _opt_row_from_payload(bo_payload, method_label="GP-BO")

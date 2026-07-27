@@ -30,7 +30,7 @@ import numpy as np
 from Constrained_BO.bo_degradation_comparison import (
     COLORS,
     DEFAULT_C_RATES,
-    _c_rate_label,
+    _cccv_rate_label,
     _cell_from_meta,
     _eval_optimizer_best,
     _load_json,
@@ -40,7 +40,7 @@ from Constrained_BO.compare_constant_current import _format_profile, _metrics_ro
 from Constrained_BO.config import Q_RATED_AH
 from Constrained_BO.hybrid_degradation import HybridDegradation, HybridDegradationParameters
 from Constrained_BO.objective import evaluate_session
-from Constrained_BO.optimize_api import evaluate_cc_baselines
+from Constrained_BO.optimize_api import evaluate_cccv_baselines
 from Constrained_BO.profiles import get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
 
@@ -48,11 +48,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Line styles / colors for lifetime curves
 POLICY_STYLE = {
+    "CCCV ½C": {"color": "#64748b", "ls": "-", "lw": 2.2},
+    "CCCV 1C": {"color": "#2563eb", "ls": "--", "lw": 1.6},
+    "CCCV 2C": {"color": "#1e3a8a", "ls": ":", "lw": 1.6},
+    "Random": {"color": "#f59e0b", "ls": "-", "lw": 2.4},
+    "GP-BO": {"color": "#16a34a", "ls": "-", "lw": 2.6},
+    "GP-BO (min Q)": {"color": "#0f766e", "ls": "-", "lw": 2.4},
+    # Legacy aliases
     "CC ½C": {"color": "#64748b", "ls": "-", "lw": 2.2},
     "CC 1C": {"color": "#2563eb", "ls": "--", "lw": 1.6},
     "CC 2C": {"color": "#1e3a8a", "ls": ":", "lw": 1.6},
-    "Random": {"color": "#f59e0b", "ls": "-", "lw": 2.4},
-    "GP-BO": {"color": "#16a34a", "ls": "-", "lw": 2.6},
 }
 
 
@@ -98,11 +103,11 @@ def _collect_policies(
 
     c_rates = DEFAULT_C_RATES
     currents = [float(c) * float(Q_RATED_AH) for c in c_rates]
-    cc_rows = evaluate_cc_baselines(cell, simulator, currents_a=currents, **rw)
+    cccv_rows = evaluate_cccv_baselines(cell, simulator, currents_a=currents, **rw)
 
     policies: List[Dict[str, Any]] = []
-    for c_rate, row in zip(c_rates, cc_rows):
-        name = _c_rate_label(float(c_rate))
+    for c_rate, row in zip(c_rates, cccv_rows):
+        name = _cccv_rate_label(float(c_rate))
         feas = bool(row.get("feasible"))
         if not feas and not include_infeasible_cc:
             continue
@@ -155,7 +160,7 @@ def project_fade(
     *,
     n_cycles: int = 600,
     soh_anchor_pct: float = 80.0,
-    anchor_policy: str = "CC ½C",
+    anchor_policy: str = "CCCV ½C",
     anchor_cycle: int = 400,
     hybrid_params: Optional[HybridDegradationParameters] = None,
 ) -> Tuple[np.ndarray, Dict[str, Dict[str, np.ndarray]], float]:
@@ -275,7 +280,9 @@ def plot_delta_vs_halfc(
     info: Dict[str, Any],
     out_path: Path,
 ) -> None:
-    baseline = "CC ½C" if "CC ½C" in curves else None
+    baseline = "CCCV ½C" if "CCCV ½C" in curves else None
+    if baseline is None and "CC ½C" in curves:
+        baseline = "CC ½C"
     if baseline is None:
         for p in policies:
             if p["feasible"] and p["name"] in curves:
@@ -449,7 +456,7 @@ def main() -> None:
         policies,
         n_cycles=args.n_cycles,
         soh_anchor_pct=args.soh_anchor,
-        anchor_policy="CC ½C",
+        anchor_policy="CCCV ½C",
         anchor_cycle=args.anchor_cycle,
     )
     measured = _load_measured_cell(str(info.get("cell", "RW9")))
