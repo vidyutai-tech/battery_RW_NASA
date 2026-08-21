@@ -345,7 +345,7 @@ def plot_digital_twin_validation(
         return
 
     n = len(samples)
-    fig, axes = plt.subplots(2, n, figsize=(5.0 * n, 6), facecolor=LIGHT_BG)
+    fig, axes = plt.subplots(2, n, figsize=(5.6 * n, 7.0), facecolor=LIGHT_BG)
     if n == 1:
         axes = axes[:, np.newaxis]
 
@@ -363,15 +363,25 @@ def plot_digital_twin_validation(
 
         ax = axes[0, col]
         ax.set_facecolor(LIGHT_BG)
-        ax.plot(t_axis, v_a, color=GREY, linestyle="--", label="Measured", alpha=0.85, lw=1.8)
-        ax.plot(t_axis, v_p, color=ACCENT, label="Digital Twin predicted", lw=2.0)
+        # Display: faint raw prediction + Savitzky–Golay overlay (MAPE stays on raw).
+        ax.plot(t_axis, v_a, color=GREY, linestyle=":", alpha=0.35, lw=1.0, zorder=1)
+        ax.plot(
+            t_axis, _savgol_display(v_a), color=GREY, linestyle="--",
+            label="Measured", alpha=0.85, lw=2.2, zorder=2,
+        )
+        ax.plot(t_axis, v_p, color=ACCENT, linestyle=":", alpha=0.4, lw=1.2, zorder=3)
+        ax.plot(
+            t_axis, _savgol_display(v_p), color=ACCENT, linestyle="-",
+            label="Digital Twin predicted", lw=2.4, zorder=4,
+        )
         ax.set_title(
             f"Chunk {samp['chunk_idx']}  —  Relative age = {samp['rel_age']:.3f}\n"
             f"Voltage MAPE = {samp['mape_v']:.2f}%  (steps {st + 1}–{T})",
-            fontsize=9,
+            fontsize=15, fontweight="bold",
         )
-        ax.set_ylabel("Voltage (V)" if col == 0 else "")
-        ax.legend(fontsize=8, loc="lower right", framealpha=0.85)
+        ax.set_ylabel("Voltage (V)" if col == 0 else "", fontsize=16)
+        ax.tick_params(labelsize=14)
+        ax.legend(fontsize=13, loc="lower right", framealpha=0.85)
         if voltage_ylim is not None:
             ax.set_ylim(*voltage_ylim)
         else:
@@ -385,29 +395,30 @@ def plot_digital_twin_validation(
 
         ax = axes[1, col]
         ax.set_facecolor(LIGHT_BG)
-        ax.plot(t_axis, t_a, color=ORANGE, linestyle=":", alpha=0.35, linewidth=0.9, zorder=1)
+        ax.plot(t_axis, t_a, color=ORANGE, linestyle=":", alpha=0.35, linewidth=1.0, zorder=1)
         ax.plot(
             t_axis, t_meas_smooth, color=GREY, linestyle="--",
-            label="Measured", alpha=0.85, lw=1.8, zorder=2,
+            label="Measured", alpha=0.85, lw=2.2, zorder=2,
         )
-        ax.plot(t_axis, t_p, color=ORANGE, linestyle=":", alpha=0.4, linewidth=1.0, zorder=3)
+        ax.plot(t_axis, t_p, color=ORANGE, linestyle=":", alpha=0.4, linewidth=1.2, zorder=3)
         ax.plot(
             t_axis, t_pred_smooth, color=ORANGE, linestyle="-",
-            label="Digital Twin predicted", linewidth=2.0, zorder=4,
+            label="Digital Twin predicted", linewidth=2.4, zorder=4,
         )
         ax.set_title(
             f"Temperature MAPE = {samp['mape_t']:.2f}%  (steps {st + 1}–{T})",
-            fontsize=9,
+            fontsize=15, fontweight="bold",
         )
-        ax.set_xlabel("Time (min)")
-        ax.set_ylabel("Temperature (°C)" if col == 0 else "")
-        ax.legend(fontsize=7.5, loc="upper right", framealpha=0.85)
+        ax.set_xlabel("Time (min)", fontsize=16)
+        ax.set_ylabel("Temperature (°C)" if col == 0 else "", fontsize=16)
+        ax.tick_params(labelsize=14)
+        ax.legend(fontsize=13, loc="upper right", framealpha=0.85)
 
     suffix = f"  {title_suffix}" if title_suffix else ""
     fig.suptitle(
         f"Digital Twin — measured vs predicted  "
         f"(first {seq_len} steps, {n} held-out test chunks, {cell_id}){suffix}",
-        fontsize=11,
+        fontsize=18,
         fontweight="bold",
     )
     plt.tight_layout()
@@ -511,33 +522,179 @@ def plot_digital_twin_validation_val_mean(
 ) -> None:
     """Mean V/T on validation chunks (main-repo figure 1c style)."""
     t_ax = stats["t_axis_minutes"]
-    fig, axes = plt.subplots(2, 1, figsize=(9.5, 6.8), sharex=True, facecolor=LIGHT_BG)
+    fig, axes = plt.subplots(2, 1, figsize=(10.5, 7.4), sharex=True, facecolor=LIGHT_BG)
     for ax in axes:
         ax.set_facecolor(LIGHT_BG)
 
-    axes[0].plot(t_ax, stats["v_meas_mean"], color=GREY, linestyle="--", lw=2.0, label="Measured")
-    axes[0].plot(t_ax, stats["v_pred_mean"], color=ACCENT, lw=2.2, label="Digital Twin predicted")
-    axes[0].set_ylabel("Voltage (V)")
-    axes[0].legend(fontsize=8, loc="lower right")
-    axes[0].set_title(f"Voltage MAPE = {stats['pooled_mape_v_pct']:.2f}%", fontsize=9)
+    axes[0].plot(t_ax, stats["v_meas_mean"], color=GREY, linestyle=":", alpha=0.35, lw=1.0)
+    axes[0].plot(
+        t_ax, _savgol_display(stats["v_meas_mean"]),
+        color=GREY, linestyle="--", lw=2.4, label="Measured",
+    )
+    axes[0].plot(t_ax, stats["v_pred_mean"], color=ACCENT, linestyle=":", alpha=0.4, lw=1.2)
+    axes[0].plot(
+        t_ax, _savgol_display(stats["v_pred_mean"]),
+        color=ACCENT, lw=2.6, label="Digital Twin predicted",
+    )
+    axes[0].set_ylabel("Voltage (V)", fontsize=16)
+    axes[0].tick_params(labelsize=14)
+    axes[0].legend(fontsize=13, loc="lower right")
+    axes[0].set_title(f"Voltage MAPE = {stats['pooled_mape_v_pct']:.2f}%", fontsize=15, fontweight="bold")
 
     t_meas_smooth = _savgol_display(stats["t_meas_mean"])
     t_pred_smooth = _savgol_display(stats["t_pred_mean"])
 
-    axes[1].plot(t_ax, stats["t_meas_mean"], color=ORANGE, linestyle=":", alpha=0.35, lw=0.9)
-    axes[1].plot(t_ax, t_meas_smooth, color=GREY, linestyle="--", lw=2.0, label="Measured")
-    axes[1].plot(t_ax, t_pred_smooth, color=ORANGE, lw=2.2, label="Digital Twin predicted")
-    axes[1].set_xlabel("Time (min)")
-    axes[1].set_ylabel("Temperature (°C)")
-    axes[1].legend(fontsize=8, loc="upper right")
-    axes[1].set_title(f"Temperature MAPE = {stats['pooled_mape_t_pct']:.2f}%", fontsize=9)
+    axes[1].plot(t_ax, stats["t_meas_mean"], color=ORANGE, linestyle=":", alpha=0.35, lw=1.0)
+    axes[1].plot(t_ax, t_meas_smooth, color=GREY, linestyle="--", lw=2.4, label="Measured")
+    axes[1].plot(t_ax, t_pred_smooth, color=ORANGE, lw=2.6, label="Digital Twin predicted")
+    axes[1].set_xlabel("Time (min)", fontsize=16)
+    axes[1].set_ylabel("Temperature (°C)", fontsize=16)
+    axes[1].tick_params(labelsize=14)
+    axes[1].legend(fontsize=13, loc="upper right")
+    axes[1].set_title(f"Temperature MAPE = {stats['pooled_mape_t_pct']:.2f}%", fontsize=15, fontweight="bold")
 
     suffix = f"  {title_suffix}" if title_suffix else ""
     fig.suptitle(
         f"Digital Twin — mean measured vs predicted "
         f"({stats['n_windows_used']} validation chunks){suffix}",
-        fontsize=10,
+        fontsize=17,
         fontweight="bold",
+    )
+    plt.tight_layout()
+    _savefig(fig, out_path)
+
+
+def plot_voltage_error_panel(
+    samples: Sequence[Dict[str, Any]],
+    out_path: Path,
+    *,
+    cell_id: str = "RW9",
+) -> None:
+    """Paper panel: voltage residual (pred−meas) shows absolute noise is mV-scale."""
+    if not samples:
+        return
+    n = len(samples)
+    fig, axes = plt.subplots(1, n, figsize=(5.2 * n, 3.8), facecolor=LIGHT_BG, sharey=True)
+    if n == 1:
+        axes = [axes]
+    for ax, samp in zip(axes, samples):
+        ax.set_facecolor(LIGHT_BG)
+        st = samp["burn_in"]
+        T = len(samp["v_actual"])
+        t_axis = samp["t_minutes"][st:] if len(samp["t_minutes"]) >= T - st else (
+            np.arange(T - st, dtype=np.float64) * samp["dt_s"] / 60.0
+        )
+        err_mv = 1000.0 * (samp["v_pred"][st:] - samp["v_actual"][st:])
+        ax.axhline(0.0, color=GREY, lw=1.2)
+        ax.plot(t_axis, err_mv, color=ACCENT, lw=1.5, alpha=0.85)
+        ax.plot(t_axis, _savgol_display(err_mv), color="#1e3a8a", lw=2.4, label="Smoothed residual")
+        mae = float(np.mean(np.abs(err_mv)))
+        ax.set_title(
+            f"Chunk {samp['chunk_idx']}  |  MAE = {mae:.1f} mV\n"
+            f"Voltage MAPE = {samp['mape_v']:.2f}%",
+            fontsize=13, fontweight="bold",
+        )
+        ax.set_xlabel("Time (min)", fontsize=14)
+        ax.tick_params(labelsize=12)
+        ax.legend(fontsize=11, loc="upper right", framealpha=0.85)
+    axes[0].set_ylabel("Voltage residual (mV)\npred − measured", fontsize=14)
+    fig.suptitle(
+        f"{cell_id}: voltage prediction residual (held-out test chunks)",
+        fontsize=15, fontweight="bold",
+    )
+    fig.text(
+        0.5, -0.02,
+        "High-frequency twin jitter is typically a few mV; MAPE remains on raw predictions.",
+        ha="center", fontsize=11, color="#64748b", style="italic",
+    )
+    plt.tight_layout()
+    _savefig(fig, out_path)
+
+
+def plot_cross_cell_twin_summary(
+    rows: Sequence[Dict[str, Any]],
+    out_path: Path,
+    *,
+    footnote: str = "RW9 = source twin; RW10–RW12 = finetuned models.",
+) -> None:
+    """Bar comparison of pooled val MAPE across cells (paper summary)."""
+    if not rows:
+        return
+    labels = []
+    for r in rows:
+        cell = str(r.get("cell", "?"))
+        frac = r.get("fraction")
+        if frac is None:
+            labels.append(cell)
+        else:
+            labels.append(f"{cell}\n{float(frac):.0%}")
+    v_mape = [float(r["mape_v"]) for r in rows]
+    t_mape = [float(r["mape_t"]) for r in rows]
+    x = np.arange(len(labels))
+    w = 0.36
+    fig, ax = plt.subplots(figsize=(max(9.0, 1.25 * len(labels)), 5.2), facecolor=LIGHT_BG)
+    ax.set_facecolor(LIGHT_BG)
+    ax.bar(x - w / 2, v_mape, w, color=ACCENT, edgecolor="k", lw=0.4, label="Voltage MAPE")
+    ax.bar(x + w / 2, t_mape, w, color=ORANGE, edgecolor="k", lw=0.4, label="Temperature MAPE")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylabel("Validation MAPE (%)", fontsize=14)
+    ax.set_title(
+        "Digital Twin accuracy across NASA RW cells\n(pooled validation windows)",
+        fontsize=15, fontweight="bold",
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=12)
+    for i, (vv, tt) in enumerate(zip(v_mape, t_mape)):
+        ax.text(i - w / 2, vv + 0.02, f"{vv:.2f}", ha="center", va="bottom", fontsize=11)
+        ax.text(i + w / 2, tt + 0.02, f"{tt:.2f}", ha="center", va="bottom", fontsize=11)
+    fig.text(0.5, -0.04, footnote, ha="center", fontsize=11, color="#64748b", style="italic")
+    plt.tight_layout()
+    _savefig(fig, out_path)
+
+
+def plot_finetune_fraction_summary(
+    rows: Sequence[Dict[str, Any]],
+    out_path: Path,
+) -> None:
+    """Grouped bars: V/T MAPE vs adapt fraction for RW10–RW12."""
+    cells = sorted({r["cell"] for r in rows if r.get("fraction") is not None})
+    fracs = sorted({float(r["fraction"]) for r in rows if r.get("fraction") is not None})
+    if not cells or not fracs:
+        return
+    by = {(r["cell"], float(r["fraction"])): r for r in rows if r.get("fraction") is not None}
+    x = np.arange(len(fracs))
+    w = 0.22
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.0), facecolor=LIGHT_BG, sharey=False)
+    colors = {"RW10": "#2563eb", "RW11": "#16a34a", "RW12": "#ea580c"}
+    for ax, key, ylab, title in (
+        (axes[0], "mape_v", "Voltage MAPE (%)", "Voltage MAPE vs adapt fraction"),
+        (axes[1], "mape_t", "Temperature MAPE (%)", "Temperature MAPE vs adapt fraction"),
+    ):
+        ax.set_facecolor(LIGHT_BG)
+        for i, cell in enumerate(cells):
+            vals = [float(by[(cell, f)][key]) if (cell, f) in by else np.nan for f in fracs]
+            ax.bar(
+                x + (i - (len(cells) - 1) / 2) * w,
+                vals,
+                w,
+                color=colors.get(cell, GREY),
+                edgecolor="k",
+                lw=0.3,
+                label=cell,
+            )
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"{f:.0%}" for f in fracs], fontsize=12)
+        ax.set_xlabel("Finetune adapt-data fraction", fontsize=14)
+        ax.set_ylabel(ylab, fontsize=14)
+        ax.set_title(title, fontsize=13, fontweight="bold")
+        ax.grid(True, axis="y", alpha=0.3)
+        ax.tick_params(labelsize=12)
+        ax.legend(fontsize=11)
+    fig.suptitle(
+        "Finetuned digital twin: effect of adapt-data fraction (20% / 40% / 60%)",
+        fontsize=15, fontweight="bold",
     )
     plt.tight_layout()
     _savefig(fig, out_path)
@@ -586,32 +743,34 @@ def plot_soc_estimation(
             t_h, pred, color=SOC_VARIANT_COLORS[variant], linestyle=ls, linewidth=lw,
             label=SOC_VARIANT_LABELS.get(variant, variant),
         )
-    ax.set_xlabel("Time (h)")
-    ax.set_ylabel("State of Charge (%)")
+    ax.set_xlabel("Time (h)", fontsize=14)
+    ax.set_ylabel("State of Charge (%)", fontsize=14)
     ax.set_ylim(0, 105)
-    ax.legend(fontsize=8, loc="best", framealpha=0.9)
-    ax.set_title(f"{cell_id} — SOC vs time", fontsize=10, fontweight="bold")
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=11, loc="best", framealpha=0.9)
+    ax.set_title(f"{cell_id} — SOC vs time", fontsize=14, fontweight="bold")
 
     ax = axes[1]
-    ax.scatter(volt, labels_pct, s=6, alpha=0.45, color=GREEN, label="Coulomb", zorder=2)
+    ax.scatter(volt, labels_pct, s=8, alpha=0.45, color=GREEN, label="Coulomb", zorder=2)
     for variant in ("v_only", "vta", "vta_i"):
         if variant not in soc_preds:
             continue
         pred = soc_preds[variant][:n] * 100.0
         ax.scatter(
-            volt, pred, s=6, alpha=0.4,
+            volt, pred, s=8, alpha=0.4,
             color=SOC_VARIANT_COLORS[variant],
             label=SOC_VARIANT_LABELS.get(variant, variant),
             zorder=3 if variant == primary_variant else 1,
         )
-    ax.set_xlabel("Voltage (V)")
-    ax.set_ylabel("SOC (%)")
-    ax.legend(fontsize=8, markerscale=2, framealpha=0.9)
-    ax.set_title("SOC vs voltage", fontsize=10, fontweight="bold")
+    ax.set_xlabel("Voltage (V)", fontsize=14)
+    ax.set_ylabel("SOC (%)", fontsize=14)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=11, markerscale=2, framealpha=0.9)
+    ax.set_title("SOC vs voltage", fontsize=14, fontweight="bold")
 
     fig.suptitle(
         f"SOC estimation — Coulomb labels vs measured-feature MLPs ({cell_id})",
-        fontsize=11,
+        fontsize=15,
         fontweight="bold",
     )
     plt.tight_layout()

@@ -38,6 +38,7 @@ from Constrained_BO.bo_degradation_comparison import (
 )
 from Constrained_BO.compare_constant_current import _format_profile, _metrics_row
 from Constrained_BO.config import Q_RATED_AH
+from Constrained_BO.viz import PAPER_DPI, PAPER_LIGHT_BG, apply_paper_style
 from Constrained_BO.hybrid_degradation import HybridDegradation, HybridDegradationParameters
 from Constrained_BO.objective import evaluate_session
 from Constrained_BO.optimize_api import evaluate_cccv_baselines
@@ -84,6 +85,7 @@ def _collect_policies(
     device: str = "cpu",
     include_infeasible_cc: bool = False,
     gpbo_select: str = "min_q",
+    c_rates: Sequence[float] = DEFAULT_C_RATES,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """Collect policies for lifetime projection.
 
@@ -101,7 +103,7 @@ def _collect_policies(
     rw = _reward_kwargs(meta)
     simulator = ChargingSimulator.from_cell(cell, device=device)
 
-    c_rates = DEFAULT_C_RATES
+    c_rates = tuple(float(c) for c in c_rates)
     currents = [float(c) * float(Q_RATED_AH) for c in c_rates]
     cccv_rows = evaluate_cccv_baselines(cell, simulator, currents_a=currents, **rw)
 
@@ -239,38 +241,42 @@ def plot_lifetime_vs_cycles(
     soh_anchor_pct: float,
     out_path: Path,
 ) -> None:
-    fig, ax = plt.subplots(figsize=(9.0, 5.2), dpi=150)
+    apply_paper_style()
+    fig, ax = plt.subplots(figsize=(9.8, 5.6), dpi=PAPER_DPI, facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
 
     for p in policies:
         name = p["name"]
         if name not in curves:
             continue
         d = curves[name]
-        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 1.8})
+        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
         ax.plot(
             d["cycles"], d["remaining_pct"],
-            color=style["color"], ls=style["ls"], lw=style["lw"],
+            color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2),
             label=name,
         )
 
-    ax.axhline(soh_anchor_pct, color="#94a3b8", ls="--", lw=1.0, alpha=0.8)
-    ax.axvline(anchor_cycle, color="#94a3b8", ls="--", lw=1.0, alpha=0.5)
-    ax.set_xlabel("Equivalent charge cycles (each = one 40% energy session)")
-    ax.set_ylabel("Projected remaining capacity [%]")
+    ax.axhline(soh_anchor_pct, color="#94a3b8", ls="--", lw=1.2, alpha=0.8)
+    ax.axvline(anchor_cycle, color="#94a3b8", ls="--", lw=1.2, alpha=0.5)
+    ax.set_xlabel("Equivalent charge cycles (each = one 40% energy session)", fontsize=14)
+    ax.set_ylabel("Projected remaining capacity [%]", fontsize=14)
     efrac = info.get("energy_fraction")
     cell = info.get("cell", "?")
     ax.set_title(
         f"{cell}: projected capacity fade under different charging policies\n"
         f"(hybrid calendar+cyclic model · equal-energy sessions"
-        f"{f' · {100 * float(efrac):.0f}% energy' if efrac is not None else ''})"
+        f"{f' · {100 * float(efrac):.0f}% energy' if efrac is not None else ''})",
+        fontsize=14, fontweight="bold",
     )
     ax.set_xlim(0, float(next(iter(curves.values()))["cycles"][-1]))
     ax.set_ylim(75, 100)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, loc="lower left", framealpha=0.95)
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=12, loc="lower left", framealpha=0.95)
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
@@ -293,27 +299,33 @@ def plot_delta_vs_halfc(
     base = curves[baseline]["remaining_pct"]
     cycles = curves[baseline]["cycles"]
 
-    fig, ax = plt.subplots(figsize=(9.0, 5.0), dpi=150)
-    ax.axhline(0.0, color="#64748b", lw=1.2)
+    apply_paper_style()
+    fig, ax = plt.subplots(figsize=(9.8, 5.4), dpi=PAPER_DPI, facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
+    ax.axhline(0.0, color="#64748b", lw=1.4)
     for p in policies:
         name = p["name"]
         if name == baseline or not p["feasible"] or name not in curves:
             continue
         d = curves[name]
-        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.0})
+        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
         ax.plot(
             cycles, d["remaining_pct"] - base,
-            color=style["color"], ls=style["ls"], lw=style["lw"],
+            color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2),
             label=name,
         )
-    ax.set_xlabel("Equivalent charge cycles")
-    ax.set_ylabel(f"Δ remaining capacity vs {baseline} [%-points]")
-    ax.set_title(f"{info.get('cell', '?')}: capacity retention vs {baseline}")
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, loc="best")
+    ax.set_xlabel("Equivalent charge cycles", fontsize=14)
+    ax.set_ylabel(f"Δ remaining capacity vs {baseline} [%-points]", fontsize=14)
+    ax.set_title(
+        f"{info.get('cell', '?')}: capacity retention vs {baseline}",
+        fontsize=14, fontweight="bold",
+    )
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=12, loc="best")
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
@@ -324,38 +336,45 @@ def plot_lifetime_vs_ah(
     measured: Optional[Dict[str, np.ndarray]],
     out_path: Path,
 ) -> None:
+    apply_paper_style()
     fig, (ax, ax_zoom) = plt.subplots(
-        1, 2, figsize=(11.5, 5.0), dpi=150,
+        1, 2, figsize=(12.2, 5.4), dpi=PAPER_DPI,
         gridspec_kw={"width_ratios": [1.15, 1.0]},
+        facecolor=PAPER_LIGHT_BG,
     )
+    for a in (ax, ax_zoom):
+        a.set_facecolor(PAPER_LIGHT_BG)
     for p in policies:
         name = p["name"]
         if (not p["feasible"] and str(name).startswith("CC")) or name not in curves:
             continue
         d = curves[name]
-        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 1.8})
-        ax.plot(d["cum_ah"], d["remaining_pct"], color=style["color"], ls=style["ls"], lw=style["lw"], label=name)
-        ax_zoom.plot(d["cum_ah"], d["remaining_pct"], color=style["color"], ls=style["ls"], lw=style["lw"], label=name)
+        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
+        lw = style.get("lw", 2.2)
+        ax.plot(d["cum_ah"], d["remaining_pct"], color=style["color"], ls=style["ls"], lw=lw, label=name)
+        ax_zoom.plot(d["cum_ah"], d["remaining_pct"], color=style["color"], ls=style["ls"], lw=lw, label=name)
     if measured is not None:
-        ax.plot(measured["cum_ah"], measured["remaining_pct"], color="#0f172a", ls="--", lw=1.8, alpha=0.75, label="NASA measured")
-    ax.set_xlabel("Cumulative ampere-hour throughput [Ah]")
-    ax.set_ylabel("Remaining capacity [%]")
-    ax.set_title(f"{info.get('cell', '')}: fade vs throughput")
+        ax.plot(measured["cum_ah"], measured["remaining_pct"], color="#0f172a", ls="--", lw=2.0, alpha=0.75, label="NASA measured")
+    ax.set_xlabel("Cumulative ampere-hour throughput [Ah]", fontsize=14)
+    ax.set_ylabel("Remaining capacity [%]", fontsize=14)
+    ax.set_title(f"{info.get('cell', '')}: fade vs throughput", fontsize=13, fontweight="bold")
     ax.set_ylim(30, 105)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=8, loc="lower left", framealpha=0.95)
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=11, loc="lower left", framealpha=0.95)
     feas = [p for p in policies if p["feasible"] and p["name"] in curves]
     xmax = max(float(curves[p["name"]]["cum_ah"][-1]) for p in feas) if feas else 1.0
-    ax_zoom.set_xlabel("Cumulative Ah")
-    ax_zoom.set_ylabel("Projected remaining capacity [%]")
-    ax_zoom.set_title("Policy comparison")
+    ax_zoom.set_xlabel("Cumulative Ah", fontsize=14)
+    ax_zoom.set_ylabel("Projected remaining capacity [%]", fontsize=14)
+    ax_zoom.set_title("Policy comparison", fontsize=13, fontweight="bold")
     ax_zoom.set_xlim(0, xmax * 1.02)
     ax_zoom.set_ylim(75, 100)
-    ax_zoom.grid(True, alpha=0.3)
-    ax_zoom.legend(fontsize=8, loc="lower left")
+    ax_zoom.grid(True, linestyle="--", alpha=0.35)
+    ax_zoom.tick_params(labelsize=12)
+    ax_zoom.legend(fontsize=11, loc="lower left")
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
@@ -368,8 +387,10 @@ def plot_lifetime_vs_ref_style(
     *,
     n_show: int = 80,
 ) -> None:
+    apply_paper_style()
     q0 = float(Q_RATED_AH)
-    fig, ax = plt.subplots(figsize=(9.0, 5.2), dpi=150)
+    fig, ax = plt.subplots(figsize=(9.8, 5.6), dpi=PAPER_DPI, facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
     ys = []
     for p in policies:
         name = p["name"]
@@ -380,18 +401,19 @@ def plot_lifetime_vs_ref_style(
         x = d["cycles"][: n + 1]
         q_ah = q0 * d["remaining_pct"][: n + 1] / 100.0
         ys.append(float(q_ah[-1]))
-        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.0})
-        ax.plot(x, q_ah, color=style["color"], ls=style["ls"], lw=style["lw"], label=name)
-    ax.set_xlabel("Equivalent charge cycle index")
-    ax.set_ylabel("Projected capacity [Ah]")
-    ax.set_title(f"{info.get('cell', '?')}: capacity vs cycle")
+        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
+        ax.plot(x, q_ah, color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2), label=name)
+    ax.set_xlabel("Equivalent charge cycle index", fontsize=14)
+    ax.set_ylabel("Projected capacity [Ah]", fontsize=14)
+    ax.set_title(f"{info.get('cell', '?')}: capacity vs cycle", fontsize=14, fontweight="bold")
     if ys:
         ax.set_ylim(min(ys) - 0.05, q0 + 0.05)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, loc="lower left")
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=12, loc="lower left")
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 

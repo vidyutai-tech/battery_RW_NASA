@@ -38,6 +38,14 @@ from Constrained_BO.simulator import ChargingSimulator
 from Constrained_BO.viz import plot_best_profiles
 
 DEFAULT_CC_CURRENTS_A = (0.5, 1.0, 2.0, 3.0, 4.0)
+
+
+def paper_cccv_currents_a() -> Tuple[float, float]:
+    """½C and 1C amperes for NASA RW (Q_rated → 1.1 A / 2.2 A)."""
+    from Constrained_BO.config import Q_RATED_AH
+
+    q = float(Q_RATED_AH)
+    return (0.5 * q, 1.0 * q)
 PAPER_N_CALLS = 120
 PAPER_N_INITIAL = 15
 PAPER_N_RANDOM = 120
@@ -413,8 +421,12 @@ def dataframe_to_excel_bytes(df: pd.DataFrame, sheet_name: str = "comparison") -
 
 
 def figure_to_png_bytes(fig) -> bytes:
+    from Constrained_BO.viz import PAPER_DPI, PAPER_LIGHT_BG
+
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    fig.savefig(
+        buf, format="png", dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG,
+    )
     buf.seek(0)
     return buf.getvalue()
 
@@ -603,6 +615,49 @@ def _opt_row_from_payload(
     )
 
 
+def _reward_kwargs_from_payload(payload: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Pull reward weights from optimizer JSON meta (matched scoring)."""
+    meta = (payload or {}).get("meta") or {}
+    rw = meta.get("reward_weights") or {}
+    return {
+        "reward_mode": meta.get("reward_mode", "hybrid_qloss"),
+        "w_soc": float(rw.get("w_soc", 1.0)),
+        "w_qloss": float(rw.get("w_qloss", 1.0)),
+        "w_time": float(rw.get("w_time", 0.1)),
+        "w_temperature": float(rw.get("w_temperature", 1.0)),
+        "z": float(rw.get("z", 0.55)),
+    }
+
+
+def _reeval_opt_row(
+    cell,
+    simulator: ChargingSimulator,
+    payload: Dict[str, Any],
+    *,
+    method_label: str,
+    reward_kwargs: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """Re-simulate the payload winner and score with ``reward_kwargs`` (fair bars)."""
+    from Constrained_BO.bo_degradation_comparison import _eval_optimizer_best
+
+    try:
+        row = _eval_optimizer_best(
+            cell,
+            simulator,
+            payload,
+            method_label=method_label,
+            reward_kwargs=reward_kwargs,
+            by="reward",
+        )
+    except Exception:
+        return _opt_row_from_payload(payload, method_label=method_label)
+    fl = row.get("family_label") or ""
+    if fl:
+        row = dict(row)
+        row["label"] = f"{method_label} ({fl})"
+    return row
+
+
 def build_baseline_comparison_rows(
     cell,
     simulator: ChargingSimulator,
@@ -613,7 +668,12 @@ def build_baseline_comparison_rows(
     reward_kwargs: Optional[Dict[str, Any]] = None,
     use_cccv: bool = True,
 ) -> List[Dict[str, Any]]:
-    rw = reward_kwargs or {}
+    # Match optimizer weights so CCCV / GP-BO / Random share one reward scale.
+    # Do not apply qloss_cap here — that soft constraint is BO-only.
+    if reward_kwargs:
+        rw = dict(reward_kwargs)
+    else:
+        rw = _reward_kwargs_from_payload(bo_payload or random_payload)
     eval_kw = dict(
         currents_a=currents_a,
         reward_mode=rw.get("reward_mode", "hybrid_qloss"),
@@ -623,21 +683,33 @@ def build_baseline_comparison_rows(
         w_temperature=float(rw.get("w_temperature", 1.0)),
         z=float(rw.get("z", 0.55)),
     )
+    score_kw = {
+        "reward_mode": eval_kw["reward_mode"],
+        "w_soc": eval_kw["w_soc"],
+        "w_qloss": eval_kw["w_qloss"],
+        "w_time": eval_kw["w_time"],
+        "w_temperature": eval_kw["w_temperature"],
+        "z": eval_kw["z"],
+    }
     rows = (
         evaluate_cccv_baselines(cell, simulator, **eval_kw)
         if use_cccv
         else evaluate_cc_baselines(cell, simulator, **eval_kw)
     )
     if bo_payload is not None:
-        opt = _opt_row_from_payload(bo_payload, method_label="GP-BO")
+        opt = _reeval_opt_row(
+            cell, simulator, bo_payload,
+            method_label="GP-BO", reward_kwargs=score_kw,
+        )
         if opt is not None:
-            # Use "Optimized" color path for plots that key off method name.
             opt_plot = dict(opt)
             opt_plot["method"] = "Optimized"
-            # Keep family-aware label from _opt_row_from_payload
             rows.append(opt_plot)
     if random_payload is not None:
-        rnd = _opt_row_from_payload(random_payload, method_label="Random")
+        rnd = _reeval_opt_row(
+            cell, simulator, random_payload,
+            method_label="Random", reward_kwargs=score_kw,
+        )
         if rnd is not None:
             rnd_plot = dict(rnd)
             rnd_plot["method"] = "Random"
@@ -668,16 +740,30 @@ def plot_baseline_bar_png(
     value_key: str,
     ylabel: str,
     title: str,
+    plot_currents_a: Optional[Sequence[float]] = None,
 ) -> bytes:
-    """Hima-style bar chart; CC + Optimized/Random (exclude high-current infeasible CC from plot)."""
+    """Bar chart of CCCV/CC baselines + GP-BO + Random (UI-style)."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
 
     from Constrained_BO.compare_constant_current import PLOT_CC_CURRENTS_A, _infeasible_bar_label
+    from Constrained_BO.config import Q_RATED_AH
 
-    plot_currents = set(PLOT_CC_CURRENTS_A)
+    if plot_currents_a is None:
+        plot_currents = set(float(a) for a in PLOT_CC_CURRENTS_A)
+    else:
+        plot_currents = {float(a) for a in plot_currents_a}
+
+    def _is_plot_cccv(r: Dict[str, Any]) -> bool:
+        if r.get("method") not in ("CC", "CCCV"):
+            return False
+        ca = r.get("current_a")
+        if ca is None:
+            return False
+        return any(abs(float(ca) - t) < 1e-6 for t in plot_currents)
+
     cc = sorted(
-        (r for r in rows if r["method"] == "CC" and r.get("current_a") in plot_currents),
+        (r for r in rows if _is_plot_cccv(r)),
         key=lambda r: float(r["current_a"]),
     )
     others = [r for r in rows if r["method"] in ("Optimized", "Random", "GP-BO", "Random search")]
@@ -687,16 +773,38 @@ def plot_baseline_bar_png(
 
     color_map = {
         "CC": "#2563eb",
+        "CCCV": "#2563eb",
         "Optimized": "#9333ea",
         "GP-BO": "#9333ea",
         "Random": "#ea580c",
         "Random search": "#ea580c",
     }
-    labels = [r["label"] for r in plot_rows]
+
+    def _axis_label(r: Dict[str, Any]) -> str:
+        lab = str(r.get("label") or "")
+        ca = r.get("current_a")
+        if r.get("method") in ("CC", "CCCV") and ca is not None:
+            c_rate = float(ca) / float(Q_RATED_AH)
+            if abs(c_rate - 0.5) < 0.05:
+                return "CCCV ½C"
+            if abs(c_rate - 1.0) < 0.05:
+                return "CCCV 1C"
+            if abs(c_rate - 2.0) < 0.05:
+                return "CCCV 2C"
+        return lab
+
+    labels = [_axis_label(r) for r in plot_rows]
     values = [float(r[value_key]) for r in plot_rows]
     colors = [color_map.get(r["method"], "#6b7280") for r in plot_rows]
 
-    fig, ax = plt.subplots(figsize=(max(7, 1.2 * len(labels)), 4.5))
+    from Constrained_BO.viz import PAPER_DPI, PAPER_LIGHT_BG, apply_paper_style
+
+    apply_paper_style()
+    fig, ax = plt.subplots(
+        figsize=(max(8.0, 1.35 * len(labels)), 5.0),
+        facecolor=PAPER_LIGHT_BG,
+    )
+    ax.set_facecolor(PAPER_LIGHT_BG)
     x = np.arange(len(labels))
     bars = ax.bar(x, values, color=colors, edgecolor="white", linewidth=0.8)
     for bar, row in zip(bars, plot_rows):
@@ -712,17 +820,18 @@ def plot_baseline_bar_png(
                 _infeasible_bar_label(row),
                 ha="center",
                 va="bottom" if y >= 0 else "top",
-                fontsize=8,
+                fontsize=11,
                 color="#555555",
                 fontweight="bold",
             )
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=25, ha="right")
-    ax.set_ylabel(ylabel)
-    ax.set_title(title, fontweight="bold")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_xticklabels(labels, rotation=25, ha="right", fontsize=12)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.set_title(title, fontweight="bold", fontsize=15)
+    ax.grid(True, axis="y", linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
     legend_items = [
-        Patch(facecolor="#2563eb", label="CC baseline"),
+        Patch(facecolor="#2563eb", label="CCCV baseline"),
         Patch(facecolor="#9333ea", label="GP-BO best"),
         Patch(facecolor="#ea580c", label="Random best"),
     ]
@@ -730,7 +839,7 @@ def plot_baseline_bar_png(
         legend_items.append(
             Patch(facecolor="white", edgecolor="#666", hatch="//", label="Infeasible"),
         )
-    ax.legend(handles=legend_items, loc="best", fontsize=8)
+    ax.legend(handles=legend_items, loc="best", fontsize=11)
     fig.tight_layout()
     data = figure_to_png_bytes(fig)
     plt.close(fig)
@@ -843,12 +952,19 @@ def save_run_artifacts(
         bdf = baseline_rows_to_dataframe(baseline_rows)
         bdf.to_csv(out_dir / "baseline_comparison.csv", index=False)
         paths["baseline_csv"] = out_dir / "baseline_comparison.csv"
+        plot_currents = paper_cccv_currents_a()
         for key, ylabel, title, fname in (
             ("total_reward", "Total reward", "Reward comparison", "reward_comparison.png"),
             ("duration_min", "Duration (min)", "Time comparison", "time_comparison.png"),
             ("peak_temperature", "Peak T (°C)", "Temperature comparison", "temperature_comparison.png"),
         ):
-            png = plot_baseline_bar_png(baseline_rows, value_key=key, ylabel=ylabel, title=title)
+            png = plot_baseline_bar_png(
+                baseline_rows,
+                value_key=key,
+                ylabel=ylabel,
+                title=title,
+                plot_currents_a=plot_currents,
+            )
             p = out_dir / fname
             p.write_bytes(png)
             paths[fname] = p

@@ -14,15 +14,25 @@ import numpy as np
 
 # ── shared visual style (mirrors main repo visualize.py) ─────────────────────
 plt.rcParams.update({
-    "figure.dpi": 150,
+    "figure.dpi": 200,
+    "savefig.dpi": 200,
+    "figure.facecolor": "#FFFFFF",
+    "axes.facecolor": "#FFFFFF",
+    "savefig.facecolor": "#FFFFFF",
     "font.family": "DejaVu Sans",
-    "font.size": 10,
+    "font.size": 15,
+    "axes.titlesize": 16,
+    "axes.labelsize": 16,
+    "xtick.labelsize": 14,
+    "ytick.labelsize": 14,
+    "legend.fontsize": 13,
+    "figure.titlesize": 18,
     "axes.spines.top": False,
     "axes.spines.right": False,
     "axes.grid": True,
     "grid.linestyle": "--",
     "grid.alpha": 0.4,
-    "lines.linewidth": 1.8,
+    "lines.linewidth": 2.2,
 })
 
 ACCENT   = "#2563EB"
@@ -31,7 +41,8 @@ GREEN    = "#16A34A"
 PURPLE   = "#7C3AED"
 GREY     = "#6B7280"
 RED      = "#DC2626"
-LIGHT_BG = "#F8FAFC"
+# Pure white so figures blend with a paper page (no slate tint).
+LIGHT_BG = "#FFFFFF"
 
 CELL_COLORS = {"RW9": ACCENT, "RW10": ORANGE, "RW11": GREEN, "RW12": PURPLE}
 
@@ -46,7 +57,10 @@ FULL_COLOR     = GREEN
 def _savefig(fig: plt.Figure, path: Path, **kwargs) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=150, bbox_inches="tight", **kwargs)
+    fig.savefig(
+        path, dpi=200, bbox_inches="tight",
+        facecolor=LIGHT_BG, edgecolor=LIGHT_BG, transparent=False, **kwargs,
+    )
     plt.close(fig)
 
 

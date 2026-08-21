@@ -1,0 +1,9 @@
+{
+  "cell": "RW9",
+  "fraction": null,
+  "ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "mape_v": 0.4763233009725809,
+  "mape_t": 0.5069964565336704,
+  "n_val_windows": 400,
+  "title_suffix": "source twin"
+}

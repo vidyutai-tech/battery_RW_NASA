@@ -21,6 +21,42 @@ from Constrained_BO.profiles import DEFAULT_FAMILIES, get_family
 
 REWARDS_OUT_DIR = Path(__file__).resolve().parent / "data" / "rewards"
 
+# Paper-ready theme (aligned with rw_transfer digital-twin figures).
+# Pure white so figures blend with a paper page (no slate tint).
+PAPER_LIGHT_BG = "#FFFFFF"
+PAPER_ACCENT = "#2563EB"
+PAPER_ORANGE = "#EA580C"
+PAPER_GREEN = "#16A34A"
+PAPER_RED = "#DC2626"
+PAPER_GREY = "#6B7280"
+PAPER_PROFILE_COLORS = (PAPER_ACCENT, PAPER_ORANGE, PAPER_GREEN, PAPER_RED)
+PAPER_DPI = 200
+
+
+def apply_paper_style() -> None:
+    """Large fonts + clean spines for research-paper figures."""
+    plt.rcParams.update({
+        "figure.dpi": PAPER_DPI,
+        "savefig.dpi": PAPER_DPI,
+        "figure.facecolor": PAPER_LIGHT_BG,
+        "axes.facecolor": PAPER_LIGHT_BG,
+        "savefig.facecolor": PAPER_LIGHT_BG,
+        "font.family": "DejaVu Sans",
+        "font.size": 15,
+        "axes.titlesize": 16,
+        "axes.labelsize": 16,
+        "xtick.labelsize": 14,
+        "ytick.labelsize": 14,
+        "legend.fontsize": 13,
+        "figure.titlesize": 18,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": True,
+        "grid.linestyle": "--",
+        "grid.alpha": 0.35,
+        "lines.linewidth": 2.2,
+    })
+
 
 def _charge_current_plot(i_a: np.ndarray) -> np.ndarray:
     """Display magnitude (positive = charge)."""
@@ -202,6 +238,7 @@ def plot_best_profiles(
     title_suffix: str = "",
     family_order: Optional[List[str]] = None,
 ) -> plt.Figure:
+    apply_paper_style()
     order = family_order or DEFAULT_FAMILIES
     families = [
         fid for fid in order
@@ -211,8 +248,15 @@ def plot_best_profiles(
     if n_cols == 0:
         raise ValueError("No sessions to plot")
 
-    fig, axes = plt.subplots(4, n_cols, figsize=(3.2 * n_cols, 10), squeeze=False)
+    fig, axes = plt.subplots(
+        4, n_cols,
+        # Near final paper width so point sizes stay readable when inserted.
+        figsize=(2.6 * n_cols + 0.5, 9.8),
+        squeeze=False,
+        facecolor=PAPER_LIGHT_BG,
+    )
     row_labels = ["Current (A)", "Voltage (V)", "SoC (%)", "Temperature (°C)"]
+    c_i, c_v, c_soc, c_t = PAPER_PROFILE_COLORS
 
     for col, fid in enumerate(families):
         res = family_results[fid]
@@ -223,8 +267,7 @@ def plot_best_profiles(
 
         header = (
             f"{label}\n"
-            f"{metrics['duration_min']:.0f} min | "
-            f"loss={metrics['loss']:.1f}\n"
+            f"{metrics['duration_min']:.0f} min  ·  "
             f"{'feasible' if metrics['feasible'] else 'infeasible'}"
         )
         if metrics.get("constraint_mode") == "energy":
@@ -232,37 +275,43 @@ def plot_best_profiles(
                 f"\nE={metrics['energy_delivered_j']:.0f}/"
                 f"{metrics['energy_required_j']:.0f} J"
             )
-        axes[0, col].set_title(header, fontsize=9)
+        axes[0, col].set_title(header, fontsize=12, fontweight="bold", pad=8, linespacing=1.35)
 
-        axes[0, col].plot(t_min, _charge_current_plot(session["current_a"]), color="C0", lw=1.2)
-        axes[1, col].plot(t_min, session["voltage_v"], color="C1", lw=1.2)
-        axes[1, col].axhline(4.2, color="gray", ls="--", lw=0.8, alpha=0.7)
-        axes[2, col].plot(t_min, session["soc"] * 100.0, color="C2", lw=1.2)
-        axes[2, col].axhline(soc_target * 100.0, color="gray", ls="--", lw=0.8, alpha=0.7)
-        axes[2, col].axhline(soc_start * 100.0, color="C2", ls=":", lw=0.8, alpha=0.5)
-        axes[3, col].plot(t_min, session["temperature_c"], color="C3", lw=1.2)
-        axes[3, col].axhline(TEMP_LOW_C, color="green", ls="--", lw=0.8, alpha=0.6)
-        axes[3, col].axhline(TEMP_HIGH_C, color="green", ls="--", lw=0.8, alpha=0.6)
-        axes[3, col].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color="green", alpha=0.08)
+        axes[0, col].plot(
+            t_min, _charge_current_plot(session["current_a"]),
+            color=c_i, lw=2.2, drawstyle="steps-post",
+        )
+        axes[1, col].plot(t_min, session["voltage_v"], color=c_v, lw=2.0)
+        axes[1, col].axhline(4.2, color=PAPER_GREY, ls="--", lw=1.1, alpha=0.75)
+        axes[2, col].plot(t_min, session["soc"] * 100.0, color=c_soc, lw=2.0)
+        axes[2, col].axhline(soc_target * 100.0, color=PAPER_GREY, ls="--", lw=1.1, alpha=0.75)
+        axes[2, col].axhline(soc_start * 100.0, color=c_soc, ls=":", lw=1.1, alpha=0.55)
+        axes[3, col].plot(t_min, session["temperature_c"], color=c_t, lw=2.0)
+        axes[3, col].axhline(TEMP_LOW_C, color=PAPER_GREEN, ls="--", lw=1.1, alpha=0.65)
+        axes[3, col].axhline(TEMP_HIGH_C, color=PAPER_GREEN, ls="--", lw=1.1, alpha=0.65)
+        axes[3, col].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color=PAPER_GREEN, alpha=0.10)
 
         for row in range(4):
-            axes[row, col].grid(True, alpha=0.3)
+            ax = axes[row, col]
+            ax.set_facecolor(PAPER_LIGHT_BG)
+            ax.grid(True, linestyle="--", alpha=0.35)
+            ax.tick_params(labelsize=11)
             if col == 0:
-                axes[row, col].set_ylabel(row_labels[row])
+                ax.set_ylabel(row_labels[row], fontsize=13)
 
     for col in range(n_cols):
-        axes[3, col].set_xlabel("Time (min)")
+        axes[3, col].set_xlabel("Time (min)", fontsize=13)
 
-    sup = f"Best charging profiles — {cell_id}  (temp + time reward)"
-    if title_suffix:
-        sup += f"\n{title_suffix}"
-    fig.suptitle(sup, fontsize=11, y=1.01)
-    fig.tight_layout()
+    fig.suptitle(f"Best Charging Profile - {cell_id}", fontsize=16, fontweight="bold", y=0.99)
+    fig.tight_layout(h_pad=0.75, w_pad=0.35, rect=(0, 0, 1, 0.97))
 
     if out_path is not None:
         out_path = Path(out_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+        fig.savefig(
+            out_path, dpi=PAPER_DPI, bbox_inches="tight",
+            facecolor=PAPER_LIGHT_BG, edgecolor=PAPER_LIGHT_BG, transparent=False,
+        )
 
     return fig
 
@@ -305,13 +354,17 @@ def plot_optimized_profile(
     out_path: Optional[Path] = None,
 ) -> plt.Figure:
     """Four-panel trajectory plot for a single optimized charging session."""
+    apply_paper_style()
     t_min = session["time_s"] / 60.0
     i_plot = _charge_current_plot(session["current_a"])
     rest_spans = _rest_intervals_min(session["time_s"], session["current_a"])
     t_end = float(t_min[-1]) if t_min.size else 0.0
     soc_end_pct = float(session["soc"][-1] * 100.0) if session["soc"].size else 0.0
+    c_i, c_v, c_soc, c_t = PAPER_PROFILE_COLORS
 
-    fig, axes = plt.subplots(4, 1, figsize=(8.5, 10), sharex=True)
+    fig, axes = plt.subplots(
+        4, 1, figsize=(9.0, 11.0), sharex=True, facecolor=PAPER_LIGHT_BG,
+    )
     row_labels = ["Current (A)", "Voltage (V)", "SoC (%)", "Temperature (°C)"]
 
     feasible = metrics.get("feasible", False)
@@ -340,45 +393,47 @@ def plot_optimized_profile(
             f"  |  E={metrics.get('energy_delivered_j', 0):.0f}/"
             f"{metrics.get('energy_required_j', 0):.0f} J"
         )
-    axes[0].set_title(header, fontsize=10, fontweight="bold", loc="left")
+    axes[0].set_title(header, fontsize=14, fontweight="bold", loc="left")
 
     for ax in axes:
+        ax.set_facecolor(PAPER_LIGHT_BG)
         for t0, t1 in rest_spans:
             ax.axvspan(t0, t1, color="#94a3b8", alpha=0.18, zorder=0)
-        ax.axvline(t_end, color="#9333ea", ls="--", lw=1.0, alpha=0.85, zorder=1)
-        ax.grid(True, alpha=0.3)
+        ax.axvline(t_end, color="#9333ea", ls="--", lw=1.3, alpha=0.85, zorder=1)
+        ax.grid(True, linestyle="--", alpha=0.35)
+        ax.tick_params(labelsize=12)
 
-    axes[0].plot(t_min, i_plot, color="C0", lw=1.4, drawstyle="steps-post", label="Charge current")
-    axes[0].set_ylabel(row_labels[0])
+    axes[0].plot(t_min, i_plot, color=c_i, lw=2.2, drawstyle="steps-post", label="Charge current")
+    axes[0].set_ylabel(row_labels[0], fontsize=14)
     if rest_spans:
         axes[0].fill_between([], [], color="#94a3b8", alpha=0.35, label="Rest interval")
 
-    axes[1].plot(t_min, session["voltage_v"], color="C1", lw=1.2)
-    axes[1].axhline(4.2, color="gray", ls="--", lw=0.8, alpha=0.7)
-    axes[1].set_ylabel(row_labels[1])
+    axes[1].plot(t_min, session["voltage_v"], color=c_v, lw=2.0)
+    axes[1].axhline(4.2, color=PAPER_GREY, ls="--", lw=1.1, alpha=0.75)
+    axes[1].set_ylabel(row_labels[1], fontsize=14)
 
-    axes[2].plot(t_min, session["soc"] * 100.0, color="C2", lw=1.2)
-    axes[2].axhline(soc_target * 100.0, color="gray", ls="--", lw=0.8, alpha=0.7,
+    axes[2].plot(t_min, session["soc"] * 100.0, color=c_soc, lw=2.0)
+    axes[2].axhline(soc_target * 100.0, color=PAPER_GREY, ls="--", lw=1.1, alpha=0.75,
                     label=f"SoC target ({soc_target * 100:.0f}%)")
-    axes[2].axhline(soc_start * 100.0, color="C2", ls=":", lw=0.8, alpha=0.5)
-    axes[2].scatter([t_end], [soc_end_pct], color="#9333ea", s=45, zorder=5, label="Stop")
+    axes[2].axhline(soc_start * 100.0, color=c_soc, ls=":", lw=1.1, alpha=0.55)
+    axes[2].scatter([t_end], [soc_end_pct], color="#9333ea", s=55, zorder=5, label="Stop")
     axes[2].annotate(
         f"Stop\n{metrics.get('end_reason', '')}",
         (t_end, soc_end_pct),
         textcoords="offset points",
         xytext=(-40, 8),
-        fontsize=8,
+        fontsize=11,
         color="#9333ea",
     )
-    axes[2].set_ylabel(row_labels[2])
+    axes[2].set_ylabel(row_labels[2], fontsize=14)
 
-    axes[3].plot(t_min, session["temperature_c"], color="C3", lw=1.2)
-    axes[3].axhline(TEMP_LOW_C, color="green", ls="--", lw=0.8, alpha=0.6)
-    axes[3].axhline(TEMP_HIGH_C, color="green", ls="--", lw=0.8, alpha=0.6)
-    axes[3].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color="green", alpha=0.08,
+    axes[3].plot(t_min, session["temperature_c"], color=c_t, lw=2.0)
+    axes[3].axhline(TEMP_LOW_C, color=PAPER_GREEN, ls="--", lw=1.1, alpha=0.65)
+    axes[3].axhline(TEMP_HIGH_C, color=PAPER_GREEN, ls="--", lw=1.1, alpha=0.65)
+    axes[3].axhspan(TEMP_LOW_C, TEMP_HIGH_C, color=PAPER_GREEN, alpha=0.10,
                     label=f"Optimal band ({TEMP_LOW_C:.0f}–{TEMP_HIGH_C:.0f} °C)")
-    axes[3].set_ylabel(row_labels[3])
-    axes[3].set_xlabel("Time (min)")
+    axes[3].set_ylabel(row_labels[3], fontsize=14)
+    axes[3].set_xlabel("Time (min)", fontsize=14)
 
     if params and params.get("family_id") == "pulsed":
         ic = params.get("i_charge", 0.0)
@@ -387,19 +442,22 @@ def plot_optimized_profile(
         param_note = f"Pulsed: {ic:.2f} A  |  ON {on:.2f} min  |  REST {rest:.2f} min"
         axes[0].text(
             0.02, 0.97, param_note, transform=axes[0].transAxes,
-            fontsize=8, va="top", ha="left",
+            fontsize=11, va="top", ha="left",
             bbox=dict(boxstyle="round,pad=0.35", facecolor="#eef4ff", edgecolor="#93b4e8", alpha=0.95),
         )
 
-    axes[0].legend(loc="upper right", fontsize=8)
-    axes[2].legend(loc="lower right", fontsize=8)
-    axes[3].legend(loc="upper right", fontsize=8)
+    axes[0].legend(loc="upper right", fontsize=11)
+    axes[2].legend(loc="lower right", fontsize=11)
+    axes[3].legend(loc="upper right", fontsize=11)
     fig.tight_layout()
 
     if out_path is not None:
         out_path = Path(out_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+        fig.savefig(
+            out_path, dpi=PAPER_DPI, bbox_inches="tight",
+            facecolor=PAPER_LIGHT_BG, edgecolor=PAPER_LIGHT_BG, transparent=False,
+        )
     return fig
 
 

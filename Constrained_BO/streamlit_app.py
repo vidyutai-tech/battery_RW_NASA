@@ -53,6 +53,7 @@ from Constrained_BO.optimize_api import (
     comparison_dataframe,
     dataframe_to_excel_bytes,
     generate_degradation_report_figures,
+    paper_cccv_currents_a,
     plot_baseline_bar_png,
     plot_profiles_png,
     results_to_dataframe,
@@ -297,6 +298,7 @@ if run_clicked:
             bo_payload=payloads.get("gp_bo"),
             random_payload=payloads.get("random_search"),
             reward_kwargs=reward_kwargs,
+            currents_a=paper_cccv_currents_a(),
         )
         deg_cache = (
             _ROOT / "Constrained_BO" / "results" / "ui_runs" / cell.cell_id / "degradation_report"
@@ -474,7 +476,11 @@ else:
         ):
             try:
                 png = plot_baseline_bar_png(
-                    baseline_rows, value_key=key, ylabel=ylabel, title=title,
+                    baseline_rows,
+                    value_key=key,
+                    ylabel=ylabel,
+                    title=title,
+                    plot_currents_a=paper_cccv_currents_a(),
                 )
                 baseline_pngs[fname] = png
                 col.image(png, caption=title, use_container_width=True)

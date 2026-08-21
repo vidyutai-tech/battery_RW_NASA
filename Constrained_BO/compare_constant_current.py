@@ -24,7 +24,12 @@ from Constrained_BO.simulator import ChargingSimulator
 from Constrained_BO.viz import plot_optimized_profile
 
 DEFAULT_CC_CURRENTS_A = (0.5, 1.0, 2.0, 3.0, 4.0)
-PLOT_CC_CURRENTS_A = (0.5, 1.0)  # feasible baselines shown in bar charts
+# Bar-chart baselines: true NASA ½C / 1C (Q_rated = 2.2 Ah → 1.1 A / 2.2 A)
+try:
+    from Constrained_BO.config import Q_RATED_AH as _Q_RATED_AH
+except Exception:  # pragma: no cover
+    _Q_RATED_AH = 2.2
+PLOT_CC_CURRENTS_A = (0.5 * float(_Q_RATED_AH), 1.0 * float(_Q_RATED_AH))
 _COMPARE_OUTPUTS = (
     "baseline_results.json",
     "reward_comparison.png",

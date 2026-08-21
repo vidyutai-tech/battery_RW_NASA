@@ -30,11 +30,15 @@ from Constrained_BO.objective import evaluate_session
 from Constrained_BO.optimize_api import build_cell, evaluate_cccv_baselines
 from Constrained_BO.profiles import get_family, set_profile_bounds
 from Constrained_BO.simulator import ChargingSimulator
+from Constrained_BO.viz import PAPER_DPI, PAPER_LIGHT_BG, apply_paper_style
 
 ROOT = Path(__file__).resolve().parents[1]
 
 # C-rate → amperes for NASA RW (Q_rated = 2.2 Ah → 1C = 2.2 A)
-DEFAULT_C_RATES = (0.5, 1.0, 2.0)
+# Paper/UI narrative: ½C and 1C CCCV only (2C optional via CLI).
+PAPER_C_RATES = (0.5, 1.0)
+DEFAULT_C_RATES = PAPER_C_RATES
+ALL_C_RATES = (0.5, 1.0, 2.0)
 
 COLORS = {
     "CCCV ½C": "#64748b",
@@ -313,12 +317,14 @@ def plot_simple_one_axis(
     out_path: Path,
 ) -> None:
     """Clean single-axis bar chart (main deliverable)."""
+    apply_paper_style()
     labels = [r["axis_label"] for r in rows]
     q_tot = [float(r.get("qloss_total") or 0.0) for r in rows]
     feasible = [bool(r.get("feasible")) for r in rows]
     colors = [COLORS.get(r["group"], "#94a3b8") for r in rows]
 
-    fig, ax = plt.subplots(figsize=(9.2, 5.2), dpi=150)
+    fig, ax = plt.subplots(figsize=(10.0, 5.8), dpi=PAPER_DPI, facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
     x = np.arange(len(rows))
     bars = ax.bar(x, q_tot, color=colors, edgecolor="k", lw=0.6, width=0.7)
     ymax = max(q_tot) if q_tot else 1.0
@@ -330,14 +336,14 @@ def plot_simple_one_axis(
                 bar.get_x() + bar.get_width() / 2,
                 q + ymax * 0.02,
                 "infeasible\n(Vmax / shortfall)",
-                ha="center", va="bottom", fontsize=7, color="#b91c1c",
+                ha="center", va="bottom", fontsize=10, color="#b91c1c",
             )
         else:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 q + ymax * 0.015,
                 f"{q:.4f}",
-                ha="center", va="bottom", fontsize=8, color="#0f172a",
+                ha="center", va="bottom", fontsize=11, color="#0f172a",
             )
 
     # % vs best feasible CCCV (½C / 1C / 2C)
@@ -360,14 +366,14 @@ def plot_simple_one_axis(
                     xy=(i, q),
                     xytext=(0, 22),
                     textcoords="offset points",
-                    ha="center", fontsize=8,
+                    ha="center", fontsize=11,
                     color="#166534" if red > 0 else "#9a3412",
                     fontweight="bold",
                 )
 
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, fontsize=9)
-    ax.set_ylabel("Session degradation Q_loss (index, lower better)")
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.set_ylabel("Session degradation Q_loss (index, lower better)", fontsize=14)
     cell = info.get("cell", "?")
     efrac = info.get("energy_fraction")
     mode = info.get("constraint_mode")
@@ -378,10 +384,12 @@ def plot_simple_one_axis(
     ax.set_title(
         f"Charging policy vs degradation — {cell}\n"
         f"CCCV ½C / 1C / 2C   vs   Random best   vs   GP-BO best\n"
-        f"({constraint}; same BDT twin + hybrid calendar/cyclic model)"
+        f"({constraint}; same BDT twin + hybrid calendar/cyclic model)",
+        fontsize=14, fontweight="bold",
     )
     ax.set_ylim(0, ymax * 1.35)
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(True, axis="y", linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
 
     from matplotlib.patches import Patch
     legend_items = [
@@ -392,18 +400,18 @@ def plot_simple_one_axis(
         Patch(facecolor=COLORS["GP-BO"], edgecolor="k", label="GP-BO best"),
         Patch(facecolor="#94a3b8", edgecolor="k", hatch="//", label="Infeasible (energy)"),
     ]
-    ax.legend(handles=legend_items, fontsize=8, loc="upper left", framealpha=0.95)
+    ax.legend(handles=legend_items, fontsize=11, loc="upper left", framealpha=0.95)
 
     fig.text(
         0.5, -0.06,
         "Baselines = classic CCCV (CC at ½C/1C/2C then CV at Vmax). "
         "NASA RW Q_rated = 2.2 Ah → ½C=1.1 A, 1C=2.2 A, 2C=4.4 A. "
         "Q_loss = Relative Capacity-Loss Index for one session (not multi-year % fade).",
-        ha="center", fontsize=7.5, color="#475569", style="italic",
+        ha="center", fontsize=10, color="#475569", style="italic",
     )
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
@@ -413,6 +421,7 @@ def plot_degradation_comparison(
     out_path: Path,
 ) -> None:
     """Detail: Q_total bars + stacked calendar/cyclic."""
+    apply_paper_style()
     labels = [r["axis_label"] for r in rows]
     q_tot = np.array([float(r.get("qloss_total") or 0.0) for r in rows])
     q_cal = np.array([float(r.get("qloss_calendar") or 0.0) for r in rows])
@@ -423,9 +432,12 @@ def plot_degradation_comparison(
     peak_t = [float(r.get("peak_temperature") or 0.0) for r in rows]
 
     fig, axes = plt.subplots(
-        1, 2, figsize=(11.5, 5.2), dpi=140,
+        1, 2, figsize=(12.2, 5.8), dpi=PAPER_DPI,
         gridspec_kw={"width_ratios": [1.35, 1.0]},
+        facecolor=PAPER_LIGHT_BG,
     )
+    for a in axes:
+        a.set_facecolor(PAPER_LIGHT_BG)
 
     ax = axes[0]
     x = np.arange(len(rows))
@@ -435,8 +447,8 @@ def plot_degradation_comparison(
             bar.set_hatch("//")
             bar.set_alpha(0.45)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, fontsize=8)
-    ax.set_ylabel("Session Q_loss index (lower = less degradation)")
+    ax.set_xticklabels(labels, fontsize=11)
+    ax.set_ylabel("Session Q_loss index (lower = less degradation)", fontsize=14)
     cell = info.get("cell", "?")
     efrac = info.get("energy_fraction")
     mode = info.get("constraint_mode", "?")
@@ -444,8 +456,9 @@ def plot_degradation_comparison(
         f"energy {100 * float(efrac):.0f}%" if efrac is not None and mode == "energy"
         else f"SoC→{info.get('soc_target')}"
     )
-    ax.set_title(f"{cell}: degradation per charge session ({title_extra})")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_title(f"{cell}: degradation per charge session ({title_extra})", fontsize=13, fontweight="bold")
+    ax.grid(True, axis="y", linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
 
     ax2 = axes[1]
     ax2.bar(x, q_cyc, color=colors, edgecolor="k", lw=0.4, width=0.72, label="Q_cyclic")
@@ -458,11 +471,12 @@ def plot_degradation_comparison(
             ax2.patches[i].set_hatch("//")
             ax2.patches[i].set_alpha(0.45)
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, fontsize=8)
-    ax2.set_ylabel("Stacked Q_loss index")
-    ax2.set_title("Calendar vs cyclic split")
-    ax2.legend(fontsize=8, loc="upper right")
-    ax2.grid(True, axis="y", alpha=0.3)
+    ax2.set_xticklabels(labels, fontsize=11)
+    ax2.set_ylabel("Stacked Q_loss index", fontsize=14)
+    ax2.set_title("Calendar vs cyclic split", fontsize=13, fontweight="bold")
+    ax2.legend(fontsize=11, loc="upper right")
+    ax2.grid(True, axis="y", linestyle="--", alpha=0.35)
+    ax2.tick_params(labelsize=12)
 
     lines = []
     for r, d, t, ok in zip(rows, durations, peak_t, feasible):
@@ -476,11 +490,11 @@ def plot_degradation_comparison(
         "  |  ".join(lines) + "\n"
         "Q_loss = Relative Capacity-Loss Index for one equal-energy session; "
         "hatched = constraint-infeasible.",
-        ha="center", fontsize=7.5, color="#475569",
+        ha="center", fontsize=10, color="#475569",
     )
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
@@ -491,7 +505,9 @@ def plot_pareto_cloud(
     out_path: Path,
 ) -> None:
     """Duration vs Q_loss: all BO/Random trials + CC / winners highlighted."""
-    fig, ax = plt.subplots(figsize=(9.0, 5.4), dpi=150)
+    apply_paper_style()
+    fig, ax = plt.subplots(figsize=(9.8, 5.8), dpi=PAPER_DPI, facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
 
     for method, color, marker in (
         ("Random", COLORS["Random"], "o"),
@@ -503,7 +519,7 @@ def plot_pareto_cloud(
         ax.scatter(
             [p["duration_min"] for p in pts],
             [p["qloss_total"] for p in pts],
-            c=color, s=22, alpha=0.35, marker=marker,
+            c=color, s=28, alpha=0.35, marker=marker,
             label=f"{method} trials (feasible)", edgecolors="none",
         )
         inf = [p for p in cloud if p["method"] == method and not p["feasible"]]
@@ -511,7 +527,7 @@ def plot_pareto_cloud(
             ax.scatter(
                 [p["duration_min"] for p in inf],
                 [p["qloss_total"] for p in inf],
-                c=color, s=18, alpha=0.15, marker="x",
+                c=color, s=22, alpha=0.15, marker="x",
             )
 
     for r in rows:
@@ -520,7 +536,7 @@ def plot_pareto_cloud(
         ok = bool(r.get("feasible"))
         color = COLORS.get(r["group"], "#334155")
         marker = "s" if str(r["group"]).startswith("CC") else "*"
-        size = 160 if marker == "*" else 110
+        size = 180 if marker == "*" else 130
         ax.scatter(
             [d], [q], c=color, s=size, marker=marker,
             edgecolors="k", linewidths=0.8, zorder=5,
@@ -531,20 +547,22 @@ def plot_pareto_cloud(
             xy=(d, q),
             xytext=(6, 6),
             textcoords="offset points",
-            fontsize=8,
+            fontsize=11,
             color="#0f172a",
         )
 
-    ax.set_xlabel("Charge duration [min]")
-    ax.set_ylabel("Session Q_loss index (lower better)")
+    ax.set_xlabel("Charge duration [min]", fontsize=14)
+    ax.set_ylabel("Session Q_loss index (lower better)", fontsize=14)
     cell = info.get("cell", "?")
     efrac = info.get("energy_fraction")
     ax.set_title(
         f"{cell}: search cloud + baselines (equal-energy when feasible)\n"
         f"Lower-left is better (faster + less degradation). "
-        f"Energy fraction={efrac}"
+        f"Energy fraction={efrac}",
+        fontsize=14, fontweight="bold",
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
     # de-duplicate legend
     handles, labels = ax.get_legend_handles_labels()
     seen = set()
@@ -554,16 +572,16 @@ def plot_pareto_cloud(
             continue
         seen.add(lab)
         uniq.append((h, lab))
-    ax.legend(*zip(*uniq), fontsize=8, loc="best", framealpha=0.95)
+    ax.legend(*zip(*uniq), fontsize=11, loc="best", framealpha=0.95)
     fig.text(
         0.5, -0.03,
         "Stars = optimizer winners; squares = CCCV ½C/1C/2C baselines. "
         "Infeasible CCCV still plotted at truncated session Q_loss (do not deliver full energy).",
-        ha="center", fontsize=7.5, color="#475569", style="italic",
+        ha="center", fontsize=10, color="#475569", style="italic",
     )
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 

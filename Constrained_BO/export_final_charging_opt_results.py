@@ -29,6 +29,7 @@ import numpy as np
 import pandas as pd
 
 from Constrained_BO.bo_degradation_comparison import (
+    PAPER_C_RATES,
     _pick_best_family,
     _save_csv,
     build_comparison_rows,
@@ -52,13 +53,19 @@ from Constrained_BO.optimize_api import (
     build_cell,
     comparison_dataframe,
     dataframe_to_excel_bytes,
+    paper_cccv_currents_a,
     plot_baseline_bar_png,
-    plot_profiles_png,
     results_to_dataframe,
     run_optimization,
 )
 from Constrained_BO.simulator import ChargingSimulator
-from Constrained_BO.viz import plot_best_profiles, rebuild_family_results_from_json
+from Constrained_BO.viz import (
+    PAPER_DPI,
+    PAPER_LIGHT_BG,
+    apply_paper_style,
+    plot_best_profiles,
+    rebuild_family_results_from_json,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_ROOT = ROOT / "Constrained_BO" / "results" / "final_charging_opt_results"
@@ -276,7 +283,9 @@ def _plot_lifetime_fair(
     anchor_n: int = ANCHOR_N,
 ) -> None:
     """Lifetime plot: solid = equal-energy feasible; dotted = infeasible ghosts."""
-    fig, ax = plt.subplots(figsize=(7.2, 4.4))
+    apply_paper_style()
+    fig, ax = plt.subplots(figsize=(8.2, 5.0), facecolor=PAPER_LIGHT_BG)
+    ax.set_facecolor(PAPER_LIGHT_BG)
     feas_pols = [p for p in policies if p.get("feasible")]
     ghosts = [p for p in policies if not p.get("feasible")]
 
@@ -285,11 +294,11 @@ def _plot_lifetime_fair(
         c = curves.get(name)
         if c is None:
             continue
-        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 1.8})
+        style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
         ax.plot(
             c["cycles"], c["remaining_pct"],
             color=style["color"], ls=style.get("ls", "-"),
-            lw=style.get("lw", 1.8), label=name,
+            lw=style.get("lw", 2.2), label=name,
         )
     for p in ghosts:
         name = p["name"]
@@ -298,44 +307,41 @@ def _plot_lifetime_fair(
             continue
         ax.plot(
             c["cycles"], c["remaining_pct"],
-            color="#94a3b8", ls=":", lw=1.3, alpha=0.7,
+            color="#94a3b8", ls=":", lw=1.6, alpha=0.7,
             label=f"{name} (infeasible)",
         )
 
-    ax.axhline(80.0, color="#475569", ls="--", lw=0.9, alpha=0.7)
-    ax.axvline(anchor_n, color="#475569", ls=":", lw=0.9, alpha=0.5)
-    ax.set_xlabel("Equivalent charge cycles (one equal-energy session each)")
-    ax.set_ylabel("Projected remaining capacity [%]")
+    ax.axhline(80.0, color="#475569", ls="--", lw=1.1, alpha=0.7)
+    ax.axvline(anchor_n, color="#475569", ls=":", lw=1.1, alpha=0.5)
+    ax.set_xlabel("Equivalent charge cycles (one equal-energy session each)", fontsize=14)
+    ax.set_ylabel("Projected remaining capacity [%]", fontsize=14)
     cell = info.get("cell", "")
     ax.set_title(
         f"{cell}: capacity fade — equal-energy lifetime ranking\n"
-        f"(hybrid calendar+cyclic; solid = feasible)"
+        f"(hybrid calendar+cyclic; solid = feasible)",
+        fontsize=14, fontweight="bold",
     )
     ax.set_xlim(0, max((c["cycles"][-1] for c in curves.values()), default=600))
     ax.set_ylim(60, 102)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=8, loc="lower left")
+    ax.grid(True, linestyle="--", alpha=0.35)
+    ax.tick_params(labelsize=12)
+    ax.legend(fontsize=11, loc="lower left")
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=160, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
 
 
 def _pick_best_cccv_baseline(by_pol: Dict[str, Dict[str, Any]]) -> str:
-    """Best feasible CCCV among ½C/1C/2C: lowest Q, then shortest time."""
-    candidates = []
-    for name in ("CCCV ½C", "CCCV 1C", "CCCV 2C"):
+    """Percent-column baseline: prefer CCCV ½C, else CCCV 1C (paper narrative)."""
+    for name in ("CCCV ½C", "CCCV 1C"):
         p = by_pol.get(name)
-        if not p or not p.get("feasible"):
-            continue
-        q = float(p.get("qloss_total") or 1e9)
-        t = float(p.get("duration_min") or 1e9)
-        candidates.append((q, t, name))
-    if candidates:
-        candidates.sort()
-        return candidates[0][2]
+        if p and p.get("feasible"):
+            return name
     if by_pol.get("CC ½C", {}).get("feasible"):
         return "CC ½C"
+    if by_pol.get("CC 1C", {}).get("feasible"):
+        return "CC 1C"
     return "Random"
 
 
@@ -387,7 +393,7 @@ def _comparison_table(
         if name:
             sess_by[str(name).replace("\n", " ").strip()] = r
 
-    order = ["CCCV ½C", "CCCV 1C", "CCCV 2C", "Random", "GP-BO", "GP-BO (min Q)"]
+    order = ["CCCV ½C", "CCCV 1C", "Random", "GP-BO", "GP-BO (min Q)"]
     # Map session row labels → canonical names
     alias = {}
     for r in session_rows:
@@ -514,6 +520,7 @@ def _export_ui(
     rnd_results: Dict[str, Any],
     device: str,
 ) -> None:
+    """Write UI-style artifacts into ``out_dir`` and mirror under ``ui_runs``."""
     ui_dir = UI_ROOT / cell.cell_id
     ui_dir.mkdir(parents=True, exist_ok=True)
     for src, dst in [
@@ -527,26 +534,43 @@ def _export_ui(
 
     try:
         cdf = comparison_dataframe(bo_payload, rnd_payload)
-        cdf.to_csv(ui_dir / "bo_vs_random_comparison.csv", index=False)
-        (ui_dir / "bo_vs_random_comparison.xlsx").write_bytes(
-            dataframe_to_excel_bytes(cdf)
-        )
+        for dest in (out_dir, ui_dir):
+            cdf.to_csv(dest / "bo_vs_random_comparison.csv", index=False)
+            (dest / "bo_vs_random_comparison.xlsx").write_bytes(
+                dataframe_to_excel_bytes(cdf)
+            )
     except Exception as exc:
         print(f"  (comparison xlsx skipped: {exc})")
 
     try:
         sim = ChargingSimulator.from_cell(cell, device=device)
+        plot_currents = paper_cccv_currents_a()
         rows = build_baseline_comparison_rows(
-            cell, sim, bo_payload=bo_payload, random_payload=rnd_payload,
+            cell,
+            sim,
+            bo_payload=bo_payload,
+            random_payload=rnd_payload,
+            currents_a=plot_currents,
         )
-        pd.DataFrame(rows).to_csv(ui_dir / "baseline_comparison.csv", index=False)
-        png = plot_baseline_bar_png(
-            rows,
-            value_key="total_reward",
-            ylabel="Total reward",
-            title=f"{cell.cell_id}: baseline comparison",
+        for dest in (out_dir, ui_dir):
+            pd.DataFrame(rows).to_csv(dest / "baseline_comparison.csv", index=False)
+        bar_specs = (
+            ("total_reward", "Total reward", "Reward comparison", "reward_comparison.png"),
+            ("duration_min", "Duration (min)", "Time comparison", "time_comparison.png"),
+            ("peak_temperature", "Peak T (°C)", "Temperature comparison", "temperature_comparison.png"),
+            ("total_reward", "Total reward", f"{cell.cell_id}: baseline comparison", "baseline_comparison.png"),
         )
-        (ui_dir / "baseline_comparison.png").write_bytes(png)
+        for key, ylabel, title, fname in bar_specs:
+            png = plot_baseline_bar_png(
+                rows,
+                value_key=key,
+                ylabel=ylabel,
+                title=title,
+                plot_currents_a=plot_currents,
+            )
+            for dest in (out_dir, ui_dir):
+                (dest / fname).write_bytes(png)
+        print(f"  Wrote bar charts → {out_dir.name}/ + ui_runs/{cell.cell_id}/")
     except Exception as exc:
         print(f"  (baseline bars skipped: {exc})")
 
@@ -582,7 +606,9 @@ def export_cell(
 
     print(f"=== {cell_id}  sources:\n  {bo_path}\n  {rnd_path}")
 
-    rows, info, cloud = build_comparison_rows(bo_path, rnd_path, device=device)
+    rows, info, cloud = build_comparison_rows(
+        bo_path, rnd_path, device=device, c_rates=PAPER_C_RATES,
+    )
     # Also evaluate min-Q GP-BO row for the table
     from Constrained_BO.bo_degradation_comparison import (
         _cell_from_meta,
@@ -612,7 +638,6 @@ def export_cell(
     COLORS = {
         "CCCV ½C": "#64748b",
         "CCCV 1C": "#2563eb",
-        "CCCV 2C": "#1e40af",
         "Random": "#f59e0b",
         "GP-BO": "#16a34a",
         "GP-BO (min Q)": "#86efac",
@@ -631,11 +656,13 @@ def export_cell(
 
     # Lifetime: reward-best (primary) + min-Q (for table row fade only).
     policies, life_info = _collect_policies(
-        bo_path, rnd_path, device=device, include_infeasible_cc=True, gpbo_select="reward",
+        bo_path, rnd_path, device=device, include_infeasible_cc=True,
+        gpbo_select="reward", c_rates=PAPER_C_RATES,
     )
     _, curves, scale = project_fade(policies)
     policies_mq, _ = _collect_policies(
-        bo_path, rnd_path, device=device, include_infeasible_cc=True, gpbo_select="min_q",
+        bo_path, rnd_path, device=device, include_infeasible_cc=True,
+        gpbo_select="min_q", c_rates=PAPER_C_RATES,
     )
     _, curves_mq, _ = project_fade(policies_mq)
     # Expose min-Q GP-BO under a distinct curve key for the comparison table.
@@ -677,24 +704,31 @@ def export_cell(
     except Exception as exc:
         print(f"  (comparison xlsx skipped: {exc})")
 
-    # Profile PNGs: never overwrite existing GP-BO / Random best-profile grids.
+    # Always regenerate GP-BO / Random best-profile grids (paper fonts/theme).
     for name in ("gp_bo_best_profiles.png", "random_best_profiles.png"):
-        if (out_dir / name).is_file():
-            print(f"  Keeping existing {name}")
-        else:
-            try:
-                payload = bo if name.startswith("gp_bo") else rnd
-                results = rebuild_family_results_from_json(payload, device=device)
-                _assert_family_structure(results)
-                suffix = (
-                    f"GP-BO improved (w_qloss={IMPROVED_W_QLOSS}, qloss_cap)"
-                    if name.startswith("gp_bo")
-                    else f"random search (w_qloss={IMPROVED_W_QLOSS}, w_time={IMPROVED_W_TIME})"
+        try:
+            payload = bo if name.startswith("gp_bo") else rnd
+            results = rebuild_family_results_from_json(payload, device=device)
+            _assert_family_structure(results)
+            suffix = (
+                f"GP-BO  ·  hybrid_qloss  ·  w_qloss={IMPROVED_W_QLOSS}  ·  qloss_cap"
+                if name.startswith("gp_bo")
+                else (
+                    f"random search  ·  hybrid_qloss  ·  "
+                    f"w_qloss={IMPROVED_W_QLOSS}, w_time={IMPROVED_W_TIME}"
                 )
-                png = plot_profiles_png(results, cell, title_suffix=suffix)
-                (out_dir / name).write_bytes(png)
-            except Exception as exc:
-                print(f"  (profile plot {name}: {exc})")
+            )
+            plot_best_profiles(
+                results,
+                cell_id=cell.cell_id,
+                soc_target=float(cell.soc_target),
+                soc_start=float(cell.start_state.get("soc", 0.2)),
+                out_path=out_dir / name,
+                title_suffix=suffix,
+            )
+            print(f"  Wrote {name}")
+        except Exception as exc:
+            print(f"  (profile plot {name}: {exc})")
 
     _export_ui(cell, out_dir, bo, rnd, {}, {}, device)
     print(f"  Wrote → {out_dir}")
@@ -746,20 +780,91 @@ def _plot_summary_table(all_rows: List[Dict[str, Any]], out_path: Path) -> None:
             base if base_row and base_row.get("Feasible") else "none (all CC infeasible)" if base == "Random" else base,
         ])
 
-    fig, ax = plt.subplots(figsize=(11, 1.2 + 0.45 * len(lines)))
+    apply_paper_style()
+    fig, ax = plt.subplots(figsize=(12.5, 1.5 + 0.55 * len(lines)), facecolor=PAPER_LIGHT_BG)
     ax.axis("off")
     table = ax.table(cellText=lines[1:], colLabels=lines[0], loc="center", cellLoc="center")
     table.auto_set_font_size(False)
-    table.set_fontsize(8)
-    table.scale(1.0, 1.4)
+    table.set_fontsize(11)
+    table.scale(1.0, 1.55)
     ax.set_title(
         "GP-BO vs best CCCV / Random — energy target, time saved, degradation improvement",
-        fontsize=10, pad=12,
+        fontsize=14, pad=14, fontweight="bold",
     )
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=160, bbox_inches="tight")
+    fig.savefig(out_path, dpi=PAPER_DPI, bbox_inches="tight", facecolor=PAPER_LIGHT_BG)
     plt.close(fig)
+
+
+def _write_paper_md(all_rows: List[Dict[str, Any]], out_path: Path) -> None:
+    """Slim Table-4 style markdown: CCCV ½C | CCCV 1C | Random | GP-BO."""
+    cells = sorted({r["cell"] for r in all_rows})
+    lines = [
+        "# GP-BO comparison table",
+        "",
+        "Baselines are classic **CCCV (CC→CV at Vmax)** at **½C and 1C**.",
+        "Percent columns use **CCCV ½C** as the reference (falls back to 1C if ½C is infeasible).",
+        "",
+        "| Cell | Energy | GP-BO time (min) | Time ↓ vs CCCV ½C | Deg. ↓ vs CCCV ½C | Time ↓ vs Random | Deg. ↓ vs Random | Baseline |",
+        "|------|--------|------------------|-------------------|-------------------|------------------|------------------|----------|",
+    ]
+    for cell in cells:
+        subset = [r for r in all_rows if r["cell"] == cell]
+        gp = next((r for r in subset if r["Method"] == "GP-BO"), None)
+        rnd = next((r for r in subset if r["Method"] == "Random"), None)
+        if gp is None:
+            continue
+        base = gp.get("Baseline for %") or "CCCV ½C"
+        e = gp.get("Energy Delivered (%)")
+        t_vs_base = gp.get("Time Saved (%)")
+        d_vs_base = gp.get("Degradation Improvement (%)")
+        t_vs_rnd = d_vs_rnd = None
+        if rnd and gp.get("Charging Time (min)") and rnd.get("Charging Time (min)"):
+            t_vs_rnd = _pct(
+                float(rnd["Charging Time (min)"]) - float(gp["Charging Time (min)"]),
+                float(rnd["Charging Time (min)"]),
+            )
+        if (
+            rnd
+            and gp.get("Capacity Fade (%)") is not None
+            and rnd.get("Capacity Fade (%)") is not None
+        ):
+            d_vs_rnd = _pct(
+                float(rnd["Capacity Fade (%)"]) - float(gp["Capacity Fade (%)"]),
+                float(rnd["Capacity Fade (%)"]),
+            )
+
+        def fmt(v):
+            if v is None:
+                return "—"
+            return f"{v:.1f}%" if isinstance(v, float) else str(v)
+
+        lines.append(
+            "| {cell} | {e} | {t} | {tb} | {db} | {tr} | {dr} | {base} |".format(
+                cell=cell,
+                e=f"{e:.0f}%" if isinstance(e, (int, float)) else "—",
+                t=gp.get("Charging Time (min)", "—"),
+                tb=fmt(t_vs_base),
+                db=fmt(d_vs_base),
+                tr=fmt(t_vs_rnd),
+                dr=fmt(d_vs_rnd),
+                base=base,
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "**Reading guide**",
+            "",
+            "- **Energy**: delivered fraction of full pack (same 40% target on all cells).",
+            "- **Time ↓**: \\((t_{\\mathrm{base}}-t_{\\mathrm{GPBO}})/t_{\\mathrm{base}}\\). Positive = faster than baseline.",
+            "- **Deg. ↓**: \\((Q_{\\mathrm{base}}-Q_{\\mathrm{GPBO}})/Q_{\\mathrm{base}}\\). Positive = *less* session degradation than baseline.",
+            "- Hitting 4.2 V enters the CV phase; it does not mark the baseline infeasible.",
+            "",
+        ]
+    )
+    out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
@@ -807,23 +912,28 @@ def main() -> None:
         _plot_summary_table(all_tables, OUT_ROOT / "fig10_paper_comparison_table.png")
         # paper md/csv slim view
         pd.DataFrame(all_tables).to_csv(OUT_ROOT / "paper_comparison_table.csv", index=False)
+        _write_paper_md(all_tables, OUT_ROOT / "paper_comparison_table.md")
 
     (OUT_ROOT / "README.txt").write_text(
         "Final charging optimization results (paper + UI)\n"
         "================================================\n"
         "Per-cell folders RW9–RW12 contain fig8*/fig9*, comparison_table.*,\n"
-        "GP-BO/random JSON+PNG, baseline bar charts, and lifetime CSVs.\n"
+        "GP-BO/random JSON+PNG, UI-style bar charts (time/temp/reward), and lifetime CSVs.\n"
         "\n"
         "* Same energy target for all cells (default ``--energy-fraction 0.40``).\n"
         f"* w_qloss={IMPROVED_W_QLOSS}, w_time={IMPROVED_W_TIME}.\n"
         "* Soft qloss_cap = Random reward-best Q (GP-BO must match/beat Random on Q).\n"
-        "* Baselines = classic CCCV (CC→CV at Vmax) at ½C / 1C / 2C; all three shown.\n"
-        "* Paper % columns use the **best feasible CCCV** (lowest Q, then shortest time).\n"
+        "* Baselines = classic CCCV (CC→CV at Vmax) at **½C and 1C** (1.1 A / 2.2 A).\n"
+        "* Paper % columns use **CCCV ½C** as the reference baseline.\n"
         "* Hitting 4.2 V enters CV (not infeasible); energy target still applies.\n"
-        "* GP-BO / Random best-profile PNGs are preserved unless missing.\n"
+        "* GP-BO / Random best-profile PNGs are regenerated from saved JSON.\n"
+        "* Also writes time_comparison.png, temperature_comparison.png, reward_comparison.png.\n"
         "\n"
         "UI mirrors: Constrained_BO/results/ui_runs/{cell}/\n"
-        "Regenerate:\n"
+        "Regenerate figures (reuse existing JSON):\n"
+        "  python -m Constrained_BO.export_final_charging_opt_results "
+        "--device cpu --figures-only --energy-fraction 0.40\n"
+        "Full re-optimize:\n"
         "  python -m Constrained_BO.export_final_charging_opt_results "
         "--device cuda --energy-fraction 0.40\n",
         encoding="utf-8",
