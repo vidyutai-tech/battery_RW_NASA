@@ -54,11 +54,11 @@ SCRATCH_COLOR  = ORANGE
 FULL_COLOR     = GREEN
 
 
-def _savefig(fig: plt.Figure, path: Path, **kwargs) -> None:
+def _savefig(fig: plt.Figure, path: Path, dpi: int = 200, pad_inches: float = 0.1, **kwargs) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(
-        path, dpi=200, bbox_inches="tight",
+        path, dpi=dpi, bbox_inches="tight", pad_inches=pad_inches,
         facecolor=LIGHT_BG, edgecolor=LIGHT_BG, transparent=False, **kwargs,
     )
     plt.close(fig)
@@ -67,7 +67,7 @@ def _savefig(fig: plt.Figure, path: Path, **kwargs) -> None:
 # ── Training curves ───────────────────────────────────────────────────────────
 
 def plot_twin_training_curves(log_path: Path, out_path: Path) -> None:
-    """Training loss + val V/T RMSE over epochs from JSONL log."""
+    """Save three separate square panels (loss / V / T) for LaTeX arrangement."""
     log_path = Path(log_path)
     if not log_path.is_file():
         return
@@ -80,32 +80,44 @@ def plot_twin_training_curves(log_path: Path, out_path: Path) -> None:
             val_v.append(row.get("val_voltage_rmse"))
             val_t.append(row.get("val_temp_rmse"))
 
-    fig, axes = plt.subplots(1, 3, figsize=(13, 3.5), facecolor=LIGHT_BG)
-    for ax in axes:
+    label_fs, title_fs, tick_fs = 8, 7.5, 7
+    line_lw, spine_lw = 1.5, 0.75
+    text_kw = dict(fontsize=label_fs, fontfamily="DejaVu Serif")
+    title_kw = dict(fontsize=title_fs, fontweight="bold", fontfamily="DejaVu Serif", pad=2)
+    plot_kw = dict(lw=line_lw, solid_capstyle="round", solid_joinstyle="round", antialiased=True)
+
+    panels = [
+        ("loss", train_loss, ACCENT, "Train loss", "Training Loss\n(Weighted MSE)"),
+        ("voltage", val_v, ORANGE, "RMSE (V)", "Val voltage\nRMSE"),
+        ("temp", val_t, GREEN, "RMSE (°C)", "Val temperature\nRMSE"),
+    ]
+
+    out_path = Path(out_path)
+    for key, y, color, ylabel, title in panels:
+        if key == "temp" and not any(v is not None and np.isfinite(v) for v in val_t):
+            continue
+
+        fig, ax = plt.subplots(figsize=(1.6, 1.6), facecolor=LIGHT_BG)
         ax.set_facecolor(LIGHT_BG)
+        ax.grid(False)
+        ax.set_box_aspect(1)
+        ax.tick_params(labelsize=tick_fs, width=spine_lw, length=2.2, pad=1.0)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        for spine in ("bottom", "left"):
+            ax.spines[spine].set_linewidth(spine_lw)
 
-    axes[0].plot(epochs, train_loss, color=ACCENT, lw=1.5)
-    axes[0].set_xlabel("Epoch")
-    axes[0].set_ylabel("Train loss")
-    axes[0].set_title("Training loss (weighted MSE)")
+        ax.plot(epochs, y, color=color, **plot_kw)
+        ax.set_xlabel("Epoch", **text_kw)
+        ax.set_ylabel(ylabel, **text_kw)
+        ax.set_title(title, **title_kw)
+        ax.set_xticks([0, 50, 100])
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontfamily("DejaVu Serif")
 
-    axes[1].plot(epochs, val_v, color=ORANGE, lw=1.5)
-    axes[1].set_xlabel("Epoch")
-    axes[1].set_ylabel("RMSE (V)")
-    axes[1].set_title("Val voltage RMSE")
-
-    has_t = any(v is not None and np.isfinite(v) for v in val_t)
-    if has_t:
-        axes[2].plot(epochs, val_t, color=GREEN, lw=1.5)
-        axes[2].set_xlabel("Epoch")
-        axes[2].set_ylabel("RMSE (°C)")
-        axes[2].set_title("Val temperature RMSE")
-    else:
-        axes[2].set_visible(False)
-
-    fig.suptitle("Digital twin — training curves", fontsize=11, fontweight="bold")
-    fig.tight_layout()
-    _savefig(fig, out_path)
+        fig.subplots_adjust(left=0.22, right=0.98, bottom=0.20, top=0.82)
+        panel_path = out_path.with_name(f"{out_path.stem}_{key}{out_path.suffix}")
+        _savefig(fig, panel_path, dpi=400, pad_inches=0.01)
 
 
 def plot_soc_training_curves(log_path: Path, out_path: Path) -> None:

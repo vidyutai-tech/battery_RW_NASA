@@ -425,6 +425,121 @@ def plot_digital_twin_validation(
     _savefig(fig, out_path)
 
 
+def plot_digital_twin_validation_separate(
+    samples: Sequence[Dict[str, Any]],
+    out_dir: Path,
+    *,
+    voltage_ylim: Optional[Tuple[float, float]] = None,
+) -> List[Path]:
+    """
+    Save each voltage / temperature panel as its own square PNG (no figure title).
+
+    Intended for LaTeX ``\\includegraphics`` arrangement. Files land in ``out_dir``:
+      chunk{idx}_voltage.png , chunk{idx}_temperature.png
+    """
+    if not samples:
+        return []
+
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    label_fs, title_fs, tick_fs, legend_fs = 9, 8, 8, 6.5
+    line_lw, spine_lw = 1.6, 0.75
+    text_kw = dict(fontsize=label_fs, fontfamily="DejaVu Serif")
+    title_kw = dict(fontsize=title_fs, fontweight="bold", fontfamily="DejaVu Serif", pad=2)
+    legend_kw = dict(
+        fontsize=legend_fs, framealpha=0.9, borderpad=0.25, labelspacing=0.25,
+        handlelength=1.4, handletextpad=0.4,
+        prop={"family": "DejaVu Serif", "size": legend_fs},
+    )
+    saved: List[Path] = []
+
+    def _style(ax: plt.Axes) -> None:
+        ax.set_facecolor(LIGHT_BG)
+        ax.grid(False)
+        ax.set_box_aspect(1)
+        ax.tick_params(labelsize=tick_fs, width=spine_lw, length=2.2, pad=1.0)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        for spine in ("bottom", "left"):
+            ax.spines[spine].set_linewidth(spine_lw)
+        for lab in ax.get_xticklabels() + ax.get_yticklabels():
+            lab.set_fontfamily("DejaVu Serif")
+
+    for samp in samples:
+        st = samp["burn_in"]
+        T = len(samp["v_actual"])
+        t_axis = samp["t_minutes"][st:] if len(samp["t_minutes"]) >= T - st else (
+            np.arange(T - st, dtype=np.float64) * samp["dt_s"] / 60.0
+        )
+        v_a = samp["v_actual"][st:]
+        v_p = samp["v_pred"][st:]
+        t_a = samp["t_actual"][st:]
+        t_p = samp["t_pred"][st:]
+        cid = int(samp["chunk_idx"])
+
+        # ── voltage ──────────────────────────────────────────────────────────
+        fig, ax = plt.subplots(figsize=(2.2, 2.2), facecolor=LIGHT_BG)
+        _style(ax)
+        ax.plot(t_axis, v_a, color=GREY, linestyle=":", alpha=0.35, lw=1.0, zorder=1)
+        ax.plot(
+            t_axis, _savgol_display(v_a), color=GREY, linestyle="--",
+            label="Measured", alpha=0.85, lw=line_lw, zorder=2,
+        )
+        ax.plot(t_axis, v_p, color=ACCENT, linestyle=":", alpha=0.4, lw=1.0, zorder=3)
+        ax.plot(
+            t_axis, _savgol_display(v_p), color=ACCENT, linestyle="-",
+            label="Predicted", lw=line_lw, zorder=4,
+        )
+        ax.set_title(
+            f"Chunk {cid} — Rel. age = {samp['rel_age']:.3f}\n"
+            f"Voltage MAPE = {samp['mape_v']:.2f}%",
+            **title_kw,
+        )
+        ax.set_xlabel("Time (min)", **text_kw)
+        ax.set_ylabel("Voltage (V)", **text_kw)
+        ax.legend(loc="best", **legend_kw)
+        if voltage_ylim is not None:
+            ax.set_ylim(*voltage_ylim)
+        else:
+            v_lo = min(float(np.min(v_a)), float(np.min(v_p)))
+            v_hi = max(float(np.max(v_a)), float(np.max(v_p)))
+            pad = max(0.05, 0.05 * (v_hi - v_lo))
+            ax.set_ylim(v_lo - pad, v_hi + pad)
+        fig.subplots_adjust(left=0.22, right=0.98, bottom=0.18, top=0.82)
+        v_path = out_dir / f"chunk{cid}_voltage.png"
+        _savefig(fig, v_path, dpi=400, pad_inches=0.01)
+        saved.append(v_path)
+
+        # ── temperature ──────────────────────────────────────────────────────
+        fig, ax = plt.subplots(figsize=(2.2, 2.2), facecolor=LIGHT_BG)
+        _style(ax)
+        ax.plot(t_axis, t_a, color=ORANGE, linestyle=":", alpha=0.35, lw=1.0, zorder=1)
+        ax.plot(
+            t_axis, _savgol_display(t_a), color=GREY, linestyle="--",
+            label="Measured", alpha=0.85, lw=line_lw, zorder=2,
+        )
+        ax.plot(t_axis, t_p, color=ORANGE, linestyle=":", alpha=0.4, lw=1.0, zorder=3)
+        ax.plot(
+            t_axis, _savgol_display(t_p), color=ORANGE, linestyle="-",
+            label="Predicted", lw=line_lw, zorder=4,
+        )
+        ax.set_title(
+            f"Chunk {cid} — Rel. age = {samp['rel_age']:.3f}\n"
+            f"Temperature MAPE = {samp['mape_t']:.2f}%",
+            **title_kw,
+        )
+        ax.set_xlabel("Time (min)", **text_kw)
+        ax.set_ylabel("Temperature (°C)", **text_kw)
+        ax.legend(loc="best", **legend_kw)
+        fig.subplots_adjust(left=0.22, right=0.98, bottom=0.18, top=0.82)
+        t_path = out_dir / f"chunk{cid}_temperature.png"
+        _savefig(fig, t_path, dpi=400, pad_inches=0.01)
+        saved.append(t_path)
+
+    return saved
+
+
 @torch.no_grad()
 def compute_val_mean_trajectories(
     trainer: TwinTrainer,
