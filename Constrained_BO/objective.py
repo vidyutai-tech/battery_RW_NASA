@@ -164,7 +164,6 @@ def make_hybrid_params(
     w_qloss: float = 1.0,
     w_time: float = 0.1,
     z: float = 0.55,
-    calendar_model: str = "eq2",
 ) -> HybridDegradationParameters:
     return HybridDegradationParameters(
         w_soc=float(w_soc),
@@ -172,7 +171,6 @@ def make_hybrid_params(
         w_time=float(w_time),
         z_time=float(z),
         z_cal=float(z),
-        calendar_model=calendar_model,  # type: ignore[arg-type]
     )
 
 

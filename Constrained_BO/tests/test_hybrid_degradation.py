@@ -1,14 +1,9 @@
 """Deterministic monotonicity tests for the hybrid degradation model.
 
-These tests check the physically expected qualitative behaviour of the default
-Eq. (2) calendar model and the default Eq. (7) / Table 7 cyclic model:
+Eq. (5) calendar and Eq. (8) / Table 7 cyclic:
 
-- Calendar loss must increase with increasing SoC, temperature, and time.
-- Cyclic loss must increase with increasing Ah throughput, and with increasing
-  C-rate.
-
-No randomness is involved; every assertion is a plain numeric comparison so the
-suite is fully repeatable.
+- Calendar loss increases with SoC, temperature, and time.
+- Cyclic loss increases with Ah throughput and with C-rate (2C–10C).
 """
 
 from __future__ import annotations
@@ -31,7 +26,8 @@ def _cyclic() -> CyclicDegradation:
 
 
 # --------------------------------------------------------------------------- #
-# Calendar degradation (Eq. 2): Q_loss(t, T, SoC) = A*exp(B*SoC)*exp(-(Ea+C*SoC)/RT)*t^z
+# Calendar Eq. (5):
+#   Q = A_cal*exp(B_cal*SoC)*exp(-(Ea_cal+C_cal*SoC)/(R*T))*t^z_cal
 # --------------------------------------------------------------------------- #
 
 def test_calendar_increases_with_soc():
@@ -70,7 +66,7 @@ def test_calendar_incremental_is_nonnegative_and_consistent():
 
 
 # --------------------------------------------------------------------------- #
-# Cyclic degradation (Eq. 7 / Table 7): Q_loss = B(I)*exp(-Ea(I)/RT)*Ah^z(I)
+# Cyclic Eq. (8) / Table 7: Q = B(I)*exp(-Ea(I)/(R*T))*Ah^z(I)
 # --------------------------------------------------------------------------- #
 
 def test_cyclic_increases_with_ah_throughput():
