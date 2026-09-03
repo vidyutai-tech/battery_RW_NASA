@@ -1,5 +1,4 @@
 """
-Author-style chunk dataset and random train/val/test split (seed 42).
 
 Mirrors ``MyDataset`` in the original ``data_loading.py``:
   * ``chunk_size`` contiguous samples, stride = ``chunk_size`` (non-overlapping)
