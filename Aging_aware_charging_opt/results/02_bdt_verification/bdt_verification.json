@@ -1,0 +1,349 @@
+{
+  "gate": "max-abs equivalence vs TwinTrainer < 1e-5",
+  "tolerance": 1e-05,
+  "passed": true,
+  "per_cell": {
+    "RW9": {
+      "checkpoint": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "sha256": "493b85dbb0924622e0a355a620f0fcf4a721c47d2971ea6fe8ec742404855404",
+      "equivalence": {
+        "max_abs_voltage": 0.0,
+        "max_abs_temperature": 0.0,
+        "tolerance": 1e-05,
+        "n_comparisons": 22,
+        "passed": true,
+        "n_worst_shown": 5,
+        "worst": [
+          {
+            "n": 80,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.8,
+            "v0": 3.4,
+            "t0": 22.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          }
+        ]
+      },
+      "held_out_nasa": {
+        "split": "author_random_60_20_20_seed42_test",
+        "n_windows": 11377,
+        "seq_len": 150,
+        "voltage": {
+          "n": 1706550,
+          "rmse": 0.028346536185207775,
+          "mae": 0.015056003624791262,
+          "mape_pct": 0.4145997967362021,
+          "r2": 0.9911070587298517,
+          "bias": 0.0006676295525141023
+        },
+        "temperature": {
+          "n": 1706550,
+          "rmse": 0.30845948572427684,
+          "mae": 0.13526617980905173,
+          "mape_pct": 0.4181546439315109,
+          "r2": 0.9932323395541447,
+          "bias": -0.03045609411956214
+        },
+        "note": "Inherited-artifact verification on the original author test split. Not a new training result. Fine-tunes used a prefix of the *train* split only; this test split was not used to update weights."
+      }
+    },
+    "RW10": {
+      "checkpoint": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+      "sha256": "096b7e25e16a35f4da245ec839ca963110e07b6734073bed3a7acdb5f559f48f",
+      "equivalence": {
+        "max_abs_voltage": 0.0,
+        "max_abs_temperature": 0.0,
+        "tolerance": 1e-05,
+        "n_comparisons": 22,
+        "passed": true,
+        "n_worst_shown": 5,
+        "worst": [
+          {
+            "n": 80,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.8,
+            "v0": 3.4,
+            "t0": 22.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          }
+        ]
+      },
+      "held_out_nasa": {
+        "split": "author_random_60_20_20_seed42_test",
+        "n_windows": 11461,
+        "seq_len": 150,
+        "voltage": {
+          "n": 1719150,
+          "rmse": 0.03232914213844151,
+          "mae": 0.018827330485531073,
+          "mape_pct": 0.5143203463963256,
+          "r2": 0.9881937231399306,
+          "bias": -0.0012283669786192798
+        },
+        "temperature": {
+          "n": 1719150,
+          "rmse": 0.284166795486449,
+          "mae": 0.12554289215006234,
+          "mape_pct": 0.39426536723413796,
+          "r2": 0.9941505195704781,
+          "bias": -0.01986315544143285
+        },
+        "note": "Inherited-artifact verification on the original author test split. Not a new training result. Fine-tunes used a prefix of the *train* split only; this test split was not used to update weights."
+      }
+    },
+    "RW11": {
+      "checkpoint": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+      "sha256": "27757af356b7d709fcf3c730fa1c4e0143a382dc80763eaac183baf8f19d345c",
+      "equivalence": {
+        "max_abs_voltage": 0.0,
+        "max_abs_temperature": 0.0,
+        "tolerance": 1e-05,
+        "n_comparisons": 22,
+        "passed": true,
+        "n_worst_shown": 5,
+        "worst": [
+          {
+            "n": 80,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.8,
+            "v0": 3.4,
+            "t0": 22.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          }
+        ]
+      },
+      "held_out_nasa": {
+        "split": "author_random_60_20_20_seed42_test",
+        "n_windows": 11553,
+        "seq_len": 150,
+        "voltage": {
+          "n": 1732950,
+          "rmse": 0.04825838049076362,
+          "mae": 0.03285344518226032,
+          "mape_pct": 0.8901663107826705,
+          "r2": 0.9737147321484294,
+          "bias": -0.002781629016462051
+        },
+        "temperature": {
+          "n": 1732950,
+          "rmse": 0.15170196855919357,
+          "mae": 0.08955555301814735,
+          "mape_pct": 0.3527278996526837,
+          "r2": 0.9971838076474705,
+          "bias": -0.026396171623535296
+        },
+        "note": "Inherited-artifact verification on the original author test split. Not a new training result. Fine-tunes used a prefix of the *train* split only; this test split was not used to update weights."
+      }
+    },
+    "RW12": {
+      "checkpoint": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+      "sha256": "2707bb77b7abd520163b55c8b04f7f735c4a0be330353e6cadc0b2053832ebec",
+      "equivalence": {
+        "max_abs_voltage": 0.0,
+        "max_abs_temperature": 0.0,
+        "tolerance": 1e-05,
+        "n_comparisons": 22,
+        "passed": true,
+        "n_worst_shown": 5,
+        "worst": [
+          {
+            "n": 80,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 80,
+            "age": 0.8,
+            "v0": 3.4,
+            "t0": 22.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.0,
+            "v0": 3.55,
+            "t0": 24.0,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          },
+          {
+            "n": 150,
+            "age": 0.35,
+            "v0": 3.72,
+            "t0": 26.5,
+            "max_abs_v": 0.0,
+            "max_abs_t": 0.0
+          }
+        ]
+      },
+      "held_out_nasa": {
+        "split": "author_random_60_20_20_seed42_test",
+        "n_windows": 11519,
+        "seq_len": 150,
+        "voltage": {
+          "n": 1727850,
+          "rmse": 0.06392941710730615,
+          "mae": 0.03979254226605643,
+          "mape_pct": 1.0777365527742242,
+          "r2": 0.9549197839153397,
+          "bias": 0.0008512600833530638
+        },
+        "temperature": {
+          "n": 1727850,
+          "rmse": 0.26355151510516145,
+          "mae": 0.15764400875160986,
+          "mape_pct": 0.6017996651174826,
+          "r2": 0.9928526809428173,
+          "bias": -0.01891865620421436
+        },
+        "note": "Inherited-artifact verification on the original author test split. Not a new training result. Fine-tunes used a prefix of the *train* split only; this test split was not used to update weights."
+      }
+    }
+  },
+  "provenance": {
+    "stage": "02_bdt_verification",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T16:05:26+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0"
+    },
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+        "sha256": "493b85dbb0924622e0a355a620f0fcf4a721c47d2971ea6fe8ec742404855404"
+      },
+      {
+        "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+        "sha256": "096b7e25e16a35f4da245ec839ca963110e07b6734073bed3a7acdb5f559f48f"
+      },
+      {
+        "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+        "sha256": "27757af356b7d709fcf3c730fa1c4e0143a382dc80763eaac183baf8f19d345c"
+      },
+      {
+        "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+        "sha256": "2707bb77b7abd520163b55c8b04f7f735c4a0be330353e6cadc0b2053832ebec"
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+_comment: FROZEN last-valid 4-parameter pooled operating-window fit. Calendar LITERATURE-ANCHORED;
+  cyclic calibrated on NASA RW. Do not edit by hand.
+generated_utc: '2026-09-04T15:51:49+00:00'
+source_dataset: /data/battery_RW_NASA/Aging_aware_charging_opt/results/01_calibration_dataset/calibration_intervals.csv
+deployed_fit: operating_window:primary_4p_pooled_frozen
+deployed:
+  A_cal: 71011.01912693257
+  B_cal: 1.0986122886681098
+  C_cal: 0.0
+  Ea_cal: 50000.0
+  z_cal: 0.5
+  c_rate_bins:
+  - 0.5
+  - 1.0
+  - 2.0
+  B_cyc:
+  - 4293453.763085374
+  - 18820573.106659856
+  - 82500940.17749056
+  Ea_cyc:
+  - 69312.6
+  - 69312.6
+  - 69312.6
+  z_cyc:
+  - 1.4001
+  - 1.4001
+  - 1.4001
+  R: 8.314
+  q_nominal_ah: 2.2
+  provenance: frozen_operating_window_4p_pooled
+layout:
+  n_parameters: 4
+  parameter_names:
+  - log10_k_cyc_ref[1C]
+  - p_c_rate
+  - Ea_cyc[shared]
+  - z_cyc[shared]
+  label: 4p, calendar literature-anchored, Ea_cyc shared, z_cyc shared, k_cyc ~ C^p
+    about 1C
+  fit_calendar: false
+  c_rate_power_law: true
+  c_rate_ref: 1.0
+  scale_cells: []
+calendar_branch:
+  mode: literature_anchored
+  status: "NOT identified from NASA RW \u2014 see rationale above (RULE 8)"
+  anchors:
+    z_cal: 0.5
+    Ea_cal_j_per_mol: 50000.0
+    soc_acceleration_ratio: 3.0
+    C_cal: 0.0
+    fade_fraction_at_anchor: 0.02
+    anchor_time_h: 8760.0
+    anchor_soc: 0.5
+    anchor_temperature_k: 298.15
+  derived_coefficients:
+    A_cal: 71011.01912693257
+    B_cal: 1.0986122886681098
+    C_cal: 0.0
+    Ea_cal: 50000.0
+    z_cal: 0.5
+operating_window_max_y: 0.2
+fitted_cyclic_at_reference_temperature:
+  T_ref_K: 298.15
+  p_c_rate: 2.1321
+  k_cyc_ref:
+    0.5C: 3.0838195583508207e-06
+    1C: 1.351808e-05
+    2C: 5.925719174831543e-05
+  Ea_cyc: 69312.6
+  z_cyc: 1.4001
+  standard_errors_from_original_nls:
+    p_c_rate: 0.2253
+    log10_k_cyc_ref[1C]: 0.1917
+    Ea_cyc: 1.967e-06
+    z_cyc: 0.07106
+fit_summary:
+  n_obs: 76
+  n_params: 4
+  converged: true
+  pooled_r2: 0.9490465277994264
+  pooled_rmse_pct_capacity: 1.4441646060781486
+  pooled_mae_pct_capacity: 1.0280252305111888
+  pooled_bias_pct_capacity: 0.09442020273299438
+  calendar_share_end_of_fit_range: 0.031119315838846928
+identifiability_flags:
+- "J\u1D40J numerical rank 3 < 4 \u2014 log10_k_cyc_ref[1C] aliased with z_cyc (|corr|=0.9938);\
+  \ predictions remain well determined"
+- p_c_rate <-> Ea_cyc |corr|=0.9933 (C-rate confounded with self-heating); p=2.13+/-0.23
+  still identified
+loco_limitation:
+  note: Leave-one-cell-out of THIS pooled 4p form fails on RW11 (R2=0.84) and RW12
+    (R2=-1.62) because absolute fade at matched throughput differs 1.6-1.8x across
+    cells (manufacturing spread, not C-rate). Protocol ranking uses the shared C-rate
+    exponent p=2.13+/-0.23, which is identified. Absolute lifetime numbers are cell-specific
+    and are NOT claimed transferable.
+  holdout:
+    RW9:
+      r2: 0.9691
+      rmse_pct: 0.981
+      bias_pct: 0.694
+    RW10:
+      r2: 0.9746
+      rmse_pct: 1.026
+      bias_pct: -0.577
+    RW11:
+      r2: 0.8367
+      rmse_pct: 2.491
+      bias_pct: 1.792
+    RW12:
+      r2: -1.6173
+      rmse_pct: 10.589
+      bias_pct: 8.3
+  gate_absolute_r2_passed: false
+  gate_shape_identified: true

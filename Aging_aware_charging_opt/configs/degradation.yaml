@@ -1,0 +1,270 @@
+# Degradation model STRUCTURE and CALIBRATION SETTINGS.
+#
+# This file contains no fitted coefficients. The fitted coefficients are
+# written by scripts/03_fit_degradation.py to configs/degradation_fitted.yaml
+# and that file is the single source of truth for every downstream stage.
+#
+# Model (unchanged from the study methodology; only coefficients are re-derived):
+#   Q_cal(SOC,T,t) = A_cal*exp(B_cal*SOC)*exp(-(Ea_cal + C_cal*SOC)/(R*T_K))*t_h^z_cal
+#   Q_cyc(Ah,T,C)  = B_cyc(C)*exp(-Ea_cyc(C)/(R*T_K))*Ah^z_cyc(C)
+#   Q_total        = Q_cal + Q_cyc
+
+physical_constants:
+  R_universal: 8.314          # J mol^-1 K^-1
+  q_nominal_ah: 2.2           # NASA RW nominal capacity
+  seconds_per_hour: 3600.0
+
+# C-rate grid for the cyclic coefficients. Chosen to span the measured NASA RW
+# duty cycle (|I| in 0.75-4.8 A on a 2.2 Ah cell => 0.34C-2.18C), so that both
+# calibration and later profile scoring interpolate rather than extrapolate.
+c_rate_bins: [0.5, 1.0, 2.0]
+
+# Samples with |I| below this are treated as rest (calendar only, no throughput).
+rest_current_threshold_a: 0.01
+
+# ---------------------------------------------------------------------------
+# CALENDAR BRANCH — literature-anchored, NOT calibrated on NASA RW.
+# ---------------------------------------------------------------------------
+# RULE 8 disclosure. The NASA RW experiment cannot identify calendar aging,
+# and this is a property of its design, not a numerical difficulty:
+#
+#   * rest is only 8.8-9.1 % of each record, and the longest single rest
+#     period is ~12 h — there is no storage arm at a controlled SOC/T;
+#   * the little rest that exists sits in a narrow LOW-SOC band (mean SOC
+#     0.12-0.21 during the longest rests), so the SOC sensitivity of calendar
+#     aging has essentially no leverage;
+#   * cumulative elapsed time and cumulative throughput are collinear at
+#     r = 0.988-0.991 per cell (rest hours vs throughput: r = 0.942-0.957),
+#     so the calendar/cyclic APPORTIONMENT is not identified either.
+#
+# Fitting the calendar coefficients anyway produced exactly the pathologies
+# that diagnosis predicts: bound-pinned prefactors, B_cal driven to 12
+# (a physically absurd 2.7e3x SOC sensitivity), JtJ rank 3 of 9, and a
+# profile likelihood over the calendar share that is flat.
+#
+# Therefore the calendar branch is FIXED from published calendar-aging
+# results for comparable 18650 graphite/layered-oxide cells, and only the
+# CYCLIC branch is calibrated on NASA RW. The cyclic branch is the one the
+# data informs and the one that discriminates charging protocols (C-rate
+# dependence), so this places the fitted freedom where the evidence is.
+#
+# The anchors below are stated as CHECKABLE PHYSICAL QUANTITIES rather than
+# as opaque coefficients: A_cal is DERIVED from them in code
+# (aacopt.degradation.calendar_from_anchors), so a reviewer can challenge one
+# interpretable number instead of reverse-engineering a prefactor.
+calendar_branch:
+  mode: "literature_anchored"
+  status: "NOT identified from NASA RW — see rationale above (RULE 8)"
+
+  anchors:
+    # Square-root-of-time. The consensus form for SEI-diffusion-limited
+    # calendar fade, reported for 18650 NMC/graphite, NCA/graphite and
+    # NMC622/Si-graphite cells alike; reviews place z in 0.45-1.0 with 0.5 the
+    # mechanistically motivated value.
+    z_cal: 0.5
+
+    # Apparent activation energy for calendar fade. Reported range for
+    # graphite/layered-oxide cells is ~25-60 kJ/mol; 50 kJ/mol is taken as a
+    # mid-range value. Implies a 2.6x rate increase from 25 to 40 degC.
+    Ea_cal_j_per_mol: 50000.0
+
+    # SOC sensitivity, expressed as the rate ratio between SOC = 1 and
+    # SOC = 0; B_cal = ln(ratio) is derived from it. A factor of 3 matches the
+    # ~2.5-3x spread between high- and moderate-SOC storage rates in the
+    # 5-year Ni-rich 18650 study. Calendar fade is known to rise in SOC
+    # plateaus tied to graphite potential rather than exponentially, so this
+    # is a smooth approximation to a step-like dependence — flagged, not
+    # claimed as mechanistic.
+    soc_acceleration_ratio: 3.0
+
+    # Held at 0: exp(B_cal*SOC - C_cal*SOC/(R*T)) makes B_cal and C_cal
+    # structurally aliased at fixed temperature, so a separate SOC term inside
+    # the Arrhenius exponent is not separately supported here.
+    C_cal: 0.0
+
+    # Scale anchor. Fixes the one remaining degree of freedom (A_cal) by
+    # requiring the branch to reproduce a literature-consensus calendar fade
+    # of 2 % of capacity after one year at 25 degC and 50 % SOC. Reported
+    # values span ~2-5 %/yr across chemistries; the low end is chosen so the
+    # calendar term does not silently dominate the objective.
+    fade_fraction_at_anchor: 0.02
+    anchor_time_h: 8760.0
+    anchor_soc: 0.5
+    anchor_temperature_k: 298.15
+
+  # Because the anchor is an assumption, every downstream conclusion is
+  # re-scored with the calendar branch scaled by each of these multipliers.
+  # 0.0 is the pure-cyclic limit; 4.0 covers the top of the reported
+  # calendar-fade range. If the protocol ranking is stable across this sweep,
+  # the assumption does not drive the conclusions — and if it is not, that is
+  # reported as a limitation instead of being hidden.
+  sensitivity_multipliers: [0.0, 0.5, 1.0, 2.0, 4.0]
+
+  references:
+    - "Calendar fade ~ sqrt(t) from SEI growth; Arrhenius temperature
+       dependence: Quantitative validation of calendar aging models for
+       lithium-ion batteries, J. Power Sources 400 (2018) 402-414."
+    - "z ~ 0.5 and Ea from 3D Arrhenius analysis of graphite and
+       Si/graphite-NMC622 cells at SOC 30/60/100 % and 25/45/60 degC:
+       J. Electrochem. Soc. 171 (2024) 010531."
+    - "SOC/voltage dominates rate, ~2.5-3x between high and moderate SOC,
+       weak temperature sensitivity over 35-50 degC, 5-year Ni-rich 18650
+       Si/C study: ChemElectroChem (2024) e202400020."
+    - "SOC plateaus in calendar fade correlate with graphite anode potential
+       (central graphite peak at 55-80 % SOC): J. Electrochem. Soc. 164
+       (2017) A6066."
+    - "Functional form Q = A0*exp(B*SOC)*exp(-(Ea0 + C*SOC)/(kT))*t^z
+       (generalized Eyring): Redondo-Iglesias, Venet, Pelissier,
+       J. Energy Storage 13 (2017) 176-183. Form adopted; their coefficients
+       are for SIMCAL NMC/NCA/LMO/LFP cells and are NOT transplanted here."
+
+calibration:
+  # Only the CYCLIC branch is estimated from data — see calendar_branch above.
+  fit_calendar_branch: false
+
+  # Regression target: measured fractional capacity loss y = 1 - Q_k/Q_0
+  target: "fractional_capacity_loss"
+  weighting: "uniform"        # homoscedastic; no weighting scheme was searched
+
+  algorithm: "scipy.optimize.least_squares"
+  method: "trf"               # trust-region reflective (supports box bounds)
+  ftol: 1.0e-12
+  xtol: 1.0e-12
+  gtol: 1.0e-12
+  max_nfev: 20000
+  x_scale: "jac"
+
+  n_starts: 25                # 1 literature-anchored + 24 Latin-hypercube
+  seed: 20260904
+
+  # Reference condition for the prefactor parameterization. An Arrhenius
+  # prefactor is the T -> infinity intercept, which lies far outside the data
+  # and is therefore near-perfectly correlated with its activation energy
+  # (measured |corr(log10 A_cal, Ea_cal)| = 0.9923 when fitted raw). The
+  # optimizer escapes that ridge by pinning the prefactor at a bound. So the
+  # FITTED parameters are the rate coefficients at a reference condition
+  # sitting inside the measured range,
+  #     k_cal_ref    = A_cal*exp(B_cal*SOC_ref)*exp(-(Ea_cal+C_cal*SOC_ref)/(R*T_ref))
+  #     k_cyc_ref(C) = B_cyc(C)*exp(-Ea_cyc(C)/(R*T_ref))
+  # and A_cal / B_cyc are recovered analytically for reporting. This is a
+  # change of variables, NOT a change of model: identical equation, identical
+  # predictions, identical degrees of freedom.
+  reference_condition:
+    soc_ref: 0.5              # measured mean-SOC range is 0.105-0.764
+    T_ref_K: 298.15           # measured range is 291.8-312.4 K
+
+  # log10-transformed during optimization (positive scale parameters)
+  log_parameters: ["k_cal_ref", "k_cyc_ref_0", "k_cyc_ref_1", "k_cyc_ref_2"]
+
+  # C-rate dependence of the cyclic prefactor: a two-parameter power law
+  #   k_cyc_ref(C) = k_cyc_ref(C_ref) * (C / C_ref) ** p,   p >= 0
+  # evaluated on the c_rate_bins grid, so the model and the fit see the same
+  # coefficients and nothing downstream changes.
+  #
+  # Why not a free per-node grid. Physical prior first: per ampere-hour, a
+  # higher charge C-rate is not LESS damaging than a lower one (this is the
+  # defect that made the previous study's literature Table-7 grid
+  # non-monotonic in C-rate — see docs/old_vs_new.md). But a monotone grid
+  # parameterized as base + non-negative increments still failed here: the
+  # measured bin throughputs are collinear (r = 0.87-0.98), only the sum
+  # base + increment is determined, the two were perfectly aliased
+  # (|corr| = 1.0000), and the 0.5C node ran to its lower bound — i.e. the fit
+  # reported per-ampere-hour damage at 0.5C as identically zero, which is
+  # unphysical (SEI growth per Ah is never exactly zero) and would tell the
+  # downstream optimizer that slow charging is free.
+  #
+  # The power law fixes all three at once: it is monotone by construction for
+  # p >= 0, strictly positive everywhere, removes the exact aliasing by
+  # fitting one prefactor instead of three, and interpolates and extrapolates
+  # in C-rate smoothly. p is then an interpretable C-rate damage exponent.
+  c_rate_dependence: "power_law"
+  c_rate_reference: 1.0       # anchor node: ~51 % of measured charge throughput
+  monotone_B_cyc_in_c_rate: true
+
+  bounds:
+    # Rate coefficients at the reference condition. Range set from the
+    # measurement scale alone: y ~ 0.5 accrues over ~3.5e3 h and ~1.9e3 Ah, so
+    # the informative region is k ~ 1e-5-1e-2; the bounds below are ~5 orders
+    # of magnitude wider on each side and are inactive at the solution.
+    log10_k_cal_ref: [-12.0, 2.0]
+    log10_k_cyc_ref: [-12.0, 2.0]
+    log10_k_cyc_ref_base: [-12.0, 2.0]  # grid ablations only
+    dlog10_k_cyc_ref: [0.0, 8.0]        # grid ablations only
+
+    # C-rate damage exponent, k_cyc_ref ~ C^p. Non-negative by the
+    # monotonicity prior above; capped at 3 because per-ampere-hour damage
+    # scaling steeper than C^3 is not reported for graphite/layered-oxide
+    # cells.
+    #
+    # The cap is load-bearing here and is declared as such. In this dataset
+    # C-rate and cell temperature are physically confounded (higher current
+    # causes more self-heating), so p_c_rate and Ea_cyc are strongly aliased
+    # (|corr| = 0.9998). With four free per-cell scales as well, p is only
+    # weakly determined and runs upward without a cap. For reference, the
+    # pooled single-scale fit — where the scale/exponent trade-off is absent —
+    # gives a well-determined p = 2.13 +/- 0.23, consistent with this range.
+    p_c_rate: [0.0, 3.0]
+
+    # SOC sensitivity of calendar aging. Sign is constrained non-negative
+    # (higher storage SOC is not protective — universal in the calendar-aging
+    # literature). The upper limit of 3 corresponds to a 7.2x rate ratio across
+    # the SOC range actually observed here (0.105-0.764), which brackets
+    # reported SOC sensitivities for graphite/NMC-class cells. Leaving it open
+    # to 12 admits a 2.7e3x swing that this dataset cannot support and that
+    # would dominate the downstream optimizer's SOC preference on no evidence.
+    B_cal: [0.0, 3.00]
+    C_cal: [-20000.0, 20000.0]
+    Ea_cal: [5000.0, 120000.0]
+    # z bounds span sub-linear THROUGH super-linear. The measured NASA RW fade
+    # is ACCELERATING (log-log slope 1.11-1.21 globally, rising to 1.7-2.3 over
+    # the final third), because these cells are aged to 46-62 % capacity loss —
+    # well past the degradation knee. A sub-linear prior (z < 1, the classic
+    # SEI-diffusion-limited form) is refuted by this dataset, so restricting z
+    # to it would be an unjustified constraint rather than a physical one.
+    z_cal: [0.20, 3.00]
+    Ea_cyc: [5000.0, 120000.0]
+    z_cyc: [0.20, 3.00]
+
+  # Literature-anchored starting point (Sinha et al. 2026 order of magnitude).
+  # A starting point only - it constrains nothing about the final estimate.
+  anchor_start:
+    Ea_cal: 32000.0
+    z_cal: 0.55
+    B_cal: 2.5
+    C_cal: 3500.0
+    Ea_cyc: 31000.0
+    z_cyc: 0.55
+    p_c_rate: 1.0
+
+  # Sensitivity variant: single shared Ea_cyc across all C-rate bins.
+  # Reported as an ablation; never the deployed model.
+  fit_reduced_shared_ea_cyc: true
+
+  # Operating window in which every downstream claim is made: the optimizer
+  # scores healthy cells and the retention projection is only read down to the
+  # 80 % engineering reference. A single power law cannot span the degradation
+  # knee, so the model is fitted BOTH on the full record and restricted to this
+  # window, and the deployed model is the one with the lower RMSE inside the
+  # window. This rule is declared here, before the fits are compared.
+  operating_window_max_y: 0.20        # <=> capacity retention >= 80 %
+  deploy_rule: "lower_rmse_inside_operating_window"
+
+validation:
+  scheme: "leave_one_cell_out"
+  folds: ["RW9", "RW10", "RW11", "RW12"]
+  # Hard gate. Failing this stops the pipeline for diagnosis (RULE: do not
+  # proceed to optimization with a model that does not generalize).
+  gate_min_r2: 0.90
+  gate_max_abs_bias: 0.02     # capacity fraction (2 %-capacity)
+
+  # Flag thresholds for the identifiability report.
+  flag_abs_correlation: 0.99
+  flag_relative_se: 1.0
+  flag_bound_proximity_frac: 0.01
+
+# Model deployed downstream = pooled 4-parameter cyclic fit on the
+# operating window (retention >= 80 %). LOCO shows absolute fade does NOT
+# transfer across cells (RW12 is 1.6-1.8x slower at matched Ah). Protocol
+# ranking still uses this pooled form because it depends on the shared
+# C-rate exponent, which is identified (p = 2.13 +/- 0.23).
+deployed_fit: "pooled_all_cells_operating_window"

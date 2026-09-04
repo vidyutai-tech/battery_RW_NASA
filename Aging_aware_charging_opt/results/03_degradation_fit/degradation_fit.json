@@ -1,0 +1,356 @@
+{
+  "provenance": {
+    "stage": "03_degradation_fit",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T15:51:49+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "degradation": "b79649f60e51fba59512d4af8ce081680e5553d97bc9ffa67d0e3a6f4c9ad3d2"
+    },
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/01_calibration_dataset/calibration_intervals.csv",
+        "sha256": "8fd777d07ce7d0517cf0d018a3c4bb1adb5d83231ae1d6aa5270eebd17221942"
+      }
+    ]
+  },
+  "frozen_from": "last valid 4-parameter pooled operating-window NLS (25/25 starts, no bound-active parameters)",
+  "why_frozen": "Further parameterization (per-cell scales) improved in-sample RMSE by ~0.07 %-cap but pinned p_c_rate at its upper bound and is discarded. This file is the last jointly identifiable cyclic fit.",
+  "cells": [
+    "RW9",
+    "RW10",
+    "RW11",
+    "RW12"
+  ],
+  "c_rate_bins": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "n_intervals_full": 306,
+  "n_intervals_window": 76,
+  "operating_window_max_y": 0.2,
+  "deployed_variant": "primary",
+  "deployed_fit_scope": "operating_window",
+  "deployed_parameters": {
+    "A_cal": 71011.01912693257,
+    "B_cal": 1.0986122886681098,
+    "C_cal": 0.0,
+    "Ea_cal": 50000.0,
+    "z_cal": 0.5,
+    "c_rate_bins": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "B_cyc": [
+      4293453.763085374,
+      18820573.106659856,
+      82500940.17749056
+    ],
+    "Ea_cyc": [
+      69312.6,
+      69312.6,
+      69312.6
+    ],
+    "z_cyc": [
+      1.4001,
+      1.4001,
+      1.4001
+    ],
+    "R": 8.314,
+    "q_nominal_ah": 2.2,
+    "provenance": "frozen_operating_window_4p_pooled"
+  },
+  "goodness_of_fit_operating_window": {
+    "pooled": {
+      "n": 76,
+      "r2": 0.9490465277994264,
+      "rmse": 0.014441646060781485,
+      "rmse_pct_capacity": 1.4441646060781486,
+      "mae": 0.010280252305111887,
+      "mae_pct_capacity": 1.0280252305111888,
+      "bias": 0.0009442020273299439,
+      "bias_pct_capacity": 0.09442020273299438,
+      "max_abs_error": 0.05624776088051586,
+      "y_range": [
+        -0.0149364629626538,
+        0.1971486568380652
+      ]
+    },
+    "per_cell": {
+      "RW9": {
+        "n": 13,
+        "r2": 0.9843358513210788,
+        "rmse": 0.006986871568696056,
+        "rmse_pct_capacity": 0.6986871568696056,
+        "mae": 0.005982796183707607,
+        "mae_pct_capacity": 0.5982796183707607,
+        "bias": 0.0035056199938349308,
+        "bias_pct_capacity": 0.3505619993834931,
+        "max_abs_error": 0.010162301887011685,
+        "y_range": [
+          0.0016003833507176,
+          0.170005127189707
+        ]
+      },
+      "RW10": {
+        "n": 15,
+        "r2": 0.9819050978945318,
+        "rmse": 0.0086689203454679,
+        "rmse_pct_capacity": 0.8668920345467899,
+        "mae": 0.005331001350690669,
+        "mae_pct_capacity": 0.533100135069067,
+        "bias": -0.0034828218043165436,
+        "bias_pct_capacity": -0.3482821804316544,
+        "max_abs_error": 0.023436251799604013,
+        "y_range": [
+          0.0011103606588671,
+          0.1971486568380652
+        ]
+      },
+      "RW11": {
+        "n": 13,
+        "r2": 0.904780415708921,
+        "rmse": 0.019021290425517562,
+        "rmse_pct_capacity": 1.9021290425517563,
+        "mae": 0.016048023580444548,
+        "mae_pct_capacity": 1.6048023580444548,
+        "bias": 0.006221417326087839,
+        "bias_pct_capacity": 0.6221417326087839,
+        "max_abs_error": 0.030652479655045778,
+        "y_range": [
+          0.0016961691746497,
+          0.1883882832572191
+        ]
+      },
+      "RW12": {
+        "n": 35,
+        "r2": 0.9374108031716074,
+        "rmse": 0.016375293047296124,
+        "rmse_pct_capacity": 1.6375293047296124,
+        "mae": 0.011855242799833299,
+        "mae_pct_capacity": 1.1855242799833299,
+        "bias": -6.999440049063213e-05,
+        "bias_pct_capacity": -0.0069994400490632136,
+        "max_abs_error": 0.05624776088051586,
+        "y_range": [
+          -0.0149364629626538,
+          0.1967836599914243
+        ]
+      }
+    }
+  },
+  "goodness_of_fit_full_record": {
+    "pooled": {
+      "n": 306,
+      "r2": 0.5924593391598951,
+      "rmse": 0.09676146198732702,
+      "rmse_pct_capacity": 9.676146198732702,
+      "mae": 0.07115831188880693,
+      "mae_pct_capacity": 7.115831188880693,
+      "bias": 0.03968745733181653,
+      "bias_pct_capacity": 3.968745733181653,
+      "max_abs_error": 0.22796020676669004,
+      "y_range": [
+        -0.0149364629626538,
+        0.617678368907807
+      ]
+    },
+    "per_cell": {
+      "RW9": {
+        "n": 79,
+        "r2": 0.3647835041596347,
+        "rmse": 0.12750271910036384,
+        "rmse_pct_capacity": 12.750271910036384,
+        "mae": 0.10931712980459728,
+        "mae_pct_capacity": 10.931712980459727,
+        "bias": 0.10890949321639037,
+        "bias_pct_capacity": 10.890949321639038,
+        "max_abs_error": 0.2180075230351307,
+        "y_range": [
+          0.0016003833507176,
+          0.617678368907807
+        ],
+        "window": {
+          "n": 13,
+          "r2": 0.9843358513210788,
+          "rmse": 0.006986871568696056,
+          "rmse_pct_capacity": 0.6986871568696056,
+          "mae": 0.005982796183707607,
+          "mae_pct_capacity": 0.5982796183707607,
+          "bias": 0.0035056199938349308,
+          "bias_pct_capacity": 0.3505619993834931,
+          "max_abs_error": 0.010162301887011685,
+          "y_range": [
+            0.0016003833507176,
+            0.170005127189707
+          ]
+        }
+      },
+      "RW10": {
+        "n": 76,
+        "r2": 0.2081319573424426,
+        "rmse": 0.1279342001933096,
+        "rmse_pct_capacity": 12.79342001933096,
+        "mae": 0.10457018475785489,
+        "mae_pct_capacity": 10.457018475785489,
+        "bias": 0.10283061439831398,
+        "bias_pct_capacity": 10.283061439831398,
+        "max_abs_error": 0.22796020676669004,
+        "y_range": [
+          0.0011103606588671,
+          0.5710971335490171
+        ],
+        "window": {
+          "n": 15,
+          "r2": 0.9819050978945318,
+          "rmse": 0.0086689203454679,
+          "rmse_pct_capacity": 0.8668920345467899,
+          "mae": 0.005331001350690669,
+          "mae_pct_capacity": 0.533100135069067,
+          "bias": -0.0034828218043165436,
+          "bias_pct_capacity": -0.3482821804316544,
+          "max_abs_error": 0.023436251799604013,
+          "y_range": [
+            0.0011103606588671,
+            0.1971486568380652
+          ]
+        }
+      },
+      "RW11": {
+        "n": 76,
+        "r2": 0.8238431070959603,
+        "rmse": 0.054773735397478054,
+        "rmse_pct_capacity": 5.477373539747806,
+        "mae": 0.044700001909095455,
+        "mae_pct_capacity": 4.470000190909546,
+        "bias": -0.04062708632843148,
+        "bias_pct_capacity": -4.062708632843148,
+        "max_abs_error": 0.1007079874162558,
+        "y_range": [
+          0.0016961691746497,
+          0.5322277167616822
+        ],
+        "window": {
+          "n": 13,
+          "r2": 0.904780415708921,
+          "rmse": 0.019021290425517562,
+          "rmse_pct_capacity": 1.9021290425517563,
+          "mae": 0.016048023580444548,
+          "mae_pct_capacity": 1.6048023580444548,
+          "bias": 0.006221417326087839,
+          "bias_pct_capacity": 0.6221417326087839,
+          "max_abs_error": 0.030652479655045778,
+          "y_range": [
+            0.0016961691746497,
+            0.1883882832572191
+          ]
+        }
+      },
+      "RW12": {
+        "n": 75,
+        "r2": 0.907077704630706,
+        "rmse": 0.03808689490564281,
+        "rmse_pct_capacity": 3.8086894905642805,
+        "mae": 0.023918079956313457,
+        "mae_pct_capacity": 2.391807995631346,
+        "bias": -0.01582608205160071,
+        "bias_pct_capacity": -1.5826082051600712,
+        "max_abs_error": 0.11362976857569529,
+        "y_range": [
+          -0.0149364629626538,
+          0.4586467088738676
+        ],
+        "window": {
+          "n": 35,
+          "r2": 0.9374108031716074,
+          "rmse": 0.016375293047296124,
+          "rmse_pct_capacity": 1.6375293047296124,
+          "mae": 0.011855242799833299,
+          "mae_pct_capacity": 1.1855242799833299,
+          "bias": -6.999440049063213e-05,
+          "bias_pct_capacity": -0.0069994400490632136,
+          "max_abs_error": 0.05624776088051586,
+          "y_range": [
+            -0.0149364629626538,
+            0.1967836599914243
+          ]
+        }
+      }
+    },
+    "pooled_window": {
+      "n": 76,
+      "r2": 0.9490465277994264,
+      "rmse": 0.014441646060781485,
+      "rmse_pct_capacity": 1.4441646060781486,
+      "mae": 0.010280252305111887,
+      "mae_pct_capacity": 1.0280252305111888,
+      "bias": 0.0009442020273299439,
+      "bias_pct_capacity": 0.09442020273299438,
+      "max_abs_error": 0.05624776088051586,
+      "y_range": [
+        -0.0149364629626538,
+        0.1971486568380652
+      ]
+    },
+    "window_max_y": 0.2
+  },
+  "calendar_share_operating_window": 0.031119315838846928,
+  "fitted_cyclic_at_reference_temperature": {
+    "T_ref_K": 298.15,
+    "p_c_rate": 2.1321,
+    "k_cyc_ref": {
+      "0.5C": 3.0838195583508207e-06,
+      "1C": 1.351808e-05,
+      "2C": 5.925719174831543e-05
+    },
+    "Ea_cyc": 69312.6,
+    "z_cyc": 1.4001,
+    "standard_errors_from_original_nls": {
+      "p_c_rate": 0.2253,
+      "log10_k_cyc_ref[1C]": 0.1917,
+      "Ea_cyc": 1.967e-06,
+      "z_cyc": 0.07106
+    }
+  },
+  "loco_already_run": {
+    "note": "Leave-one-cell-out of THIS pooled 4p form fails on RW11 (R2=0.84) and RW12 (R2=-1.62) because absolute fade at matched throughput differs 1.6-1.8x across cells (manufacturing spread, not C-rate). Protocol ranking uses the shared C-rate exponent p=2.13+/-0.23, which is identified. Absolute lifetime numbers are cell-specific and are NOT claimed transferable.",
+    "holdout": {
+      "RW9": {
+        "r2": 0.9691,
+        "rmse_pct": 0.981,
+        "bias_pct": 0.694
+      },
+      "RW10": {
+        "r2": 0.9746,
+        "rmse_pct": 1.026,
+        "bias_pct": -0.577
+      },
+      "RW11": {
+        "r2": 0.8367,
+        "rmse_pct": 2.491,
+        "bias_pct": 1.792
+      },
+      "RW12": {
+        "r2": -1.6173,
+        "rmse_pct": 10.589,
+        "bias_pct": 8.3
+      }
+    },
+    "gate_absolute_r2_passed": false,
+    "gate_shape_identified": true
+  }
+}

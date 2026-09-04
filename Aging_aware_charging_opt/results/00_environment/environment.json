@@ -1,0 +1,86 @@
+{
+  "packages": {
+    "python": "3.12.3",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "pandas": "3.0.3",
+    "matplotlib": "3.10.9",
+    "torch": "2.12.0+cu130",
+    "skopt": "0.10.2",
+    "yaml": "6.0.3"
+  },
+  "missing_packages": [],
+  "checkpoints": {
+    "RW9": {
+      "path": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "exists": true,
+      "bytes": 8028836
+    },
+    "RW10": {
+      "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+      "exists": true,
+      "bytes": 8029209
+    },
+    "RW11": {
+      "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+      "exists": true,
+      "bytes": 8029209
+    },
+    "RW12": {
+      "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+      "exists": true,
+      "bytes": 8029209
+    }
+  },
+  "matlab": {
+    "RW9": {
+      "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW9.mat",
+      "exists": true,
+      "bytes": 87517151
+    },
+    "RW10": {
+      "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW10.mat",
+      "exists": true,
+      "bytes": 86478157
+    },
+    "RW11": {
+      "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW11.mat",
+      "exists": true,
+      "bytes": 88524843
+    },
+    "RW12": {
+      "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW12.mat",
+      "exists": true,
+      "bytes": 90213262
+    }
+  },
+  "ocv_curves": {
+    "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/01_calibration_dataset/ocv_curves.npz",
+    "exists": true
+  },
+  "degradation_fitted": {
+    "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/configs/degradation_fitted.yaml",
+    "exists": true
+  },
+  "provenance": {
+    "stage": "00_environment",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T16:04:40+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0"
+    },
+    "inputs": []
+  }
+}

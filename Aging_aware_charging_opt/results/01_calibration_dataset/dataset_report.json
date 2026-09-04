@@ -1,0 +1,421 @@
+{
+  "provenance": {
+    "stage": "01_calibration_dataset",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T14:04:38+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "degradation": "cdae0180eb3a378964a1628cd3af1be399bfd05216d42c79eeb3faa9b17a1401"
+    },
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW9.mat",
+        "sha256": "8169a09a539f350dcffa51a3fa3865279c57d627e80c6ad4ba53960399bea4a1"
+      },
+      {
+        "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW10.mat",
+        "sha256": "7c53dae256f93f161d19366e352d84f3be51ffe3cc63f096b03092f9d571fdd7"
+      },
+      {
+        "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW11.mat",
+        "sha256": "2bf4342813c7977dea3020263540147dab90e58112bd029e7667fe82a5614992"
+      },
+      {
+        "path": "/data/battery_RW_NASA/NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab/RW12.mat",
+        "sha256": "b69c3c006aaae292c0afd96e63be3afd944e244a486cc2e80d13ed96a0762103"
+      }
+    ]
+  },
+  "cells": [
+    "RW9",
+    "RW10",
+    "RW11",
+    "RW12"
+  ],
+  "c_rate_bins": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "q_nominal_ah": 2.2,
+  "rest_current_threshold_a": 0.01,
+  "n_intervals_total": 306,
+  "throughput_attribution": "charge_only",
+  "throughput_attribution_note": "Cyclic throughput is charge-only, binned by charge C-rate. The unchanged random-walk discharge duty is a fixed co-factor absorbed into the fitted coefficients; discharge Ah is recorded separately.",
+  "per_cell": {
+    "RW9": {
+      "cell": "RW9",
+      "ocv": {
+        "source_step_index": 37626,
+        "n_raw_points": 15799,
+        "n_grid_points": 600,
+        "v_min": 3.201,
+        "v_max": 4.196,
+        "nominal_voltage_v": 3.8454727683514562
+      },
+      "ocv_validation": {
+        "n": 12722,
+        "soc_rmse": 0.012516315300908477,
+        "soc_mae": 0.010372399723723983,
+        "soc_bias": 0.0021656414823861877,
+        "note": "second 0.04 A sweep is on an aged cell; residual is expected"
+      },
+      "reference_capacity": {
+        "n_reference_steps_seen": 80,
+        "n_accepted": 80,
+        "n_rejected": 0,
+        "rejected": [],
+        "min_soc_window": 0.05,
+        "min_samples": 10
+      },
+      "q0_full_ah": 2.2197208298256217,
+      "q_end_full_ah": 0.8486472882282478,
+      "y_end_measured": 0.617678368907807,
+      "n_intervals": 79,
+      "c_rate_bins": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "charge_ah_per_bin": [
+        715.9740678344898,
+        853.6929955909679,
+        274.1919337827489
+      ],
+      "charge_ah_total": 1843.8589972082068,
+      "cumulative_charge_ah": 1843.858997208207,
+      "cumulative_discharge_ah": 1906.0914405275034,
+      "calendar_span_h": 3524.477038888889,
+      "dataset_summary": {
+        "n_steps": 113578,
+        "test_span_h": 3531.4929416666673,
+        "n_reference_discharge": 80,
+        "n_low_current_discharge": 2,
+        "rw_discharge_abs_i_a": {
+          "min": 0.7471495016611296,
+          "median": 2.358,
+          "max": 4.797
+        },
+        "rw_charge_abs_i_a": {
+          "min": 0.024,
+          "median": 2.874,
+          "max": 4.618
+        },
+        "observed_c_rate_range": [
+          0.010909090909090908,
+          2.180454545454545
+        ],
+        "step_comment_counts": {
+          "rest (random walk)": 56342,
+          "discharge (random walk)": 28221,
+          "charge (random walk)": 28119,
+          "pulsed load (rest)": 184,
+          "pulsed load (discharge)": 184,
+          "pulsed charge (rest)": 114,
+          "pulsed charge (charge)": 114,
+          "reference charge": 80,
+          "reference discharge": 80,
+          "rest post reference charge": 54,
+          "rest post reference discharge": 54,
+          "rest post pulsed load or charge": 26,
+          "rest prior low current discharge": 2,
+          "low current discharge at 0.04a": 2,
+          "rest post low current discharge": 2
+        }
+      }
+    },
+    "RW10": {
+      "cell": "RW10",
+      "ocv": {
+        "source_step_index": 37200,
+        "n_raw_points": 15695,
+        "n_grid_points": 600,
+        "v_min": 3.2006666666666668,
+        "v_max": 4.196,
+        "nominal_voltage_v": 3.844605812924015
+      },
+      "ocv_validation": {
+        "n": 13445,
+        "soc_rmse": 0.012468637027678312,
+        "soc_mae": 0.009906461069404578,
+        "soc_bias": 0.005377921546768777,
+        "note": "second 0.04 A sweep is on an aged cell; residual is expected"
+      },
+      "reference_capacity": {
+        "n_reference_steps_seen": 77,
+        "n_accepted": 77,
+        "n_rejected": 0,
+        "rejected": [],
+        "min_soc_window": 0.05,
+        "min_samples": 10
+      },
+      "q0_full_ah": 2.2100581792051948,
+      "q_end_full_ah": 0.947900288084548,
+      "y_end_measured": 0.5710971335490171,
+      "n_intervals": 76,
+      "c_rate_bins": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "charge_ah_per_bin": [
+        720.0374770536966,
+        880.2539843197518,
+        267.75856258204334
+      ],
+      "charge_ah_total": 1868.0500239554917,
+      "cumulative_charge_ah": 1868.0500239554917,
+      "cumulative_discharge_ah": 1930.6980481388907,
+      "calendar_span_h": 3531.871183333333,
+      "dataset_summary": {
+        "n_steps": 110818,
+        "test_span_h": 3534.418425,
+        "n_reference_discharge": 77,
+        "n_low_current_discharge": 2,
+        "rw_discharge_abs_i_a": {
+          "min": 0.7487441860465117,
+          "median": 2.36,
+          "max": 4.622
+        },
+        "rw_charge_abs_i_a": {
+          "min": 0.026,
+          "median": 2.363,
+          "max": 4.621
+        },
+        "observed_c_rate_range": [
+          0.011818181818181816,
+          2.1009090909090906
+        ],
+        "step_comment_counts": {
+          "rest (random walk)": 54966,
+          "discharge (random walk)": 27557,
+          "charge (random walk)": 27407,
+          "pulsed load (rest)": 183,
+          "pulsed load (discharge)": 183,
+          "pulsed charge (rest)": 118,
+          "pulsed charge (charge)": 118,
+          "reference charge": 77,
+          "reference discharge": 77,
+          "rest post reference charge": 51,
+          "rest post reference discharge": 50,
+          "rest post pulsed load or charge": 25,
+          "rest prior low current discharge": 2,
+          "low current discharge at 0.04a": 2,
+          "rest post low current discharge": 2
+        }
+      }
+    },
+    "RW11": {
+      "cell": "RW11",
+      "ocv": {
+        "source_step_index": 36570,
+        "n_raw_points": 16165,
+        "n_grid_points": 600,
+        "v_min": 3.2015000000000002,
+        "v_max": 4.1912,
+        "nominal_voltage_v": 3.8417406811730195
+      },
+      "ocv_validation": {
+        "n": 13959,
+        "soc_rmse": 0.012446940007942994,
+        "soc_mae": 0.010220412577033397,
+        "soc_bias": 0.009991567240148101,
+        "note": "second 0.04 A sweep is on an aged cell; residual is expected"
+      },
+      "reference_capacity": {
+        "n_reference_steps_seen": 77,
+        "n_accepted": 77,
+        "n_rejected": 0,
+        "rejected": [],
+        "min_soc_window": 0.05,
+        "min_samples": 10
+      },
+      "q0_full_ah": 2.2134120069874745,
+      "q_end_full_ah": 1.0717433160920202,
+      "y_end_measured": 0.5157958334423705,
+      "n_intervals": 76,
+      "c_rate_bins": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "charge_ah_per_bin": [
+        706.4057364574762,
+        906.2646957325669,
+        297.73621911798165
+      ],
+      "charge_ah_total": 1910.4066513080247,
+      "cumulative_charge_ah": 1910.4066513080247,
+      "cumulative_discharge_ah": 1972.1994012336152,
+      "calendar_span_h": 3527.955627777778,
+      "dataset_summary": {
+        "n_steps": 109389,
+        "test_span_h": 3533.7969361111113,
+        "n_reference_discharge": 77,
+        "n_low_current_discharge": 2,
+        "rw_discharge_abs_i_a": {
+          "min": 0.7462038834951458,
+          "median": 2.357,
+          "max": 4.658
+        },
+        "rw_charge_abs_i_a": {
+          "min": 0.612,
+          "median": 2.874,
+          "max": 4.617
+        },
+        "observed_c_rate_range": [
+          0.27818181818181814,
+          2.117272727272727
+        ],
+        "step_comment_counts": {
+          "rest (random walk)": 54244,
+          "discharge (random walk)": 27176,
+          "charge (random walk)": 27066,
+          "pulsed load (rest)": 186,
+          "pulsed load (discharge)": 186,
+          "pulsed charge (rest)": 122,
+          "pulsed charge (charge)": 122,
+          "reference charge": 77,
+          "reference discharge": 77,
+          "rest post reference charge": 51,
+          "rest post reference discharge": 51,
+          "rest post pulsed load or charge": 25,
+          "rest prior low current discharge": 2,
+          "low current discharge at 0.04a": 2,
+          "rest post low current discharge": 2
+        }
+      }
+    },
+    "RW12": {
+      "cell": "RW12",
+      "ocv": {
+        "source_step_index": 39732,
+        "n_raw_points": 17803,
+        "n_grid_points": 600,
+        "v_min": 3.202,
+        "v_max": 4.196,
+        "nominal_voltage_v": 3.849306526956469
+      },
+      "ocv_validation": {
+        "n": 15312,
+        "soc_rmse": 0.008996248225257304,
+        "soc_mae": 0.006737655988716564,
+        "soc_bias": -0.00014385507010054833,
+        "note": "second 0.04 A sweep is on an aged cell; residual is expected"
+      },
+      "reference_capacity": {
+        "n_reference_steps_seen": 76,
+        "n_accepted": 76,
+        "n_rejected": 0,
+        "rejected": [],
+        "min_soc_window": 0.05,
+        "min_samples": 10
+      },
+      "q0_full_ah": 2.273215735056355,
+      "q_end_full_ah": 1.230612819612468,
+      "y_end_measured": 0.4586467088738676,
+      "n_intervals": 75,
+      "c_rate_bins": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "charge_ah_per_bin": [
+        734.163664328124,
+        904.7641559028314,
+        174.86320588855236
+      ],
+      "charge_ah_total": 1813.7910261195077,
+      "cumulative_charge_ah": 1813.7910261195073,
+      "cumulative_discharge_ah": 1881.8644464860022,
+      "calendar_span_h": 3501.8156999999997,
+      "dataset_summary": {
+        "n_steps": 110013,
+        "test_span_h": 3535.9772083333337,
+        "n_reference_discharge": 76,
+        "n_low_current_discharge": 2,
+        "rw_discharge_abs_i_a": {
+          "min": 0.7499435215946844,
+          "median": 2.306,
+          "max": 4.62
+        },
+        "rw_charge_abs_i_a": {
+          "min": 0.07,
+          "median": 2.363,
+          "max": 4.619
+        },
+        "observed_c_rate_range": [
+          0.03181818181818182,
+          2.1
+        ],
+        "step_comment_counts": {
+          "rest (random walk)": 54517,
+          "discharge (random walk)": 27273,
+          "charge (random walk)": 27241,
+          "pulsed load (rest)": 206,
+          "pulsed load (discharge)": 206,
+          "pulsed charge (rest)": 146,
+          "pulsed charge (charge)": 146,
+          "reference charge": 76,
+          "reference discharge": 76,
+          "rest post reference charge": 48,
+          "rest post reference discharge": 48,
+          "rest post pulsed load or charge": 24,
+          "rest prior low current discharge": 2,
+          "low current discharge at 0.04a": 2,
+          "rest post low current discharge": 2
+        }
+      }
+    }
+  },
+  "crosscheck_vs_previous_project": {
+    "available": true,
+    "source": "/data/battery_RW_NASA/Constrained_BO/results/grounded_figures/capacity_fade_measured.csv",
+    "per_cell": {
+      "RW10": {
+        "n_compared": 77,
+        "n_new": 77,
+        "n_old": 77,
+        "capacity_ah_mean_abs_diff": 0.001558931804250318,
+        "capacity_ah_max_abs_diff": 0.003045757452601494,
+        "correlation": 0.9999960974408952
+      },
+      "RW11": {
+        "n_compared": 77,
+        "n_new": 77,
+        "n_old": 77,
+        "capacity_ah_mean_abs_diff": 0.001701139405863299,
+        "capacity_ah_max_abs_diff": 0.0031531423251951463,
+        "correlation": 0.9999958474984
+      },
+      "RW12": {
+        "n_compared": 76,
+        "n_new": 76,
+        "n_old": 76,
+        "capacity_ah_mean_abs_diff": 0.001819929938766057,
+        "capacity_ah_max_abs_diff": 0.0031474040997117037,
+        "correlation": 0.999995947006187
+      },
+      "RW9": {
+        "n_compared": 80,
+        "n_new": 80,
+        "n_old": 80,
+        "capacity_ah_mean_abs_diff": 0.0015034817643962029,
+        "capacity_ah_max_abs_diff": 0.00305104627907693,
+        "correlation": 0.9999971073086162
+      }
+    }
+  }
+}

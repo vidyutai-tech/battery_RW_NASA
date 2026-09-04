@@ -1,0 +1,159 @@
+{
+  "cell": "RW9",
+  "n_checks": 19,
+  "n_passed": 19,
+  "passed": true,
+  "checks": [
+    {
+      "name": "cccv_has_cc_leg",
+      "passed": true,
+      "detail": "CC samples=738 / 1800"
+    },
+    {
+      "name": "cccv_has_cv_or_energy_stop",
+      "passed": true,
+      "detail": "CV samples=1062 end=energy target"
+    },
+    {
+      "name": "cccv_voltage_ceiling",
+      "passed": true,
+      "detail": "V_peak=4.2003 V_max=4.2"
+    },
+    {
+      "name": "cccv_soc_monotone",
+      "passed": true,
+      "detail": "\u0394SoC=0.371"
+    },
+    {
+      "name": "cccv_1c_feasible",
+      "passed": true,
+      "detail": "e_norm=1.000 shortfall=0.000"
+    },
+    {
+      "name": "reward_positive",
+      "passed": true,
+      "detail": "R=0.302  \u0394SOC=0.371  Q=1.284e-04"
+    },
+    {
+      "name": "energy_positive",
+      "passed": true,
+      "detail": "E=12186.4 J"
+    },
+    {
+      "name": "coulomb_matches_dsoc",
+      "passed": true,
+      "detail": "Ah=0.8167 \u0394SOC\u00b7Q=0.8161"
+    },
+    {
+      "name": "two_step_staircase",
+      "passed": true,
+      "detail": "|I|_med before=3.00 after=1.50"
+    },
+    {
+      "name": "two_step_soc_monotone",
+      "passed": true,
+      "detail": "\u0394SoC=0.201"
+    },
+    {
+      "name": "three_step_soc_monotone",
+      "passed": true,
+      "detail": "\u0394SoC=0.170"
+    },
+    {
+      "name": "three_step_charge_current",
+      "passed": true,
+      "detail": "min I=-4.00 A"
+    },
+    {
+      "name": "pulsed_has_rest",
+      "passed": true,
+      "detail": "rest samples=900"
+    },
+    {
+      "name": "pulsed_has_charge",
+      "passed": true,
+      "detail": "charge samples=1476"
+    },
+    {
+      "name": "crate_increases_qcyc",
+      "passed": true,
+      "detail": "Q_cyc(0.5C)=3.524e-06  Q_cyc(2C)=4.717e-04"
+    },
+    {
+      "name": "temp_increases_qcyc",
+      "passed": true,
+      "detail": "15\u00b0C=1.545e-05  45\u00b0C=2.364e-04"
+    },
+    {
+      "name": "temp_increases_qcal",
+      "passed": true,
+      "detail": "15\u00b0C=9.661e-05  45\u00b0C=6.914e-04"
+    },
+    {
+      "name": "high_soc_rest_increases_qcal",
+      "passed": true,
+      "detail": "SOC0.2=1.537e-04  SOC0.9=3.316e-04"
+    },
+    {
+      "name": "current_within_search_bounds",
+      "passed": true,
+      "detail": "|I|_max=2.200 A"
+    }
+  ],
+  "cccv_1c_metrics": {
+    "reward": 0.3023755025384315,
+    "loss": -0.23758546347594922,
+    "feasible": true,
+    "soc_reward": 0.3709343434343292,
+    "qloss_penalty": 0.0002568280581779216,
+    "time_penalty": 0.06830201283771978,
+    "time_penalty_raw": 0.6830201283771977,
+    "e_delivered_j": 12186.439044332506,
+    "e_required_j": 12182.457730137416,
+    "e_norm": 1.0003268071421452,
+    "delta_soc": 0.3709343434343292,
+    "soc_end": 0.571212121212107,
+    "q_calendar": 0.00012442111891336943,
+    "q_cyclic": 3.992910175591359e-06,
+    "q_total": 0.0001284140290889608,
+    "qloss_total": 0.0001284140290889608,
+    "ah_throughput": 0.8166666666666664,
+    "nominal_c_rate": 0.7424242424242421,
+    "mean_soc": 0.41785879629629485,
+    "duration_s": 1800.0,
+    "duration_h": 0.5,
+    "duration_min": 30.0,
+    "peak_v": 4.200347900390625,
+    "peak_t": 23.993505477905273,
+    "mean_t": 23.470273421605427,
+    "mean_charge_c_rate": 0.7424242424242421,
+    "ah_charge": 0.8166666666666664,
+    "end_reason": "energy target",
+    "energy_shortfall": 0.0,
+    "penalty": 0.034790039062482236
+  },
+  "provenance": {
+    "stage": "06_sanity_checks",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T16:58:50+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "degradation_fitted": "339ff7db1ee9642d0f938df0c10b6f20eb7ca53ee7611c3d2e9f6103c2a23af4",
+      "reward": "d8be6e71feb992c97f417877fdf79a65ecff5fadae5a1c065d2d4ba4547bb026",
+      "optimization": "170bfdcd606054155d847dd65a3a55ebbb42d73c24c1ddbbe6b68659d7f455fe"
+    },
+    "inputs": []
+  }
+}

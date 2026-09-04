@@ -1,0 +1,270 @@
+{
+  "cell": "RW10",
+  "method": "random_search",
+  "families": [
+    "cccv",
+    "two_step",
+    "three_step",
+    "pulsed"
+  ],
+  "n_evals_per_family": 80,
+  "device": "cuda:0",
+  "checkpoint": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+  "checkpoint_sha256": "096b7e25e16a35f4da245ec839ca963110e07b6734073bed3a7acdb5f559f48f",
+  "start_state": {
+    "soc": 0.2,
+    "v0": 3.735862307051581,
+    "t0": 24.0,
+    "age": 0.0,
+    "prev_i": 0.0
+  },
+  "v_nom": 3.844605812924015,
+  "anchors": {
+    "Q_ref": 0.00012485231225710697,
+    "t_ref_h": 0.4236111111111111,
+    "E_ref": 12184.45026688576
+  },
+  "reward": {
+    "w_soc": 1.0,
+    "w_loss": 2.0,
+    "w_time": 0.1,
+    "z_time": 0.55,
+    "duration_loss_weight": 0.001,
+    "energy_shortfall_penalty_scale": 300.0,
+    "voltage_ceiling_penalty_scale": 100.0
+  },
+  "baselines": [
+    {
+      "name": "CCCV 0.5C",
+      "c_rate": 0.5,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 1.1,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "loss": -0.25282924465235823,
+      "metrics": {
+        "reward": 0.2991959113190249,
+        "loss": -0.25282924465235823,
+        "feasible": true,
+        "soc_reward": 0.38624999999998066,
+        "qloss_penalty": 0.000272010965900961,
+        "time_penalty": 0.08678207771505483,
+        "time_penalty_raw": 0.8678207771505483,
+        "e_delivered_j": 12180.477801299097,
+        "e_required_j": 12179.71121534328,
+        "e_norm": 1.0000629395838918,
+        "delta_soc": 0.38624999999998066,
+        "soc_end": 0.5863888888888695,
+        "q_calendar": 0.00013419245397679934,
+        "q_cyclic": 1.8130289736811437e-06,
+        "q_total": 0.0001360054829504805,
+        "qloss_total": 0.0001360054829504805,
+        "ah_throughput": 0.8500555555555553,
+        "nominal_c_rate": 0.4999999999999999,
+        "mean_soc": 0.3932638888888832,
+        "duration_s": 2782.0,
+        "duration_h": 0.7727777777777778,
+        "duration_min": 46.36666666666667,
+        "peak_v": 4.1225104331970215,
+        "peak_t": 23.981557846069336,
+        "mean_t": 21.796333493987575,
+        "mean_charge_c_rate": 0.4999999999999999,
+        "ah_charge": 0.8500555555555553,
+        "end_reason": "energy target",
+        "energy_shortfall": 0.0,
+        "penalty": 0.0
+      },
+      "end_reason": "energy target",
+      "duration_s": 2782
+    },
+    {
+      "name": "CCCV 1C",
+      "c_rate": 1.0,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 2.2,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "loss": -0.2273588018672898,
+      "metrics": {
+        "reward": 0.30840329140991524,
+        "loss": -0.2273588018672898,
+        "feasible": true,
+        "soc_reward": 0.37099747474746514,
+        "qloss_penalty": 0.0002448177835700791,
+        "time_penalty": 0.062349365553979776,
+        "time_penalty_raw": 0.6234936555397977,
+        "e_delivered_j": 12184.45026688576,
+        "e_required_j": 12179.71121534328,
+        "e_norm": 1.0003890939168172,
+        "delta_soc": 0.37099747474746514,
+        "soc_end": 0.5712752525252429,
+        "q_calendar": 0.00011594258024189224,
+        "q_cyclic": 6.4663115431473146e-06,
+        "q_total": 0.00012240889178503954,
+        "qloss_total": 0.00012240889178503954,
+        "ah_throughput": 0.8168055555555553,
+        "nominal_c_rate": 0.8764530551415793,
+        "mean_soc": 0.40238601175691313,
+        "duration_s": 1525.0,
+        "duration_h": 0.4236111111111111,
+        "duration_min": 25.416666666666668,
+        "peak_v": 4.20055627822876,
+        "peak_t": 24.10982894897461,
+        "mean_t": 23.899812176813846,
+        "mean_charge_c_rate": 0.8764530551415793,
+        "ah_charge": 0.8168055555555553,
+        "end_reason": "energy target",
+        "energy_shortfall": 0.0,
+        "penalty": 0.0556278228759588
+      },
+      "end_reason": "energy target",
+      "duration_s": 1525
+    },
+    {
+      "name": "CCCV 2C",
+      "c_rate": 2.0,
+      "params": {
+        "family_id": "cccv",
+        "i_cc": 4.4,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "loss": 0.3455605567804329,
+      "metrics": {
+        "reward": 0.3001624555079608,
+        "loss": 0.3455605567804329,
+        "feasible": false,
+        "soc_reward": 0.36661616161617716,
+        "qloss_penalty": 0.00026551208187715184,
+        "time_penalty": 0.06618819402633926,
+        "time_penalty_raw": 0.6618819402633925,
+        "e_delivered_j": 12180.877000260354,
+        "e_required_j": 12179.71121534328,
+        "e_norm": 1.0000957153167642,
+        "delta_soc": 0.36661616161617716,
+        "soc_end": 0.5671717171717328,
+        "q_calendar": 0.00012804260474352062,
+        "q_cyclic": 4.7134361950553025e-06,
+        "q_total": 0.00013275604093857592,
+        "qloss_total": 0.00013275604093857592,
+        "ah_throughput": 0.8077777777777778,
+        "nominal_c_rate": 0.7775401069518716,
+        "mean_soc": 0.43132553475936447,
+        "duration_s": 1700.0,
+        "duration_h": 0.4722222222222222,
+        "duration_min": 28.333333333333332,
+        "peak_v": 4.206173896789551,
+        "peak_t": 24.303239822387695,
+        "mean_t": 24.09299237082986,
+        "mean_charge_c_rate": 0.7775401069518716,
+        "ah_charge": 0.8077777777777778,
+        "end_reason": "energy target",
+        "energy_shortfall": 0.0,
+        "penalty": 0.6173896789550604
+      },
+      "end_reason": "energy target",
+      "duration_s": 1700
+    }
+  ],
+  "best_by_family": {
+    "cccv": {
+      "best_params": {
+        "family_id": "cccv",
+        "i_cc": 2.0,
+        "v_cv": 4.2,
+        "i_cutoff": 0.05
+      },
+      "best_loss": -0.2878933538308501,
+      "best_reward": 0.31261002049751674,
+      "feasible": true,
+      "q_total": 0.00011670471694254774,
+      "duration_min": 24.716666666666665,
+      "peak_t": 24.02215576171875,
+      "end_reason": "energy target"
+    },
+    "two_step": {
+      "best_params": {
+        "family_id": "two_step",
+        "i1": 2.0050598735518945,
+        "i2": 1.395106229393034,
+        "soc_switch": 0.6450657810266964
+      },
+      "best_loss": -0.2879853368940163,
+      "best_reward": 0.3126353368940163,
+      "feasible": true,
+      "q_total": 0.00011669285112941947,
+      "duration_min": 24.65,
+      "peak_t": 24.022207260131836,
+      "end_reason": "energy target"
+    },
+    "three_step": {
+      "best_params": {
+        "family_id": "three_step",
+        "i1": 2.602466674927199,
+        "i2": 1.9473966197143193,
+        "i3": 1.5380914347567574,
+        "soc1": 0.302175940327232,
+        "soc2": 0.6755098924897611
+      },
+      "best_loss": -0.2881441343243788,
+      "best_reward": 0.3114774676577121,
+      "feasible": true,
+      "q_total": 0.00012038428994119829,
+      "duration_min": 23.333333333333332,
+      "peak_t": 24.23517417907715,
+      "end_reason": "energy target"
+    },
+    "pulsed": {
+      "best_params": {
+        "family_id": "pulsed",
+        "i_charge": 1.9362921256324221,
+        "pulse_on_min": 13.417250260133088,
+        "pulse_rest_min": 8.294087368833738,
+        "rest_fraction": 0.618165958600184,
+        "i_floor": 1.8834562555726002
+      },
+      "best_loss": -0.26783457527098237,
+      "best_reward": 0.30195124193764905,
+      "feasible": true,
+      "q_total": 0.00013228725144608024,
+      "duration_min": 34.11666666666667,
+      "peak_t": 24.021629333496094,
+      "end_reason": "energy target"
+    }
+  },
+  "any_feasible": true,
+  "wall_clock_s": 86.1335058970144,
+  "provenance": {
+    "stage": "07_random_search",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T17:01:58+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "degradation_fitted": "339ff7db1ee9642d0f938df0c10b6f20eb7ca53ee7611c3d2e9f6103c2a23af4",
+      "reward": "d8be6e71feb992c97f417877fdf79a65ecff5fadae5a1c065d2d4ba4547bb026",
+      "optimization": "170bfdcd606054155d847dd65a3a55ebbb42d73c24c1ddbbe6b68659d7f455fe"
+    },
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+        "sha256": "096b7e25e16a35f4da245ec839ca963110e07b6734073bed3a7acdb5f559f48f"
+      }
+    ]
+  }
+}

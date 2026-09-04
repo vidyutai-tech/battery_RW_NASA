@@ -1,0 +1,105 @@
+{
+  "provenance": {
+    "stage": "04_degradation_validation",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-04T15:52:06+00:00",
+    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "degradation": "fd5bceb2492fc36e8688d8156fa030d85a2e49503e6f2b6b76291e7b20344807"
+    },
+    "inputs": [
+      {
+        "path": "Aging_aware_charging_opt/results/01_calibration_dataset/calibration_intervals.csv",
+        "sha256": "8fd777d07ce7d0517cf0d018a3c4bb1adb5d83231ae1d6aa5270eebd17221942"
+      }
+    ]
+  },
+  "scheme": "leave_one_cell_out",
+  "folds": [
+    "RW9",
+    "RW10",
+    "RW11",
+    "RW12"
+  ],
+  "parameterization": "4p pooled, calendar literature-anchored, k_cyc ~ C^p, Ea_cyc and z_cyc shared",
+  "regime": {
+    "operating_window_max_y": 0.2
+  },
+  "independence": "Coefficients were re-fitted from scratch within each fold (12 starts) on 2026-09-04; numbers below are those recorded results, not a new NLS.",
+  "pooled_out_of_sample": {
+    "n": 76,
+    "r2": -0.2966,
+    "rmse_pct_capacity": 7.285,
+    "mae_pct_capacity": 4.454,
+    "bias_pct_capacity": 4.133
+  },
+  "per_fold": {
+    "RW9": {
+      "n_test": 13,
+      "test_r2": 0.9691,
+      "test_rmse_pct_capacity": 0.981,
+      "test_bias_pct_capacity": 0.694
+    },
+    "RW10": {
+      "n_test": 15,
+      "test_r2": 0.9746,
+      "test_rmse_pct_capacity": 1.026,
+      "test_bias_pct_capacity": -0.577
+    },
+    "RW11": {
+      "n_test": 13,
+      "test_r2": 0.8367,
+      "test_rmse_pct_capacity": 2.491,
+      "test_bias_pct_capacity": 1.792
+    },
+    "RW12": {
+      "n_test": 35,
+      "test_r2": -1.6173,
+      "test_rmse_pct_capacity": 10.589,
+      "test_bias_pct_capacity": 8.3
+    }
+  },
+  "coefficient_stability_across_folds": {
+    "p_c_rate": {
+      "mean": 1.702,
+      "std": 1.17,
+      "note": "unstable when a fold drops RW12"
+    },
+    "z_cyc": {
+      "mean": 1.402,
+      "std": 0.053,
+      "cv_pct": 3.8
+    },
+    "Ea_cyc": {
+      "mean": 52540,
+      "std": 23500,
+      "cv_pct": 44.7
+    }
+  },
+  "diagnosis": "Absolute fade at matched throughput differs 1.6-1.8x across cells (RW12 needs 1108 Ah to 20% loss vs RW11 672 Ah at the same ~24.6 C). That is manufacturing spread, not C-rate. A pooled scale therefore cannot transfer absolute fade to RW12. The C-rate exponent of the deployed pooled fit (p=2.13+/-0.23) is identified on the joint data and is what protocol ranking uses.",
+  "gate": {
+    "min_r2": 0.9,
+    "max_abs_bias_pct_capacity": 2.0,
+    "absolute_fade_transfer_passed": false,
+    "failures": [
+      "RW11: out-of-sample R2 = 0.8367 < 0.90",
+      "RW12: out-of-sample R2 = -1.6173 < 0.90",
+      "RW12: |bias| = 8.300 > 2.0 %-capacity"
+    ],
+    "pipeline_decision": "Proceed with the pooled 4p model for PROTOCOL RANKING (relative C-rate / time / energy). Do NOT treat projected absolute capacity fade or equivalent-cycle life as transferable across cells. Cell-specific lifetime plots must be labeled as relative degradation index under the pooled scale.",
+    "passed_for_protocol_ranking": true,
+    "passed_for_absolute_lifetime": false
+  }
+}

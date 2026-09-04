@@ -1,0 +1,33 @@
+# Paper reward (Eq. 10) with NASA-calibrated Q_loss coefficients.
+#
+#   R = w_soc * ΔSOC  −  w_loss * Q_loss  −  w_time * t_h^{z_time}
+#
+#   Q_loss = Q_calendar + Q_cyclic     (session-mean closed form)
+#   coefficients from configs/degradation_fitted.yaml  (not Table-7 stubs)
+#
+#   L = −R + ε t_min + λ_E g_E + λ_V g_V
+#   ε = 1e-3  (tie-break only)
+#
+# Weights are the published values. Q_loss is the calibrated capacity fraction
+# (~1e-4 per session), so the numerical reward is ~0.2–0.4 rather than the
+# ~0.14–0.19 in the draft tables (those used the uncalibrated index ~0.07).
+
+weights:
+  w_soc: 1.0
+  w_loss: 2.0
+  w_time: 0.1
+  z_time: 0.55
+  duration_loss_weight: 1.0e-3   # ε in the paper loss; minutes
+
+constraints:
+  energy_shortfall_penalty_scale: 300.0
+  voltage_ceiling_penalty_scale: 100.0
+
+# Devices used in some old Constrained_BO exports and NOT used here.
+disabled_legacy_terms:
+  qloss_cap: false
+  qloss_cap_scale: null
+  legacy_temperature_reward: false
+  legacy_time_reward: false
+  cccv_1c_normalization: false
+  hsoc_comfort: false

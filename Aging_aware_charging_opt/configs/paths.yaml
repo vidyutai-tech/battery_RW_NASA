@@ -1,0 +1,26 @@
+# Read-only inputs inherited from the previous project.
+# Nothing in this file is ever written to by Aging_aware_charging_opt.
+# All paths are relative to the repository root (/data/battery_RW_NASA).
+
+repo_root: "."
+project_dir: "Aging_aware_charging_opt"
+results_dir: "Aging_aware_charging_opt/results"
+
+nasa_matlab_dir: >-
+  NASA_RW/dataset/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/Battery_Uniform_Distribution_Charge_Discharge_DataSet_2Post/data/Matlab
+
+cells: ["RW9", "RW10", "RW11", "RW12"]
+
+# Inherited BDT checkpoints (see docs/old_vs_new.md section A).
+# RW9 is the source-trained twin; RW10-12 are two-stage fine-tunes.
+# frac0.60 selected in the source project as the lowest held-out voltage RMSE
+# for all three fine-tuned cells; that selection is inherited, not re-made here.
+bdt_checkpoints:
+  RW9: "outputs/twin_source/20260610_111409/twin_source_RW9.pt"
+  RW10: "outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt"
+  RW11: "outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt"
+  RW12: "outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt"
+
+# Cross-check reference only. Read by scripts/01 purely to report agreement of
+# an independent reimplementation; never used as a pipeline input.
+crosscheck_capacity_fade_csv: "Constrained_BO/results/grounded_figures/capacity_fade_measured.csv"

@@ -1,0 +1,73 @@
+# Session definition, search space, and optimizer budgets.
+# Identical for Random Search and GP-BO by construction: both read this file.
+
+session:
+  soc_start: 0.20
+  ambient_t0_c: 24.0
+  v_max: 4.20                 # hard voltage ceiling [V]
+  v_nom_fallback: 3.70        # used only if the OCV fit fails
+  max_duration_min: 150.0
+  decision_interval_s: 30
+  bdt_switch_pad: 5           # samples of previous current prepended on a change
+
+  constraint_mode: "energy"
+  # Delivered energy target as a fraction of nominal pack energy
+  # (Q_nom[As] * V_nom). Same target for every cell and every profile so that
+  # time and degradation are compared at equal useful work.
+  energy_fraction: 0.40
+
+search_space:
+  i_min_a: 0.75
+  i_max_a: 6.00
+  v_cv_min_v: 4.05
+  v_cv_max_v: 4.20
+  soc_switch_min: 0.32        # >= soc_start + min_stage_dsoc
+  soc_switch_max: 0.90
+  pulse_on_min_min: 1.0
+  pulse_on_max_min: 15.0
+  rest_fraction_min: 0.5
+  rest_fraction_max: 2.5
+
+  # Hard structural constraints, enforced inside each family's parameter
+  # constructor so the random sampler and the GP proposal share one feasible set.
+  min_step_di_a: 0.25         # i_{n+1} <= i_n - this
+  min_stage_dsoc: 0.12        # 2-step: soc_switch >= soc_start + this
+  min_stage1_dsoc: 0.10       # 3-step: soc1 >= soc_start + this
+  min_stage_gap_dsoc: 0.12    # 3-step: soc2 >= soc1 + this
+  cv_step_a: 0.25             # CV taper decrement per decision interval
+  min_charge_a: 0.05
+
+families: ["cccv", "two_step", "three_step", "pulsed"]
+
+budget:
+  # Identical evaluation budget for both methods (fair comparison).
+  n_evals_per_family: 80
+  gp_bo:
+    n_initial_points: 15      # family seeds + random fill up to this count
+    acq_func: "EI"
+    acq_xi: 0.01
+    noise: 1.0e-6
+    # Explicitly no cross-method information.
+    warm_start_from_random_search: false
+  random_search:
+    sampler: "uniform"
+
+seed:
+  master: 20260904
+  # seed(cell, family, method) = master + 1000*cell_idx + 100*family_idx + method_idx
+  method_index: {random_search: 0, gp_bo: 1}
+
+baselines:
+  # Conventional CCCV protocols, defined independently of the optimizers.
+  - {name: "CCCV 0.5C", c_rate: 0.5, v_cv: 4.20, i_cutoff: 0.05}
+  - {name: "CCCV 1C",   c_rate: 1.0, v_cv: 4.20, i_cutoff: 0.05}
+  - {name: "CCCV 2C",   c_rate: 2.0, v_cv: 4.20, i_cutoff: 0.05}
+
+lifetime:
+  # Relative capacity-retention projection over repeated equal-energy sessions.
+  n_equivalent_cycles: 600
+  report_at_cycles: [100, 200, 400, 600]
+  # Drawn on figures as a labelled engineering reference level only.
+  engineering_reference_retention_pct: 80.0
+
+device: "auto"
