@@ -60,16 +60,8 @@ def plot_best_profiles(
     for col, fid in enumerate(families):
         res = family_results[fid]
         session = res["best_session"]
-        metrics = res["best_metrics"]
         t_min = _as_array(session["time_s"]) / 60.0
-        label = FAMILY_LABELS.get(fid, fid)
-        header = (
-            f"{label}\n"
-            f"{float(metrics['duration_min']):.1f} min  ·  "
-            f"{'feasible' if metrics['feasible'] else 'infeasible'}\n"
-            f"R={float(metrics['reward']):.4f}  Q={float(metrics['q_total']):.3e}"
-        )
-        axes[0, col].set_title(header, fontsize=11, fontweight="bold", pad=8, linespacing=1.35)
+        axes[0, col].set_title(FAMILY_LABELS.get(fid, fid), fontsize=12, fontweight="bold", pad=8)
         axes[0, col].plot(
             t_min, _charge_current(session["current_a"]),
             color=c_i, lw=2.2, drawstyle="steps-post",
@@ -91,11 +83,7 @@ def plot_best_profiles(
     for col in range(n_cols):
         axes[3, col].set_xlabel("Time (min)", fontsize=13)
 
-    fig.suptitle(
-        f"Best charging profiles — {cell_id} ({method_title})",
-        fontsize=16, fontweight="bold", y=0.99,
-    )
-    fig.tight_layout(h_pad=0.75, w_pad=0.35, rect=(0, 0, 1, 0.97))
+    fig.tight_layout(h_pad=0.75, w_pad=0.35)
     savefig(fig, out_path)
 
 
@@ -135,7 +123,6 @@ def _draw_multiaxis_session(
     v = _as_array(session["voltage_v"])
     soc = _as_array(session["soc"]) * 100.0
     temp = _as_array(session["temperature_c"])
-    fam = FAMILY_LABELS.get(family_id, family_id)
     host.set_facecolor(PAPER_LIGHT_BG)
     host.set_xlabel("Time (min)", fontsize=18)
     host.tick_params(axis="x", labelsize=15)
@@ -177,15 +164,6 @@ def _draw_multiaxis_session(
     if t_min.size:
         host.set_xlim(0.0, float(t_min[-1]) * 1.02)
 
-    header = (
-        f"{method_name}  ·  {fam}\n"
-        f"{float(metrics['duration_min']):.1f} min   "
-        f"R={float(metrics['reward']):.4f}   "
-        f"Q={float(metrics['q_total']):.3e}"
-    )
-    host.set_title(header, fontsize=18, fontweight="bold", pad=12, loc="left")
-
-
 def plot_gpbo_vs_random_multiaxis(
     *,
     cell_id: str,
@@ -198,8 +176,8 @@ def plot_gpbo_vs_random_multiaxis(
     out_path: Path,
 ) -> None:
     apply_paper_style()
-    fig, axes = plt.subplots(2, 1, figsize=(12.4, 14.2), facecolor=PAPER_LIGHT_BG)
-    fig.subplots_adjust(left=0.22, right=0.76, hspace=0.52, top=0.93, bottom=0.06)
+    fig, axes = plt.subplots(2, 1, figsize=(12.4, 13.4), facecolor=PAPER_LIGHT_BG)
+    fig.subplots_adjust(left=0.22, right=0.76, hspace=0.32, top=0.97, bottom=0.06)
     _draw_multiaxis_session(
         axes[0], random_session, random_metrics,
         family_id=random_family, method_name="Random",
@@ -207,10 +185,6 @@ def plot_gpbo_vs_random_multiaxis(
     _draw_multiaxis_session(
         axes[1], gpbo_session, gpbo_metrics,
         family_id=gpbo_family, method_name="GP-BO (max R)",
-    )
-    fig.suptitle(
-        f"{cell_id}: best equal-energy profiles",
-        fontsize=20, fontweight="bold", y=0.985,
     )
     savefig(fig, out_path, pad_inches=0.35)
 
@@ -226,7 +200,7 @@ def plot_all_cells_gpbo_vs_random_multiaxis(
     fig, axes = plt.subplots(2 * n, 1, figsize=(12.4, 6.9 * n), facecolor=PAPER_LIGHT_BG)
     if 2 * n == 1:
         axes = np.array([axes])
-    fig.subplots_adjust(left=0.22, right=0.76, hspace=0.55, top=0.97, bottom=0.03)
+    fig.subplots_adjust(left=0.22, right=0.76, hspace=0.32, top=0.99, bottom=0.03)
     for i, cell in enumerate(cells):
         p = packs[cell]
         _draw_multiaxis_session(
@@ -237,10 +211,6 @@ def plot_all_cells_gpbo_vs_random_multiaxis(
             axes[2 * i + 1], p["gpbo_session"], p["gpbo_metrics"],
             family_id=p["gpbo_family"], method_name=f"{cell}  GP-BO (max R)",
         )
-    fig.suptitle(
-        "Best charging profiles: Random Search vs GP-BO (max R)",
-        fontsize=20, fontweight="bold", y=0.995,
-    )
     savefig(fig, out_path, pad_inches=0.35)
 
 
@@ -278,7 +248,6 @@ def plot_metric_bars(
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=12)
     ax.set_ylabel(ylabel, fontsize=14)
-    ax.set_title(title, fontweight="bold", fontsize=15)
     ax.grid(True, axis="y", linestyle="--", alpha=0.35)
     if clip_to_data and values:
         lo, hi = min(values), max(values)
@@ -338,11 +307,6 @@ def plot_qloss_bars(
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=12)
     ax.set_ylabel("Session $Q_{\\mathrm{loss}}$ (capacity fraction, lower better)", fontsize=13)
-    ax.set_title(
-        f"Charging policy vs degradation — {cell_id}\n"
-        "CCCV 0.5C / 1C / 2C   vs   Random best   vs   GP-BO best",
-        fontsize=14, fontweight="bold",
-    )
     ax.set_ylim(0, ymax * 1.40)
     ax.grid(True, axis="y", linestyle="--", alpha=0.35)
     fig.tight_layout()
@@ -378,7 +342,6 @@ def plot_qloss_detail(
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=11)
     ax.set_ylabel("Session $Q_{\\mathrm{loss}}$ (lower = less degradation)", fontsize=13)
-    ax.set_title(f"{cell_id}: degradation per equal-energy session", fontsize=13, fontweight="bold")
     ax.grid(True, axis="y", linestyle="--", alpha=0.35)
 
     ax2 = axes[1]
@@ -390,7 +353,6 @@ def plot_qloss_detail(
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels, fontsize=11)
     ax2.set_ylabel("Stacked $Q_{\\mathrm{loss}}$", fontsize=13)
-    ax2.set_title("Calendar vs cyclic split", fontsize=13, fontweight="bold")
     ax2.legend(fontsize=11, loc="upper right")
     ax2.grid(True, axis="y", linestyle="--", alpha=0.35)
     fig.tight_layout()
@@ -440,11 +402,6 @@ def plot_pareto_cloud(
         )
     ax.set_xlabel("Charge duration [min]", fontsize=14)
     ax.set_ylabel("Session $Q_{\\mathrm{loss}}$ (lower better)", fontsize=14)
-    ax.set_title(
-        f"{cell_id}: search cloud + baselines (equal-energy when feasible)\n"
-        "Lower-left is better (faster + less degradation).",
-        fontsize=14, fontweight="bold",
-    )
     ax.grid(True, linestyle="--", alpha=0.35)
     handles, labels = ax.get_legend_handles_labels()
     seen, uniq = set(), []
@@ -498,11 +455,6 @@ def plot_lifetime_vs_cycles(
     ax.axhline(soh_ref, color="#94a3b8", ls="--", lw=1.2, alpha=0.85)
     ax.set_xlabel("Equivalent charge cycles (one 40% energy session each)", fontsize=13)
     ax.set_ylabel("Projected remaining capacity [%]", fontsize=14)
-    ax.set_title(
-        f"{cell_id}: projected remaining capacity\n"
-        f"(session $Q_{{loss}}$ accumulated · CCCV 0.5C anchored to {soh_ref:.0f}% at {n_cycles} cycles)",
-        fontsize=14, fontweight="bold",
-    )
     ax.set_xlim(0, n_cycles)
     ax.set_ylim(60.0, 100.0)
     ax.grid(True, linestyle="--", alpha=0.35)
@@ -539,7 +491,6 @@ def plot_lifetime_delta(
         )
     ax.set_xlabel("Equivalent charge cycles", fontsize=14)
     ax.set_ylabel(f"Δ remaining capacity vs {baseline} [%-points]", fontsize=13)
-    ax.set_title(f"{cell_id}: capacity retention vs {baseline}", fontsize=14, fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend(fontsize=12, loc="best")
     fig.tight_layout()
@@ -572,14 +523,12 @@ def plot_lifetime_vs_ah(
         ax_zoom.plot(d["cum_ah"], d["retention_pct"], color=style["color"], ls=style["ls"], lw=lw, label=name)
     ax.set_xlabel("Cumulative ampere-hour throughput [Ah]", fontsize=13)
     ax.set_ylabel("Projected remaining capacity [%]", fontsize=13)
-    ax.set_title(f"{cell_id}: fade vs throughput", fontsize=13, fontweight="bold")
     ax.set_ylim(60.0, 100.0)
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend(fontsize=11, loc="best", framealpha=0.95)
     ax.set_ylim(60.0, 100.0)
     ax_zoom.set_xlabel("Cumulative Ah", fontsize=13)
     ax_zoom.set_ylabel("Projected remaining capacity [%]", fontsize=13)
-    ax_zoom.set_title("Policy comparison", fontsize=13, fontweight="bold")
     ax_zoom.set_ylim(60.0, 100.0)
     ax_zoom.grid(True, linestyle="--", alpha=0.35)
     ax_zoom.legend(fontsize=11, loc="best")
@@ -611,7 +560,6 @@ def plot_lifetime_capacity_ah(
         ax.plot(x, q_ah, color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2), label=name)
     ax.set_xlabel("Equivalent charge cycle index", fontsize=14)
     ax.set_ylabel("Projected capacity [Ah]", fontsize=14)
-    ax.set_title(f"{cell_id}: capacity vs cycle (unscaled model projection)", fontsize=14, fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend(fontsize=12, loc="best")
     fig.tight_layout()
@@ -623,10 +571,10 @@ def plot_consolidated_comparison(
     *,
     out_path: Path,
 ) -> None:
-    """Three-panel: time, peak T, reward for CCCV 0.5C / Random / GP-BO."""
+    """Three-panel: time, peak T, reward for CCCV 0.5C / 1C / Random / GP-BO."""
     apply_paper_style()
     cells = list(per_cell.keys())
-    series = ("CCCV 0.5C", "Random", "GP-BO")
+    series = ("CCCV 0.5C", "CCCV 1C", "Random", "GP-BO")
     colors = [GROUP_COLORS[s] for s in series]
     metrics = [
         ("duration_min", "Charging time (min)", "(a) Charging time"),
@@ -635,12 +583,16 @@ def plot_consolidated_comparison(
     ]
     fig, axes = plt.subplots(1, 3, figsize=(14.5, 4.8), facecolor=PAPER_LIGHT_BG)
     x = np.arange(len(cells))
-    width = 0.24
+    width = 0.18
+    n_s = len(series)
     for ax, (key, ylabel, title) in zip(axes, metrics):
         ax.set_facecolor(PAPER_LIGHT_BG)
         for k, (name, color) in enumerate(zip(series, colors)):
             vals = [float(per_cell[c][name][key]) for c in cells]
-            ax.bar(x + (k - 1) * width, vals, width=width, color=color, edgecolor="k", lw=0.4, label=name)
+            ax.bar(
+                x + (k - (n_s - 1) / 2.0) * width, vals, width=width,
+                color=color, edgecolor="k", lw=0.4, label=name,
+            )
         ax.set_xticks(x)
         ax.set_xticklabels(cells, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
@@ -657,10 +609,6 @@ def plot_consolidated_comparison(
             pad = max(0.005, 0.25 * (hi - lo))
             ax.set_ylim(lo - pad, hi + pad)
     axes[0].legend(fontsize=10, loc="best")
-    fig.suptitle(
-        "CCCV 0.5C vs Random Search vs GP-BO under identical energy-delivery constraints",
-        fontsize=14, fontweight="bold", y=1.02,
-    )
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -698,11 +646,6 @@ def plot_lifetime_grid(
         ax.set_ylabel("Projected remaining capacity [%]")
         ax.grid(True, linestyle="--", alpha=0.35)
         ax.legend(fontsize=9, loc="best")
-    fig.suptitle(
-        "Projected remaining battery capacity over 600 repeated equal-energy charging cycles\n"
-        r"(session $Q_{\mathrm{loss}}$ accumulated; CCCV 0.5C anchored to 80% at 600 cycles)",
-        fontsize=14, fontweight="bold",
-    )
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -732,7 +675,6 @@ def plot_family_reward_bars(
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.set_ylabel("Reward")
-    ax.set_title(f"{cell_id}: best feasible reward by family ({method})", fontweight="bold")
     lo, hi = min(rewards), max(rewards)
     pad = max(0.002, 0.35 * (hi - lo) if hi > lo else 0.01)
     ax.set_ylim(lo - pad, hi + pad)
@@ -774,9 +716,5 @@ def plot_paper_table_image(rows: List[Dict[str, Any]], *, out_path: Path) -> Non
             cell.set_text_props(color="white", fontweight="bold")
         elif row % 2 == 0:
             cell.set_facecolor("#f1f5f9")
-    ax.set_title(
-        "GP-BO vs CCCV 0.5C and Random Search (calibrated $Q_{\\mathrm{loss}}$, paper Eq. 10)",
-        fontsize=13, fontweight="bold", pad=12,
-    )
     fig.tight_layout()
     savefig(fig, out_path)

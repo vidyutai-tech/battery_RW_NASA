@@ -67,6 +67,7 @@ def _predict_chunk(
     state: torch.Tensor,
     action: torch.Tensor,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    trainer.model.eval()
     out = trainer.model.forward_author(
         state.unsqueeze(0).to(trainer.device),
         action.unsqueeze(0).to(trainer.device),
@@ -375,13 +376,14 @@ def plot_digital_twin_validation(
             label="Digital Twin predicted", lw=2.4, zorder=4,
         )
         ax.set_title(
-            f"Chunk {samp['chunk_idx']}  —  Relative age = {samp['rel_age']:.3f}\n"
-            f"Voltage MAPE = {samp['mape_v']:.2f}%  (steps {st + 1}–{T})",
+            f"Relative age = {samp['rel_age']:.3f}\n"
+            f"Voltage MAPE = {samp['mape_v']:.2f}%",
             fontsize=15, fontweight="bold",
         )
         ax.set_ylabel("Voltage (V)" if col == 0 else "", fontsize=16)
         ax.tick_params(labelsize=14)
-        ax.legend(fontsize=13, loc="lower right", framealpha=0.85)
+        if col == 0:
+            ax.legend(fontsize=13, loc="lower right", framealpha=0.85)
         if voltage_ylim is not None:
             ax.set_ylim(*voltage_ylim)
         else:
@@ -406,22 +408,17 @@ def plot_digital_twin_validation(
             label="Digital Twin predicted", linewidth=2.4, zorder=4,
         )
         ax.set_title(
-            f"Temperature MAPE = {samp['mape_t']:.2f}%  (steps {st + 1}–{T})",
+            f"Temperature MAPE = {samp['mape_t']:.2f}%",
             fontsize=15, fontweight="bold",
         )
         ax.set_xlabel("Time (min)", fontsize=16)
         ax.set_ylabel("Temperature (°C)" if col == 0 else "", fontsize=16)
         ax.tick_params(labelsize=14)
-        ax.legend(fontsize=13, loc="upper right", framealpha=0.85)
+        if col == 0:
+            ax.legend(fontsize=13, loc="upper right", framealpha=0.85)
 
-    suffix = f"  {title_suffix}" if title_suffix else ""
-    fig.suptitle(
-        f"Digital Twin — measured vs predicted  "
-        f"(first {seq_len} steps, {n} held-out test chunks, {cell_id}){suffix}",
-        fontsize=18,
-        fontweight="bold",
-    )
-    plt.tight_layout()
+    _ = (cell_id, seq_len, title_suffix)
+    fig.tight_layout()
     _savefig(fig, out_path)
 
 
@@ -781,7 +778,7 @@ def plot_finetune_fraction_summary(
     by = {(r["cell"], float(r["fraction"])): r for r in rows if r.get("fraction") is not None}
     x = np.arange(len(fracs))
     w = 0.22
-    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.0), facecolor=LIGHT_BG, sharey=False)
+    fig, axes = plt.subplots(2, 1, figsize=(7.0, 8.4), facecolor=LIGHT_BG, sharex=True)
     colors = {"RW10": "#2563eb", "RW11": "#16a34a", "RW12": "#ea580c"}
     for ax, key, ylab, title in (
         (axes[0], "mape_v", "Voltage MAPE (%)", "Voltage MAPE vs adapt fraction"),
@@ -801,16 +798,12 @@ def plot_finetune_fraction_summary(
             )
         ax.set_xticks(x)
         ax.set_xticklabels([f"{f:.0%}" for f in fracs], fontsize=12)
-        ax.set_xlabel("Finetune adapt-data fraction", fontsize=14)
         ax.set_ylabel(ylab, fontsize=14)
         ax.set_title(title, fontsize=13, fontweight="bold")
         ax.grid(True, axis="y", alpha=0.3)
         ax.tick_params(labelsize=12)
         ax.legend(fontsize=11)
-    fig.suptitle(
-        "Finetuned digital twin: effect of adapt-data fraction (20% / 40% / 60%)",
-        fontsize=15, fontweight="bold",
-    )
+    axes[1].set_xlabel("Finetune adapt-data fraction", fontsize=14)
     plt.tight_layout()
     _savefig(fig, out_path)
 

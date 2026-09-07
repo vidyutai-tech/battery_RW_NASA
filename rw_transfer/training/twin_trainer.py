@@ -521,6 +521,7 @@ class TwinTrainer:
             **extra,
         )
         trainer.model.load_state_dict(ckpt["model_state"])
+        trainer.model.eval()
         return trainer
 
     def fit_author(

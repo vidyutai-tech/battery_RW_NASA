@@ -205,8 +205,8 @@
   "provenance": {
     "stage": "12_figures",
     "project": "Aging_aware_charging_opt",
-    "created_utc": "2026-09-04T19:17:41+00:00",
-    "git_commit": "f052573d2da25fce4ce5bbd2d254b0905819c4db",
+    "created_utc": "2026-09-05T07:54:15+00:00",
+    "git_commit": "95cf16a09a5683a89bfceb16d1671d32f144f787",
     "host": "gpu-infer-4.cdis.local",
     "packages": {
       "python": "3.12.3",

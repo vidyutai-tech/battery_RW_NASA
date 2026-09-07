@@ -377,6 +377,7 @@ def process_cell(
         "bo_row": opt_row,
         "health_row": health_row,
         "halfc": next(r for r in baseline_rows if r["label"] == "CCCV 0.5C"),
+        "onec": next(r for r in baseline_rows if r["label"] == "CCCV 1C"),
         "policies": policies,
         "curves": curves,
         "family_bo": family_summary(bo),
@@ -422,10 +423,13 @@ def main() -> int:
         per_cell_pack[cell] = pack
         all_curves[cell] = pack["curves"]
         all_policies[cell] = pack["policies"]
-        halfc, rs_row, bo_row = pack["halfc"], pack["rs_row"], pack["bo_row"]
+        halfc, onec, rs_row, bo_row = (
+            pack["halfc"], pack["onec"], pack["rs_row"], pack["bo_row"],
+        )
         health = pack["health_row"]
         consolidated[cell] = {
             "CCCV 0.5C": halfc,
+            "CCCV 1C": onec,
             "Random": rs_row,
             "GP-BO": bo_row,
         }
