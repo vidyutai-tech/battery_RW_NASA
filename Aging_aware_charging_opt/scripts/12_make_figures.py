@@ -26,8 +26,11 @@ from aacopt.config import (  # noqa: E402
 from aacopt.degradation import HybridDegradationModel  # noqa: E402
 from aacopt.evaluate import load_degradation_model  # noqa: E402
 from aacopt.viz.figures import (  # noqa: E402
+    _best_so_far_trace,
+    _history_rows,
     plot_all_cells_gpbo_vs_random_multiaxis, plot_best_profiles,
     plot_consolidated_comparison, plot_family_reward_bars,
+    plot_gpbo_overall_fig10, plot_gpbo_vs_random_fig11,
     plot_gpbo_vs_random_multiaxis, plot_lifetime_capacity_ah,
     plot_lifetime_delta, plot_lifetime_grid, plot_lifetime_vs_ah,
     plot_lifetime_vs_cycles, plot_metric_bars, plot_paper_table_image,
@@ -256,7 +259,7 @@ def process_cell(
 
     rs_row = winner_row("Random", rs_fid, rs_blob)
     opt_row = winner_row("GP-BO", bo_fid, bo_blob)
-    health_row = winner_row("GP-BO", mq_fid, mq_blob)
+    health_row = winner_row("GP-BO (min Q)", mq_fid, mq_blob)
     speed_row = winner_row("GP-BO (max R)", bo_fid, bo_blob)
 
     compare_rows = baseline_rows + [rs_row, opt_row]
@@ -382,6 +385,8 @@ def process_cell(
         "curves": curves,
         "family_bo": family_summary(bo),
         "family_rs": family_summary(rs),
+        "bo_families": bo,
+        "rs_families": rs,
         "meta": meta,
         "random_session": rs_blob["best_session"],
         "random_metrics": rs_blob["best_metrics"],
@@ -449,10 +454,37 @@ def main() -> int:
             flush=True,
         )
         print(
-            f"  GP-BO health ({health['family_label']}): Q={health['q_total']:.3e}  "
+            f"  GP-BO (min Q) ({health['family_label']}): Q={health['q_total']:.3e}  "
             f"t={health['duration_min']:.2f} min",
             flush=True,
         )
+
+    gpbo_traces = {}
+    random_traces = {}
+    q_halfc = {}
+    for cell, pack in per_cell_pack.items():
+        gpbo_traces[cell] = _best_so_far_trace(_history_rows(pack["bo_families"]))
+        random_traces[cell] = _best_so_far_trace(_history_rows(pack["rs_families"]))
+        q_halfc[cell] = float(pack["halfc"]["q_total"])
+        plot_gpbo_overall_fig10(
+            {cell: gpbo_traces[cell]},
+            q_halfc_by_cell={cell: q_halfc[cell]},
+            out_path=out_root / cell / "fig10_gpbo_overall.png",
+        )
+        plot_gpbo_vs_random_fig11(
+            {cell: gpbo_traces[cell]},
+            {cell: random_traces[cell]},
+            q_halfc_by_cell={cell: q_halfc[cell]},
+            out_path=out_root / cell / "fig11_gpbo_vs_random.png",
+        )
+    plot_gpbo_overall_fig10(
+        gpbo_traces, q_halfc_by_cell=q_halfc,
+        out_path=out_root / "fig10_gpbo_overall.png",
+    )
+    plot_gpbo_vs_random_fig11(
+        gpbo_traces, random_traces, q_halfc_by_cell=q_halfc,
+        out_path=out_root / "fig11_gpbo_vs_random.png",
+    )
 
     plot_consolidated_comparison(
         consolidated, out_path=out_root / "fig_consolidated_comparison.png",
@@ -486,7 +518,7 @@ def main() -> int:
     md.append(
         "Lifetime curves accumulate the session $Q_{\\mathrm{loss}}$ index and "
         "anchor CCCV 0.5C to 80% remaining capacity at 600 cycles (paper ranking projection). "
-        "The GP-BO lifetime line is the lowest-Q feasible GP-BO trial (health-first). "
+        "GP-BO (min Q) is the lowest-Q feasible GP-BO trial (health-first). "
         "GP-BO (max R) is the Eq.~10 reward maximiser (the profile the proposed algorithm selects)."
     )
     (out_root / "paper_comparison_table.md").write_text("\n".join(md) + "\n", encoding="utf-8")

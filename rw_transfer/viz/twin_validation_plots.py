@@ -778,7 +778,7 @@ def plot_finetune_fraction_summary(
     by = {(r["cell"], float(r["fraction"])): r for r in rows if r.get("fraction") is not None}
     x = np.arange(len(fracs))
     w = 0.22
-    fig, axes = plt.subplots(2, 1, figsize=(7.0, 8.4), facecolor=LIGHT_BG, sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(7.0, 8.4), facecolor=LIGHT_BG, sharex=False)
     colors = {"RW10": "#2563eb", "RW11": "#16a34a", "RW12": "#ea580c"}
     for ax, key, ylab, title in (
         (axes[0], "mape_v", "Voltage MAPE (%)", "Voltage MAPE vs adapt fraction"),
@@ -798,12 +798,12 @@ def plot_finetune_fraction_summary(
             )
         ax.set_xticks(x)
         ax.set_xticklabels([f"{f:.0%}" for f in fracs], fontsize=12)
+        ax.set_xlabel("Finetune adapt-data fraction", fontsize=14)
         ax.set_ylabel(ylab, fontsize=14)
         ax.set_title(title, fontsize=13, fontweight="bold")
         ax.grid(True, axis="y", alpha=0.3)
-        ax.tick_params(labelsize=12)
+        ax.tick_params(axis="both", labelbottom=True, labelsize=12)
         ax.legend(fontsize=11)
-    axes[1].set_xlabel("Finetune adapt-data fraction", fontsize=14)
     plt.tight_layout()
     _savefig(fig, out_path)
 

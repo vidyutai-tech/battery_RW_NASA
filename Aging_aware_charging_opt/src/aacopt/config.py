@@ -219,6 +219,12 @@ class OptimizationSpec:
         mi = int(self.method_index.get(method, 0))
         return int(self.master_seed + 1000 * ci + 100 * fi + mi)
 
+    def seed_for_pack(self, family: str, method: str) -> int:
+        """Pack search is cell-independent: drop the 1000*cell_idx term."""
+        fi = self.families.index(family) if family in self.families else 0
+        mi = int(self.method_index.get(method, 0))
+        return int(self.master_seed + 100 * fi + mi)
+
 
 @dataclass(frozen=True)
 class RewardSpec:

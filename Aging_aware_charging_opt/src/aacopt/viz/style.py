@@ -28,7 +28,7 @@ GROUP_COLORS = {
     "CCCV 2C": "#1e40af",
     "Random": "#f59e0b",
     "GP-BO": "#16a34a",
-    "GP-BO (min Q)": "#0f766e",
+    "GP-BO (min Q)": "#16a34a",
     "GP-BO (max R)": "#0f766e",
 }
 
@@ -39,7 +39,7 @@ POLICY_STYLE = {
     "CCCV 2C": {"color": "#1e3a8a", "ls": ":", "lw": 1.6},
     "Random": {"color": "#f59e0b", "ls": "-", "lw": 2.4},
     "GP-BO": {"color": "#16a34a", "ls": "-", "lw": 2.6},
-    "GP-BO (min Q)": {"color": "#0f766e", "ls": "-", "lw": 2.4},
+    "GP-BO (min Q)": {"color": "#16a34a", "ls": "-", "lw": 2.6},
     "GP-BO (max R)": {"color": "#0f766e", "ls": "--", "lw": 2.2},
 }
 
@@ -52,13 +52,13 @@ def apply_paper_style() -> None:
         "axes.facecolor": PAPER_LIGHT_BG,
         "savefig.facecolor": PAPER_LIGHT_BG,
         "font.family": "DejaVu Sans",
-        "font.size": 16,
-        "axes.titlesize": 18,
-        "axes.labelsize": 17,
-        "xtick.labelsize": 15,
-        "ytick.labelsize": 15,
-        "legend.fontsize": 14,
-        "figure.titlesize": 20,
+        "font.size": 18,
+        "axes.titlesize": 20,
+        "axes.labelsize": 19,
+        "xtick.labelsize": 17,
+        "ytick.labelsize": 17,
+        "legend.fontsize": 16,
+        "figure.titlesize": 22,
         "axes.spines.top": False,
         "axes.spines.right": False,
         "axes.grid": True,

@@ -296,7 +296,7 @@ def plot_qloss_bars(
     if base is not None and float(base["q_total"]) > 0:
         bq = float(base["q_total"])
         for i, (row, q) in enumerate(zip(rows, q_tot)):
-            if row["label"] in ("Random", "GP-BO") and row.get("feasible"):
+            if row["label"] in ("Random", "GP-BO", "GP-BO (min Q)") and row.get("feasible"):
                 red = 100.0 * (bq - q) / bq
                 ax.annotate(
                     f"{red:+.1f}% vs 0.5C",
@@ -453,12 +453,13 @@ def plot_lifetime_vs_cycles(
             label=name,
         )
     ax.axhline(soh_ref, color="#94a3b8", ls="--", lw=1.2, alpha=0.85)
-    ax.set_xlabel("Equivalent charge cycles (one 40% energy session each)", fontsize=13)
-    ax.set_ylabel("Projected remaining capacity [%]", fontsize=14)
+    ax.set_xlabel("Equivalent charge cycles (one 40% energy session each)", fontsize=18)
+    ax.set_ylabel("Projected remaining capacity [%]", fontsize=18)
+    ax.tick_params(axis="both", labelsize=16)
     ax.set_xlim(0, n_cycles)
     ax.set_ylim(60.0, 100.0)
     ax.grid(True, linestyle="--", alpha=0.35)
-    ax.legend(fontsize=12, loc="best", framealpha=0.95)
+    ax.legend(fontsize=15, loc="best", framealpha=0.95)
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -489,10 +490,11 @@ def plot_lifetime_delta(
             color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2),
             label=name,
         )
-    ax.set_xlabel("Equivalent charge cycles", fontsize=14)
-    ax.set_ylabel(f"Δ remaining capacity vs {baseline} [%-points]", fontsize=13)
+    ax.set_xlabel("Equivalent charge cycles", fontsize=18)
+    ax.set_ylabel(f"Δ remaining capacity vs {baseline} [%-points]", fontsize=17)
+    ax.tick_params(axis="both", labelsize=16)
     ax.grid(True, linestyle="--", alpha=0.35)
-    ax.legend(fontsize=12, loc="best")
+    ax.legend(fontsize=15, loc="best")
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -521,17 +523,19 @@ def plot_lifetime_vs_ah(
         lw = style.get("lw", 2.2)
         ax.plot(d["cum_ah"], d["retention_pct"], color=style["color"], ls=style["ls"], lw=lw, label=name)
         ax_zoom.plot(d["cum_ah"], d["retention_pct"], color=style["color"], ls=style["ls"], lw=lw, label=name)
-    ax.set_xlabel("Cumulative ampere-hour throughput [Ah]", fontsize=13)
-    ax.set_ylabel("Projected remaining capacity [%]", fontsize=13)
+    ax.set_xlabel("Cumulative ampere-hour throughput [Ah]", fontsize=17)
+    ax.set_ylabel("Projected remaining capacity [%]", fontsize=17)
+    ax.tick_params(axis="both", labelsize=15)
     ax.set_ylim(60.0, 100.0)
     ax.grid(True, linestyle="--", alpha=0.35)
-    ax.legend(fontsize=11, loc="best", framealpha=0.95)
+    ax.legend(fontsize=14, loc="best", framealpha=0.95)
     ax.set_ylim(60.0, 100.0)
-    ax_zoom.set_xlabel("Cumulative Ah", fontsize=13)
-    ax_zoom.set_ylabel("Projected remaining capacity [%]", fontsize=13)
+    ax_zoom.set_xlabel("Cumulative Ah", fontsize=17)
+    ax_zoom.set_ylabel("Projected remaining capacity [%]", fontsize=17)
+    ax_zoom.tick_params(axis="both", labelsize=15)
     ax_zoom.set_ylim(60.0, 100.0)
     ax_zoom.grid(True, linestyle="--", alpha=0.35)
-    ax_zoom.legend(fontsize=11, loc="best")
+    ax_zoom.legend(fontsize=14, loc="best")
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -558,10 +562,11 @@ def plot_lifetime_capacity_ah(
         q_ah = q_rated_ah * d["retention_pct"][: n + 1] / 100.0
         style = POLICY_STYLE.get(name, {"color": "#334155", "ls": "-", "lw": 2.2})
         ax.plot(x, q_ah, color=style["color"], ls=style["ls"], lw=style.get("lw", 2.2), label=name)
-    ax.set_xlabel("Equivalent charge cycle index", fontsize=14)
-    ax.set_ylabel("Projected capacity [Ah]", fontsize=14)
+    ax.set_xlabel("Equivalent charge cycle index", fontsize=18)
+    ax.set_ylabel("Projected capacity [Ah]", fontsize=18)
+    ax.tick_params(axis="both", labelsize=16)
     ax.grid(True, linestyle="--", alpha=0.35)
-    ax.legend(fontsize=12, loc="best")
+    ax.legend(fontsize=15, loc="best")
     fig.tight_layout()
     savefig(fig, out_path)
 
@@ -641,12 +646,167 @@ def plot_lifetime_grid(
         ax.axhline(soh_ref, color="#94a3b8", ls="--", lw=1.0, alpha=0.75)
         ax.set_xlim(0, n_cycles)
         ax.set_ylim(60.0, 100.0)
-        ax.set_title(cell, fontsize=14, fontweight="bold")
-        ax.set_xlabel("Equivalent charge cycles (one equal-energy session each)")
-        ax.set_ylabel("Projected remaining capacity [%]")
+        ax.set_title(cell, fontsize=16, fontweight="bold")
+        ax.set_xlabel("Equivalent charge cycles (one equal-energy session each)", fontsize=14)
+        ax.set_ylabel("Projected remaining capacity [%]", fontsize=14)
+        ax.tick_params(axis="both", labelsize=13)
         ax.grid(True, linestyle="--", alpha=0.35)
-        ax.legend(fontsize=9, loc="best")
+        ax.legend(fontsize=12, loc="best")
     fig.tight_layout()
+    savefig(fig, out_path)
+
+
+CELL_LINE_COLORS = {
+    "RW9": "#2563eb",
+    "RW10": "#16a34a",
+    "RW11": "#ea580c",
+    "RW12": "#7c3aed",
+}
+
+
+def _history_rows(families: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for fid in FAMILY_ORDER:
+        blob = families.get(fid) or {}
+        for h in blob.get("history") or []:
+            m = h.get("metrics") or {}
+            rows.append({
+                "feasible": bool(m.get("feasible", h.get("feasible"))),
+                "loss": float(h.get("loss", m.get("loss", np.inf))),
+                "duration_min": float(m.get("duration_min") or np.nan),
+                "q_calendar": float(m.get("q_calendar") or np.nan),
+                "q_cyclic": float(m.get("q_cyclic") or np.nan),
+                "q_total": float(m.get("q_total") or m.get("qloss_total") or np.nan),
+            })
+    return rows
+
+
+def _best_so_far_trace(rows: Sequence[Dict[str, Any]]) -> Dict[str, np.ndarray]:
+    n = len(rows)
+    evals = np.arange(1, n + 1, dtype=np.float64)
+    t = np.full(n, np.nan)
+    q_cal = np.full(n, np.nan)
+    q_cyc = np.full(n, np.nan)
+    q_tot = np.full(n, np.nan)
+    best_loss = np.inf
+    cur = None
+    for i, r in enumerate(rows):
+        if r["feasible"] and np.isfinite(r["loss"]) and r["loss"] < best_loss:
+            best_loss = r["loss"]
+            cur = r
+        if cur is not None:
+            t[i] = cur["duration_min"]
+            q_cal[i] = cur["q_calendar"]
+            q_cyc[i] = cur["q_cyclic"]
+            q_tot[i] = cur["q_total"]
+    return {
+        "eval": evals,
+        "duration_min": t,
+        "q_calendar": q_cal,
+        "q_cyclic": q_cyc,
+        "q_total": q_tot,
+    }
+
+
+def _retention_at_600(q_session: np.ndarray, q_halfc: float) -> np.ndarray:
+    """Paper ranking projection: CCCV 0.5C → 80% at 600 equal-energy cycles."""
+    q_h = max(float(q_halfc), 1e-18)
+    return np.clip(100.0 - 20.0 * (q_session / q_h), 0.0, 100.0)
+
+
+def plot_gpbo_overall_fig10(
+    series_by_cell: Dict[str, Dict[str, np.ndarray]],
+    *,
+    out_path: Path,
+    q_halfc_by_cell: Dict[str, float],
+) -> None:
+    """Fig. 10 analogue: GP-BO best-so-far time, calendar/cyclic loss, retention."""
+    apply_paper_style()
+    cells = [c for c in ("RW9", "RW10", "RW11", "RW12") if c in series_by_cell]
+    fig = plt.figure(figsize=(13.6, 4.6), facecolor=PAPER_LIGHT_BG, layout="constrained")
+    gs = fig.add_gridspec(2, 3, width_ratios=[1.05, 1.0, 1.05], height_ratios=[1.0, 1.0],
+                          wspace=0.38, hspace=0.18)
+    ax_t = fig.add_subplot(gs[:, 0])
+    ax_cal = fig.add_subplot(gs[0, 1])
+    ax_cyc = fig.add_subplot(gs[1, 1], sharex=ax_cal)
+    ax_ret = fig.add_subplot(gs[:, 2])
+    for ax in (ax_t, ax_cal, ax_cyc, ax_ret):
+        ax.set_facecolor(PAPER_LIGHT_BG)
+
+    for cell in cells:
+        s = series_by_cell[cell]
+        x = s["eval"]
+        col = CELL_LINE_COLORS.get(cell, PAPER_GREY)
+        ax_t.plot(x, s["duration_min"], color=col, marker="o", ms=3.2, lw=1.8, label=cell)
+        ax_cal.plot(x, s["q_calendar"], color=col, marker="o", ms=3.2, lw=1.8, label=cell)
+        ax_cyc.plot(x, s["q_cyclic"], color=col, marker="o", ms=3.2, lw=1.8, label=cell)
+        ax_ret.plot(
+            x, _retention_at_600(s["q_total"], q_halfc_by_cell[cell]),
+            color=col, marker="o", ms=3.2, lw=1.8, label=cell,
+        )
+
+    ax_t.set_ylabel("Charging time $t_d$ [min]")
+    ax_cal.set_ylabel(r"$Q_{\mathrm{calendar}}$")
+    ax_cyc.set_ylabel(r"$Q_{\mathrm{cyclic}}$")
+    ax_ret.set_ylabel("Capacity retention $C_r$ [%]")
+    ax_t.set_xlabel("GP-BO evaluation")
+    ax_cyc.set_xlabel("GP-BO evaluation")
+    ax_ret.set_xlabel("GP-BO evaluation")
+    ax_cal.tick_params(labelbottom=False)
+    for ax in (ax_t, ax_cal, ax_cyc, ax_ret):
+        ax.grid(True, linestyle="--", alpha=0.35)
+        ax.tick_params(labelsize=12)
+    ax_t.legend(fontsize=11, loc="best", framealpha=0.95)
+    savefig(fig, out_path)
+
+
+def plot_gpbo_vs_random_fig11(
+    gpbo_by_cell: Dict[str, Dict[str, np.ndarray]],
+    random_by_cell: Dict[str, Dict[str, np.ndarray]],
+    *,
+    q_halfc_by_cell: Dict[str, float],
+    out_path: Path,
+) -> None:
+    """Fig. 11 analogue: Random Search vs GP-BO best-so-far time and retention."""
+    apply_paper_style()
+    cells = [c for c in ("RW9", "RW10", "RW11", "RW12") if c in gpbo_by_cell]
+    fig, axes = plt.subplots(2, len(cells), figsize=(3.15 * len(cells) + 0.8, 6.8),
+                             facecolor=PAPER_LIGHT_BG, squeeze=False)
+    for col, cell in enumerate(cells):
+        ax_t = axes[0, col]
+        ax_r = axes[1, col]
+        ax_t.set_facecolor(PAPER_LIGHT_BG)
+        ax_r.set_facecolor(PAPER_LIGHT_BG)
+        g = gpbo_by_cell[cell]
+        r = random_by_cell[cell]
+        qh = q_halfc_by_cell[cell]
+        ax_t.plot(
+            r["eval"], r["duration_min"], color="#111827", marker="^", ms=3.4,
+            lw=1.5, ls=":", label="Random Search",
+        )
+        ax_t.plot(
+            g["eval"], g["duration_min"], color=PAPER_GREEN, marker="o", ms=3.4,
+            lw=1.8, label="GP-BO",
+        )
+        ax_r.plot(
+            r["eval"], _retention_at_600(r["q_total"], qh),
+            color="#111827", marker="^", ms=3.4, lw=1.5, ls=":", label="Random Search",
+        )
+        ax_r.plot(
+            g["eval"], _retention_at_600(g["q_total"], qh),
+            color=PAPER_GREEN, marker="o", ms=3.4, lw=1.8, label="GP-BO",
+        )
+        ax_t.set_title(cell, fontsize=13, fontweight="bold")
+        ax_t.set_ylabel("Charging time $t_d$ [min]" if col == 0 else "")
+        ax_r.set_ylabel("Capacity retention $C_r$ [%]" if col == 0 else "")
+        ax_r.set_xlabel("Evaluation")
+        ax_t.grid(True, linestyle="--", alpha=0.35)
+        ax_r.grid(True, linestyle="--", alpha=0.35)
+        ax_t.tick_params(labelsize=11)
+        ax_r.tick_params(labelsize=11)
+        if col == len(cells) - 1:
+            ax_t.legend(fontsize=10, loc="best", framealpha=0.95)
+    fig.tight_layout(h_pad=0.9, w_pad=0.45)
     savefig(fig, out_path)
 
 
