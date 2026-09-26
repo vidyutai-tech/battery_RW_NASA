@@ -1,0 +1,378 @@
+{
+  "k": 6,
+  "n_elite": 24,
+  "family_counts": {
+    "RW9": {
+      "two_step": 3,
+      "cccv": 3
+    },
+    "RW10": {
+      "two_step": 3,
+      "three_step": 2,
+      "cccv": 1
+    },
+    "RW11": {
+      "cccv": 6
+    },
+    "RW12": {
+      "two_step": 4,
+      "cccv": 1,
+      "three_step": 1
+    }
+  },
+  "spread": {
+    "I_mean (A)": {
+      "n": 24,
+      "mean": 2.329251569949237,
+      "std": 0.5817864466550555,
+      "cv_pct": 24.977398498339742,
+      "min": 1.7355842309353464,
+      "max": 3.341250453562837
+    },
+    "I_max (A)": {
+      "n": 24,
+      "mean": 2.9058524393715324,
+      "std": 1.240748336205401,
+      "cv_pct": 42.6982567798159,
+      "min": 1.7700019097472548,
+      "max": 4.616000175476074
+    },
+    "Time (min)": {
+      "n": 24,
+      "mean": 22.375694444444445,
+      "std": 4.767125191199286,
+      "cv_pct": 21.30492621373319,
+      "min": 14.983333333333333,
+      "max": 28.85
+    },
+    "Q_loss": {
+      "n": 24,
+      "mean": 0.00011684582358997081,
+      "std": 4.6303621996470675e-06,
+      "cv_pct": 3.962796493176932,
+      "min": 0.00010957944790310439,
+      "max": 0.00012752715406022172
+    },
+    "Reward": {
+      "n": 24,
+      "mean": 0.3167780857605638,
+      "std": 0.009152296715053004,
+      "cv_pct": 2.889182404483229,
+      "min": 0.3103556298356981,
+      "max": 0.3330692138351594
+    },
+    "V_peak (V)": {
+      "n": 24,
+      "mean": 4.182567099730174,
+      "std": 0.015534067915469726,
+      "cv_pct": 0.37140032771911446,
+      "min": 4.15803337097168,
+      "max": 4.199439525604248
+    }
+  },
+  "within_cell_rmse_A": {
+    "RW9": 0.54173579160004,
+    "RW10": 0.04714307259265687,
+    "RW11": 0.12915133017534045,
+    "RW12": 0.034253615566580464
+  },
+  "between_cell_rmse_A": 0.9156096318313063,
+  "n_profiles_feasible_on_all_eval_twins": 6,
+  "voltage_headroom": {
+    "RW9": {
+      "peak_v_1c": 4.200347900390625,
+      "headroom_1c_mv": -0.34790039062482236,
+      "cccv_2c_feasible": false
+    },
+    "RW10": {
+      "peak_v_1c": 4.20055627822876,
+      "headroom_1c_mv": -0.556278228759588,
+      "cccv_2c_feasible": false
+    },
+    "RW11": {
+      "peak_v_1c": 3.9999077320098877,
+      "headroom_1c_mv": 200.09226799011248,
+      "cccv_2c_feasible": false
+    },
+    "RW12": {
+      "peak_v_1c": 4.17802095413208,
+      "headroom_1c_mv": 21.9790458679201,
+      "cccv_2c_feasible": false
+    }
+  },
+  "criteria": {
+    "C1": {
+      "pass": false,
+      "per_cell": {
+        "RW9": {
+          "dominant_family": "two_step",
+          "count": 3,
+          "pass": false,
+          "counts": {
+            "two_step": 3,
+            "cccv": 3
+          }
+        },
+        "RW10": {
+          "dominant_family": "two_step",
+          "count": 3,
+          "pass": false,
+          "counts": {
+            "two_step": 3,
+            "three_step": 2,
+            "cccv": 1
+          }
+        },
+        "RW11": {
+          "dominant_family": "cccv",
+          "count": 6,
+          "pass": true,
+          "counts": {
+            "cccv": 6
+          }
+        },
+        "RW12": {
+          "dominant_family": "two_step",
+          "count": 4,
+          "pass": true,
+          "counts": {
+            "two_step": 4,
+            "cccv": 1,
+            "three_step": 1
+          }
+        }
+      },
+      "rule": "For every cell, the same dominant family appears in >= 4 of its Top-6."
+    },
+    "C2": {
+      "pass": false,
+      "cv_pct_peak_current": 42.6982567798159,
+      "threshold_pct": 15.0,
+      "n_elites": 24,
+      "mean": 2.9058524393715324,
+      "std": 1.240748336205401,
+      "min": 1.7700019097472548,
+      "max": 4.616000175476074,
+      "rule": "Coefficient of variation of peak current across all 24 elites < 15%."
+    },
+    "C3": {
+      "pass": false,
+      "per_cell": {
+        "RW9": {
+          "n_feasible_on_all_twins": 4,
+          "of": 6,
+          "pass": true,
+          "profiles": [
+            {
+              "profile_id": "RW9-P1",
+              "feasible_on_all_twins": true
+            },
+            {
+              "profile_id": "RW9-P2",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW9-P3",
+              "feasible_on_all_twins": true
+            },
+            {
+              "profile_id": "RW9-P4",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW9-P5",
+              "feasible_on_all_twins": true
+            },
+            {
+              "profile_id": "RW9-P6",
+              "feasible_on_all_twins": true
+            }
+          ]
+        },
+        "RW10": {
+          "n_feasible_on_all_twins": 1,
+          "of": 6,
+          "pass": false,
+          "profiles": [
+            {
+              "profile_id": "RW10-P1",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW10-P2",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW10-P3",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW10-P4",
+              "feasible_on_all_twins": true
+            },
+            {
+              "profile_id": "RW10-P5",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW10-P6",
+              "feasible_on_all_twins": false
+            }
+          ]
+        },
+        "RW11": {
+          "n_feasible_on_all_twins": 0,
+          "of": 6,
+          "pass": false,
+          "profiles": [
+            {
+              "profile_id": "RW11-P1",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW11-P2",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW11-P3",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW11-P4",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW11-P5",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW11-P6",
+              "feasible_on_all_twins": false
+            }
+          ]
+        },
+        "RW12": {
+          "n_feasible_on_all_twins": 1,
+          "of": 6,
+          "pass": false,
+          "profiles": [
+            {
+              "profile_id": "RW12-P1",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW12-P2",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW12-P3",
+              "feasible_on_all_twins": true
+            },
+            {
+              "profile_id": "RW12-P4",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW12-P5",
+              "feasible_on_all_twins": false
+            },
+            {
+              "profile_id": "RW12-P6",
+              "feasible_on_all_twins": false
+            }
+          ]
+        }
+      },
+      "rule": "For every cell, >= 4 of its 6 elites are feasible (V_peak <= 4.20 V and energy target met) on ALL four twins."
+    },
+    "verdict": "FAIL",
+    "all_hold": false
+  },
+  "i_max_a": 4.616000175476074,
+  "operating_box": {
+    "soc_start": 0.2,
+    "t0_c": 24.0,
+    "v_max": 4.2,
+    "energy_fraction": 0.4,
+    "i_min_a": 0.75,
+    "i_max_a": 4.616000175476074,
+    "n_evals_per_family": 80
+  },
+  "start_states": {
+    "RW9": {
+      "soc": 0.2,
+      "v0": 3.737303728639184,
+      "t0": 24.0,
+      "age": 0.0,
+      "prev_i": 0.0
+    },
+    "RW10": {
+      "soc": 0.2,
+      "v0": 3.735862307051581,
+      "t0": 24.0,
+      "age": 0.0,
+      "prev_i": 0.0
+    },
+    "RW11": {
+      "soc": 0.2,
+      "v0": 3.728857197853136,
+      "t0": 24.0,
+      "age": 0.0,
+      "prev_i": 0.0
+    },
+    "RW12": {
+      "soc": 0.2,
+      "v0": 3.7401394244878614,
+      "t0": 24.0,
+      "age": 0.0,
+      "prev_i": 0.0
+    }
+  },
+  "checkpoints": {
+    "RW9": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "RW10": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+    "RW11": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+    "RW12": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt"
+  },
+  "provenance": {
+    "stage": "Final_Aging_based_setup_litmus",
+    "project": "Aging_aware_charging_opt",
+    "created_utc": "2026-09-25T09:37:40+00:00",
+    "git_commit": "0d51e5e1346f3ee09ce98af90556aa8133fbc1d2",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "pandas": "3.0.3",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2",
+      "yaml": "6.0.3"
+    },
+    "config_hashes": {
+      "paths": "b5b5667a9c3a441958b98978d19114b72b0d3e9cf60ec4889532ec2fb4539ae0",
+      "reward": "d8be6e71feb992c97f417877fdf79a65ecff5fadae5a1c065d2d4ba4547bb026",
+      "optimization": "170bfdcd606054155d847dd65a3a55ebbb42d73c24c1ddbbe6b68659d7f455fe",
+      "degradation_fitted": "339ff7db1ee9642d0f938df0c10b6f20eb7ca53ee7611c3d2e9f6103c2a23af4"
+    },
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/Final_Aging_based_setup/02_armA/gp_bo/RW9/summary.json",
+        "sha256": "792767b6b35ea60a03a5e2b9778957ba58ab5a43f64e28fd5c9bc2c3e7a04430"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/Final_Aging_based_setup/02_armA/gp_bo/RW10/summary.json",
+        "sha256": "20d25aabdc63b5d9ba80a7f87ecb33765782ee9b0dc75b53538de72f48c93f20"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/Final_Aging_based_setup/02_armA/gp_bo/RW11/summary.json",
+        "sha256": "b992d5aee781376f4f4b990befe376a1584058e9ec024b5b4d3d8fb801d9e1a7"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/Final_Aging_based_setup/02_armA/gp_bo/RW12/summary.json",
+        "sha256": "d6b63a78c949535f8aaebfa6c514e79675feddfb7dd27769e9cf70bb333dab7a"
+      }
+    ]
+  }
+}

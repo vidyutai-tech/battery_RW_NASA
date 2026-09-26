@@ -1,0 +1,66 @@
+{
+  "nasa_charge_sign": "I<0 is charge; I_chg=max(-I,0)",
+  "soc_function": "aacopt.calibration_data._soc_trace",
+  "i_bins": [
+    [
+      "1.5-2.5 A",
+      1.5,
+      2.5,
+      false
+    ],
+    [
+      "2.5-3.5 A",
+      2.5,
+      3.5,
+      false
+    ],
+    [
+      "3.5-4.62 A",
+      3.5,
+      4.62,
+      true
+    ]
+  ],
+  "soc_bins": [
+    [
+      "50-60%",
+      0.5,
+      0.6,
+      false
+    ],
+    [
+      "60-70%",
+      0.6,
+      0.7,
+      false
+    ],
+    [
+      "70-80%",
+      0.7,
+      0.8,
+      false
+    ],
+    [
+      "80-90%",
+      0.8,
+      0.9,
+      true
+    ]
+  ],
+  "min_n": 30,
+  "c3_verdict_unchanged": "FAIL",
+  "n_c3_fail_profiles": 18,
+  "n_rejecting_pairs": 31,
+  "n_voltage_reject": 31,
+  "n_overshoot_lt_rmse": 26,
+  "n_voltage_overshoot_lt_rmse": 26,
+  "rw11_twin_underpredicts_highI_highSOC": null,
+  "rw11_twin_underpredicts_highI_soc50_60": true,
+  "high_I_and_V_counts": {
+    "RW9": 41323,
+    "RW10": 41066,
+    "RW11": 44859,
+    "RW12": 21904
+  },
+  "answer": "The NASA records do not contain enough charging samples at 3.5-4.62 A and 80-90% SOC (n = 0, 0, 1, 2 for RW9-RW12) to test whether RW11 stays below 4.20 V in that regime, so that comparison is insufficient. Where the high-current data are sufficient (3.5-4.62 A x 50-60% SOC), RW11 measured median voltage is 4.228 V (n=128), which is not below RW9 (4.198 V, n=111); RW11 also has the most charging samples with I_chg > 4 A and V >= 4.1 V (44859). The RW11 cell twin under-predicts voltage in that sufficient high-current bin (bias -0.03252301773428922 V), more than twin_source_RW9.pt on the same RW11 windows (bias -0.009617232143878988 V). RW11 extra current headroom in GP-BO is a twin (especially fine-tune) effect, not a pattern the measured high-current voltages support."
+}

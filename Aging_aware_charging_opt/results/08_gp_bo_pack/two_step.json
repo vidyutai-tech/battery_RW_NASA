@@ -55259,7 +55259,7 @@
   "n_seed_points": 4,
   "n_initial_points": 15,
   "acq_func": "EI",
-  "seed": 20261005,
+  "seed": 42,
   "skopt_fun": -0.27713153395402185,
   "warm_start_from_random_search": false,
   "wall_clock_s": 78.2608443708159

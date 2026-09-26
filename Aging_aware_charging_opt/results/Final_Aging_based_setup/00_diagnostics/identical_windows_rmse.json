@@ -1,0 +1,207 @@
+{
+  "note": "Fine-tuned twins (frac 0.60) and twin_source_RW9.pt are both scored on the author 60/20/20 seed-42 TEST split of that cell. Training subsets differ (full train vs 60% prefix), but the held-out test windows are the same function of (cell, seed=42). Re-evaluation below uses one materialised test batch per cell for both models.",
+  "per_cell": {
+    "RW9": {
+      "cell": "RW9",
+      "n_test_windows": 11377,
+      "test_indices_sha256": "2012036536621ef3f367c6b00dd06d7b578a0ad0d3f0f6f71d8ced1becd795af",
+      "identical_test_batch_both_models": true,
+      "finetuned_or_source_cell_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "zero_shot_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "finetuned_voltage_rmse_v": 0.028346536185207775,
+      "zero_shot_voltage_rmse_v": 0.028346536185207775,
+      "finetuned_voltage_rmse_mv": 28.346536185207775,
+      "zero_shot_voltage_rmse_mv": 28.346536185207775,
+      "finetuned_temp_rmse_c": 0.30845948572427684,
+      "zero_shot_temp_rmse_c": 0.30845948572427684,
+      "finetuned_beats_zero_shot_voltage": false,
+      "finetuned_beats_zero_shot_temperature": false,
+      "voltage_rmse_delta_ft_minus_zs_v": 0.0,
+      "temp_rmse_delta_ft_minus_zs_c": 0.0,
+      "finetuned_voltage": {
+        "n": 1706550,
+        "rmse": 0.028346536185207775,
+        "mae": 0.015056003624791262,
+        "mape_pct": 0.4145997967362021,
+        "r2": 0.9911070587298517,
+        "bias": 0.0006676295525141023
+      },
+      "zero_shot_voltage": {
+        "n": 1706550,
+        "rmse": 0.028346536185207775,
+        "mae": 0.015056003624791262,
+        "mape_pct": 0.4145997967362021,
+        "r2": 0.9911070587298517,
+        "bias": 0.0006676295525141023
+      },
+      "finetuned_temperature": {
+        "n": 1706550,
+        "rmse": 0.30845948572427684,
+        "mae": 0.13526617980905173,
+        "mape_pct": 0.4181546439315109,
+        "r2": 0.9932323395541447,
+        "bias": -0.03045609411956214
+      },
+      "zero_shot_temperature": {
+        "n": 1706550,
+        "rmse": 0.30845948572427684,
+        "mae": 0.13526617980905173,
+        "mape_pct": 0.4181546439315109,
+        "r2": 0.9932323395541447,
+        "bias": -0.03045609411956214
+      }
+    },
+    "RW10": {
+      "cell": "RW10",
+      "n_test_windows": 11461,
+      "test_indices_sha256": "b8a93adb82fcd661fdd5d240a98d3fbe76038249eb20f7fa601b76e919c5247f",
+      "identical_test_batch_both_models": true,
+      "finetuned_or_source_cell_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+      "zero_shot_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "finetuned_voltage_rmse_v": 0.03232914213844151,
+      "zero_shot_voltage_rmse_v": 0.02707292935738748,
+      "finetuned_voltage_rmse_mv": 32.32914213844151,
+      "zero_shot_voltage_rmse_mv": 27.07292935738748,
+      "finetuned_temp_rmse_c": 0.284166795486449,
+      "zero_shot_temp_rmse_c": 0.28916574076525814,
+      "finetuned_beats_zero_shot_voltage": false,
+      "finetuned_beats_zero_shot_temperature": true,
+      "voltage_rmse_delta_ft_minus_zs_v": 0.005256212781054034,
+      "temp_rmse_delta_ft_minus_zs_c": -0.004998945278809119,
+      "finetuned_voltage": {
+        "n": 1719150,
+        "rmse": 0.03232914213844151,
+        "mae": 0.018827330485531073,
+        "mape_pct": 0.5143203463963256,
+        "r2": 0.9881937231399306,
+        "bias": -0.0012283669786192798
+      },
+      "zero_shot_voltage": {
+        "n": 1719150,
+        "rmse": 0.02707292935738748,
+        "mae": 0.014854301314174624,
+        "mape_pct": 0.4082937135930542,
+        "r2": 0.9917206717365148,
+        "bias": 0.0006072432055327848
+      },
+      "finetuned_temperature": {
+        "n": 1719150,
+        "rmse": 0.284166795486449,
+        "mae": 0.12554289215006234,
+        "mape_pct": 0.39426536723413796,
+        "r2": 0.9941505195704781,
+        "bias": -0.01986315544143285
+      },
+      "zero_shot_temperature": {
+        "n": 1719150,
+        "rmse": 0.28916574076525814,
+        "mae": 0.12847112906213878,
+        "mape_pct": 0.4051867308331023,
+        "r2": 0.9939429060638486,
+        "bias": -0.00034807248192231797
+      }
+    },
+    "RW11": {
+      "cell": "RW11",
+      "n_test_windows": 11553,
+      "test_indices_sha256": "8ada3fe43fc582b6703e60dd8a02f48bd4130d1b25c2e1475fcce4889094a377",
+      "identical_test_batch_both_models": true,
+      "finetuned_or_source_cell_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+      "zero_shot_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "finetuned_voltage_rmse_v": 0.04825838049076362,
+      "zero_shot_voltage_rmse_v": 0.04896023902663506,
+      "finetuned_voltage_rmse_mv": 48.25838049076362,
+      "zero_shot_voltage_rmse_mv": 48.96023902663506,
+      "finetuned_temp_rmse_c": 0.15170196855919357,
+      "zero_shot_temp_rmse_c": 0.9600909816459059,
+      "finetuned_beats_zero_shot_voltage": true,
+      "finetuned_beats_zero_shot_temperature": true,
+      "voltage_rmse_delta_ft_minus_zs_v": -0.0007018585358714372,
+      "temp_rmse_delta_ft_minus_zs_c": -0.8083890130867123,
+      "finetuned_voltage": {
+        "n": 1732950,
+        "rmse": 0.04825838049076362,
+        "mae": 0.03285344518226032,
+        "mape_pct": 0.8901663107826705,
+        "r2": 0.9737147321484294,
+        "bias": -0.002781629016462051
+      },
+      "zero_shot_voltage": {
+        "n": 1732950,
+        "rmse": 0.04896023902663506,
+        "mae": 0.030731281647690033,
+        "mape_pct": 0.8295629333676091,
+        "r2": 0.9729445987527008,
+        "bias": 0.008142456441121099
+      },
+      "finetuned_temperature": {
+        "n": 1732950,
+        "rmse": 0.15170196855919357,
+        "mae": 0.08955555301814735,
+        "mape_pct": 0.3527278996526837,
+        "r2": 0.9971838076474705,
+        "bias": -0.026396171623535296
+      },
+      "zero_shot_temperature": {
+        "n": 1732950,
+        "rmse": 0.9600909816459059,
+        "mae": 0.7133643007846646,
+        "mape_pct": 2.9925462613224485,
+        "r2": 0.8872011524621812,
+        "bias": 0.7061485093920583
+      }
+    },
+    "RW12": {
+      "cell": "RW12",
+      "n_test_windows": 11519,
+      "test_indices_sha256": "7cdfde803f5f1451b46d154037d1047df1442ef3dbb1c296c5c51fd6afb45494",
+      "identical_test_batch_both_models": true,
+      "finetuned_or_source_cell_ckpt": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt",
+      "zero_shot_ckpt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+      "finetuned_voltage_rmse_v": 0.06392941710730615,
+      "zero_shot_voltage_rmse_v": 0.05467705219013163,
+      "finetuned_voltage_rmse_mv": 63.92941710730615,
+      "zero_shot_voltage_rmse_mv": 54.67705219013163,
+      "finetuned_temp_rmse_c": 0.26355151510516145,
+      "zero_shot_temp_rmse_c": 1.0347509662567658,
+      "finetuned_beats_zero_shot_voltage": false,
+      "finetuned_beats_zero_shot_temperature": true,
+      "voltage_rmse_delta_ft_minus_zs_v": 0.009252364917174523,
+      "temp_rmse_delta_ft_minus_zs_c": -0.7711994511516043,
+      "finetuned_voltage": {
+        "n": 1727850,
+        "rmse": 0.06392941710730615,
+        "mae": 0.03979254226605643,
+        "mape_pct": 1.0777365527742242,
+        "r2": 0.9549197839153397,
+        "bias": 0.0008512600833530638
+      },
+      "zero_shot_voltage": {
+        "n": 1727850,
+        "rmse": 0.05467705219013163,
+        "mae": 0.034699780432325265,
+        "mape_pct": 0.9349351529066506,
+        "r2": 0.9670242498041421,
+        "bias": 0.009708875553659754
+      },
+      "finetuned_temperature": {
+        "n": 1727850,
+        "rmse": 0.26355151510516145,
+        "mae": 0.15764400875160986,
+        "mape_pct": 0.6017996651174826,
+        "r2": 0.9928526809428173,
+        "bias": -0.01891865620421436
+      },
+      "zero_shot_temperature": {
+        "n": 1727850,
+        "rmse": 1.0347509662567658,
+        "mae": 0.7809390099387991,
+        "mape_pct": 3.2321306101142233,
+        "r2": 0.8898248079361419,
+        "bias": 0.7083178925554927
+      }
+    }
+  },
+  "identical_held_out_windows": true,
+  "n_cells_finetune_better_voltage": 1
+}

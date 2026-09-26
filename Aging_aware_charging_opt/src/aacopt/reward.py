@@ -14,6 +14,8 @@ import numpy as np
 from aacopt.config import RewardSpec
 from aacopt.degradation import HybridDegradationModel
 
+REWARD_SCALE = 1000.0
+
 
 def full_capacity_joules(q_rated_as: float, v_nom: float) -> float:
     return float(q_rated_as) * float(v_nom)
@@ -72,9 +74,9 @@ def score_session(
     soc_term = spec.w_soc * delta_soc
     q_term = spec.w_loss * q_total
     time_term = spec.w_time * time_raw
-    reward = float(soc_term - q_term - time_term)
+    reward = REWARD_SCALE * float(soc_term - q_term - time_term)
     if not np.isfinite(reward):
-        reward = -1e6
+        reward = -1e6 * REWARD_SCALE
 
     shortfall = max(0.0, 1.0 - e_norm)
     peak_v = float(v.max()) if v.size else 0.0

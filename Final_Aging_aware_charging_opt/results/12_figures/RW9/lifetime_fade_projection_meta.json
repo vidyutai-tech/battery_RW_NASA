@@ -1,0 +1,38 @@
+{
+  "cell": "RW9",
+  "random_winner": {
+    "family": "cccv",
+    "reward": 0.329674461751988,
+    "q_total": 0.00011735071308815948,
+    "duration_min": 27.95,
+    "peak_t": 23.983083724975586,
+    "feasible": true
+  },
+  "gp_bo_winner": {
+    "family": "cccv",
+    "reward": 0.3390056282356807,
+    "q_total": 0.00011731377397888129,
+    "duration_min": 27.15,
+    "peak_t": 23.985933303833008,
+    "feasible": true
+  },
+  "gp_bo_health": {
+    "family": "cccv",
+    "reward": 0.33188875457864453,
+    "q_total": 0.00011728212145437154,
+    "duration_min": 27.816666666666666,
+    "peak_t": 23.983789443969727,
+    "feasible": true
+  },
+  "retention_pct_at_600": {
+    "CCCV 0.5C": 80.0,
+    "CCCV 1C": 80.84829452290667,
+    "Random": 82.49828067434638,
+    "GP-BO (min Q)": 82.50851045046834,
+    "GP-BO (max R)": 82.50378978379884
+  },
+  "n_cycles": 600,
+  "lifetime_mode": "session_Q_index_affine",
+  "lifetime_anchor": "CCCV 0.5C",
+  "lifetime_scale": 248.56714920436107
+}

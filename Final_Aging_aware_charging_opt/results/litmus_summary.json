@@ -1,0 +1,146 @@
+{
+  "k": 6,
+  "n_elite": 24,
+  "family_counts": {
+    "RW9": {
+      "cccv": 5,
+      "two_step": 1
+    },
+    "RW10": {
+      "cccv": 5,
+      "two_step": 1
+    },
+    "RW11": {
+      "cccv": 6
+    },
+    "RW12": {
+      "cccv": 2,
+      "two_step": 3,
+      "three_step": 1
+    }
+  },
+  "spread": {
+    "I_mean (A)": {
+      "n": 24,
+      "mean": 2.322011310781161,
+      "std": 0.5736137518145495,
+      "cv_pct": 24.703314284096955,
+      "min": 1.7408612099531917,
+      "max": 3.341250453562837
+    },
+    "I_max (A)": {
+      "n": 24,
+      "mean": 2.6622810818719995,
+      "std": 1.151311837981744,
+      "cv_pct": 43.24531492265241,
+      "min": 1.7408612099531924,
+      "max": 4.616000175476074
+    },
+    "Time (min)": {
+      "n": 24,
+      "mean": 22.397916666666664,
+      "std": 4.640353644329756,
+      "cv_pct": 20.717791361531795,
+      "min": 14.983333333333333,
+      "max": 28.6
+    },
+    "Q_loss": {
+      "n": 24,
+      "mean": 0.000116086026913731,
+      "std": 3.4062796121237583e-06,
+      "cv_pct": 2.934271852248958,
+      "min": 0.0001097754097625608,
+      "max": 0.00011967580264086932
+    },
+    "Reward": {
+      "n": 24,
+      "mean": -0.5701120372944186,
+      "std": 0.10191015297890031,
+      "cv_pct": 17.875460666036002,
+      "min": -0.6728121590014904,
+      "max": -0.4005276005363978
+    },
+    "V_peak (V)": {
+      "n": 24,
+      "mean": 4.1798765659332275,
+      "std": 0.014640579350246147,
+      "cv_pct": 0.35026343767109286,
+      "min": 4.15803337097168,
+      "max": 4.200094223022461
+    }
+  },
+  "within_cell_rmse_A": {
+    "RW9": 0.0922817758663289,
+    "RW10": 0.016813409025018135,
+    "RW11": 0.13058777038676414,
+    "RW12": 0.05154664004186946
+  },
+  "between_cell_rmse_A": 0.8242212184898613,
+  "n_profiles_feasible_on_all_twins": 12,
+  "voltage_headroom": {
+    "RW9": {
+      "peak_v_1c": 4.200347900390625,
+      "headroom_1c_mv": -0.34790039062482236,
+      "cccv_2c_feasible": false
+    },
+    "RW10": {
+      "peak_v_1c": 4.20055627822876,
+      "headroom_1c_mv": -0.556278228759588,
+      "cccv_2c_feasible": false
+    },
+    "RW11": {
+      "peak_v_1c": 3.9999077320098877,
+      "headroom_1c_mv": 200.09226799011248,
+      "cccv_2c_feasible": false
+    },
+    "RW12": {
+      "peak_v_1c": 4.17802095413208,
+      "headroom_1c_mv": 21.9790458679201,
+      "cccv_2c_feasible": false
+    }
+  },
+  "twin_voltage_rmse_mv": {},
+  "operating_box": {
+    "soc_start": 0.2,
+    "t0_c": 24.0,
+    "v_max": 4.2,
+    "energy_fraction": 0.4,
+    "i_min_a": 0.75,
+    "i_max_a": 4.616000175476074,
+    "n_evals_per_family": 80
+  },
+  "provenance": {
+    "stage": "14_litmus_top6",
+    "project": "Final_Aging_aware_charging_opt",
+    "created_utc": "2026-09-26T09:33:42+00:00",
+    "git_commit": "0d51e5e1346f3ee09ce98af90556aa8133fbc1d2",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2"
+    },
+    "settings_sha256": "e56bf1743c6ffa3b94195b6052e62ee40bc9c8f42dcff062465a2da1930a1f69",
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results/gp_bo_RW9_summary.json",
+        "sha256": "1a7aa7be56e5afdc8641ea05a67944b35324b1378aef0f3d915ceb3697e10111"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results/gp_bo_RW10_summary.json",
+        "sha256": "8e94065c6e93f571399ec598c7586b1d32306af280bf3f19df7cea62b8a000ad"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results/gp_bo_RW11_summary.json",
+        "sha256": "82ae9a8a3b5826da0c2fed34a58edb86c9baaa94ab6d525d11850d829b3fcb1f"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results/gp_bo_RW12_summary.json",
+        "sha256": "b66d09a68079c87abe3d018c99064a47041ef681f6439cb89fc068fea42805f1"
+      }
+    ]
+  }
+}

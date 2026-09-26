@@ -27,7 +27,7 @@ from aacopt.evaluate import (
     cccv_params, evaluate_params, jsonable_family_result, jsonable_session,
     load_anchors, load_degradation_model, make_simulator,
 )
-from aacopt.optimizers.gp_bo import DUPLICATE_JITTER_SCALE, _vector_key
+from aacopt.optimizers.gp_bo import DUPLICATE_JITTER_SCALE, _vector_key, ensure_twin_eval
 from aacopt.profiles import ProfileParams, bind_search, get_family
 from aacopt.viz.figures import plot_best_profiles
 from aacopt.viz.style import FAMILY_LABELS, FAMILY_ORDER
@@ -107,6 +107,8 @@ def optimize_family_gp_bo_pack(
 ) -> Dict[str, Any]:
     from skopt import gp_minimize
 
+    for _simulator, _state, _anchors in members.values():
+        ensure_twin_eval(_simulator)
     family = get_family(family_id)
     cls = type(family)
     history: List[Dict[str, Any]] = []
@@ -130,6 +132,8 @@ def optimize_family_gp_bo_pack(
         return out
 
     def objective(x: List[float]) -> float:
+        for _simulator, _state, _anchors in members.values():
+            ensure_twin_eval(_simulator)
         x = _jitter(list(x))
         seen.add(_vector_key(x))
         params = cls.from_vector(x)
@@ -170,6 +174,8 @@ def optimize_family_gp_bo_pack(
     pool = feasible if feasible else history
     best = min(pool, key=lambda h: h["loss"])
     best_params = cls.from_dict(best["params"])
+    for _simulator, _state, _anchors in members.values():
+        ensure_twin_eval(_simulator)
     pack_loss, pack_metrics, sessions = evaluate_params_pack(
         members, best_params, model=model, spec=spec,
     )

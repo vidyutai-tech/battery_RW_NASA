@@ -1,0 +1,119 @@
+{
+  "output_root": "/data/battery_RW_NASA/Aging_aware_charging_opt/results/Final_Aging_based_setup",
+  "cells": [
+    "RW9",
+    "RW10",
+    "RW11",
+    "RW12"
+  ],
+  "do_not_tune_to_pass": true,
+  "phase2_changes_only": [
+    "current upper bound = min over RW9\u2013RW12 of max charging current in that twin's training windows",
+    "identical SOC0/T0/age; cell V0 from OCV(SOC0)"
+  ],
+  "i_min_a": 0.75,
+  "i_max_a_original": 6.0,
+  "i_max_a_phase2": 4.616000175476074,
+  "i_max_a_phase2_from_cell": "RW11",
+  "i_max_a_phase2_per_cell_training_max": {
+    "RW9": 4.618000030517578,
+    "RW10": 4.620999813079834,
+    "RW11": 4.616000175476074,
+    "RW12": 4.61899995803833
+  },
+  "soc0": 0.2,
+  "t0_c": 24.0,
+  "age": 0.0,
+  "v0_policy": "cell-specific OCV(SOC0) via aacopt.evaluate.start_state_and_vnom",
+  "v0_per_cell": {
+    "RW9": 3.737303728639184,
+    "RW10": 3.735862307051581,
+    "RW11": 3.728857197853136,
+    "RW12": 3.7401394244878614
+  },
+  "energy_fraction": 0.4,
+  "v_max": 4.2,
+  "n_evals_per_family": 80,
+  "families": [
+    "cccv",
+    "two_step",
+    "three_step",
+    "pulsed"
+  ],
+  "acq_func": "EI",
+  "acq_xi": 0.01,
+  "n_initial_points": 15,
+  "noise": 1e-06,
+  "reward": {
+    "w_soc": 1.0,
+    "w_loss": 2.0,
+    "w_time": 0.1,
+    "z_time": 0.55,
+    "duration_loss_weight": 0.001,
+    "energy_shortfall_penalty_scale": 300.0,
+    "voltage_ceiling_penalty_scale": 100.0
+  },
+  "seeds_gp_bo": {
+    "RW9": {
+      "cccv": 20260905,
+      "two_step": 42,
+      "three_step": 20261105,
+      "pulsed": 20261205
+    },
+    "RW10": {
+      "cccv": 20261905,
+      "two_step": 20262005,
+      "three_step": 20262105,
+      "pulsed": 20262205
+    },
+    "RW11": {
+      "cccv": 20262905,
+      "two_step": 20263005,
+      "three_step": 20263105,
+      "pulsed": 20263205
+    },
+    "RW12": {
+      "cccv": 20263905,
+      "two_step": 20264005,
+      "three_step": 20264105,
+      "pulsed": 20264205
+    }
+  },
+  "master_seed": 20260904,
+  "checkpoints": {
+    "RW9": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "RW10": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW10/registry/finetune_RW10_frac0.60.pt",
+    "RW11": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW11/registry/finetune_RW11_frac0.60.pt",
+    "RW12": "/data/battery_RW_NASA/outputs/finetune_two_stage_RW12/registry/finetune_RW12_frac0.60.pt"
+  },
+  "checkpoint_sha256": {
+    "RW9": "493b85dbb0924622e0a355a620f0fcf4a721c47d2971ea6fe8ec742404855404",
+    "RW10": "096b7e25e16a35f4da245ec839ca963110e07b6734073bed3a7acdb5f559f48f",
+    "RW11": "27757af356b7d709fcf3c730fa1c4e0143a382dc80763eaac183baf8f19d345c",
+    "RW12": "2707bb77b7abd520163b55c8b04f7f735c4a0be330353e6cadc0b2053832ebec"
+  },
+  "twin_source_RW9_pt": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+  "twin_source_RW9_pt_sha256": "493b85dbb0924622e0a355a620f0fcf4a721c47d2971ea6fe8ec742404855404",
+  "author_split": {
+    "seed": 42,
+    "train_frac": 0.6,
+    "val_frac": 0.2,
+    "chunk_size": 150,
+    "fine_tune_fraction": 0.6
+  },
+  "device": "cuda:0",
+  "feasibility_rule_in_score_session": "e_delivered >= e_required - 1e-3 J and (peak_v - v_max) <= 1e-3 V",
+  "phase3_ran": true,
+  "phase3_reason": "Arm A FAIL on pre-registered C1-C3",
+  "phase3_variants": ["normalize_three_terms", "normalize_drop_dsoc"],
+  "phase3_any_pass": false,
+  "armB": {
+    "label": "shared-surrogate transfer test",
+    "not_a_litmus_test": true,
+    "optimizer_checkpoint": "/data/battery_RW_NASA/outputs/twin_source/20260610_111409/twin_source_RW9.pt",
+    "reward": "phase3_normalize_three_terms because Arm A failed; neither Phase 3 variant passed C1-C3",
+    "seed_cell": "RW9",
+    "i_max_a": 4.616000175476074,
+    "n_evals_per_family": 80
+  }
+}

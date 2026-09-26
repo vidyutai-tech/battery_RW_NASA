@@ -1,0 +1,80 @@
+[
+  {
+    "profile_id": "SRC-P1",
+    "rank": 1,
+    "family_id": "cccv",
+    "loss": 0.6834087606100643,
+    "reward": -0.6563420939433976,
+    "params": {
+      "family_id": "cccv",
+      "i_cc": 1.8663716261403989,
+      "v_cv": 4.198702376458542,
+      "i_cutoff": 0.31608509935842943
+    }
+  },
+  {
+    "profile_id": "SRC-P2",
+    "rank": 2,
+    "family_id": "cccv",
+    "loss": 0.6837208425025584,
+    "reward": -0.6561708425025584,
+    "params": {
+      "family_id": "cccv",
+      "i_cc": 1.8064982054716578,
+      "v_cv": 4.193833140582994,
+      "i_cutoff": 0.01
+    }
+  },
+  {
+    "profile_id": "SRC-P3",
+    "rank": 3,
+    "family_id": "cccv",
+    "loss": 0.6849344490135827,
+    "reward": -0.6523152626122333,
+    "params": {
+      "family_id": "cccv",
+      "i_cc": 1.8287784121374027,
+      "v_cv": 4.199277367742951,
+      "i_cutoff": 0.45974204820457504
+    }
+  },
+  {
+    "profile_id": "SRC-P4",
+    "rank": 4,
+    "family_id": "two_step",
+    "loss": 0.6849618439662294,
+    "reward": -0.6572618439662294,
+    "params": {
+      "family_id": "two_step",
+      "i1": 1.7935851189320036,
+      "i2": 1.5435851189320036,
+      "soc_switch": 0.9
+    }
+  },
+  {
+    "profile_id": "SRC-P5",
+    "rank": 5,
+    "family_id": "two_step",
+    "loss": 0.6883334046587538,
+    "reward": -0.6604500713254204,
+    "params": {
+      "family_id": "two_step",
+      "i1": 1.7820828817461254,
+      "i2": 0.75,
+      "soc_switch": 0.9
+    }
+  },
+  {
+    "profile_id": "SRC-P6",
+    "rank": 6,
+    "family_id": "two_step",
+    "loss": 0.6889612317207924,
+    "reward": -0.6610445650541257,
+    "params": {
+      "family_id": "two_step",
+      "i1": 1.779948862926199,
+      "i2": 1.529948862926199,
+      "soc_switch": 0.9
+    }
+  }
+]

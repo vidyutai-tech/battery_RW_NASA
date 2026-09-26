@@ -213,6 +213,8 @@ class OptimizationSpec:
         )
 
     def seed_for(self, cell: str, family: str, method: str) -> int:
+        if method == "gp_bo":
+            return 42
         cells = Paths.load().cells
         ci = cells.index(cell.upper()) if cell.upper() in cells else 0
         fi = self.families.index(family) if family in self.families else 0
@@ -221,6 +223,8 @@ class OptimizationSpec:
 
     def seed_for_pack(self, family: str, method: str) -> int:
         """Pack search is cell-independent: drop the 1000*cell_idx term."""
+        if method == "gp_bo":
+            return 42
         fi = self.families.index(family) if family in self.families else 0
         mi = int(self.method_index.get(method, 0))
         return int(self.master_seed + 100 * fi + mi)

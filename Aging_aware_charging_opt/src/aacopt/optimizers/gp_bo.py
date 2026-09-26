@@ -14,6 +14,17 @@ from aacopt.simulator import ChargingSimulator
 DUPLICATE_JITTER_SCALE = 1e-4
 
 
+def ensure_twin_eval(simulator: ChargingSimulator) -> None:
+    """Put the digital twin in inference mode for every GP-BO evaluation.
+
+    The degradation ``model`` argument is not a torch module. Dropout lives
+    on ``simulator.bdt.model``.
+    """
+    twin = getattr(getattr(simulator, "bdt", None), "model", None)
+    if twin is not None and hasattr(twin, "eval"):
+        twin.eval()
+
+
 def _vector_key(x: Sequence[float], ndigits: int = 6) -> tuple:
     return tuple(round(float(v), ndigits) for v in x)
 
@@ -33,6 +44,7 @@ def optimize_family_gp_bo(
     acq_xi: float = 0.01,
     noise: float = 1e-6,
 ) -> Dict[str, Any]:
+    ensure_twin_eval(simulator)
     family = get_family(family_id)
     cls = type(family)
     history: List[Dict[str, Any]] = []
@@ -56,6 +68,7 @@ def optimize_family_gp_bo(
         return out
 
     def objective(x: List[float]) -> float:
+        ensure_twin_eval(simulator)
         x = _jitter(list(x))
         seen.add(_vector_key(x))
         params = cls.from_vector(x)
@@ -94,6 +107,7 @@ def optimize_family_gp_bo(
     pool = feasible if feasible else history
     best = min(pool, key=lambda h: h["loss"])
     best_params = cls.from_dict(best["params"])
+    ensure_twin_eval(simulator)
     _, best_metrics, best_session = evaluate_params(
         simulator, initial_state, best_params, model=model, spec=spec, anchors=anchors,
     )

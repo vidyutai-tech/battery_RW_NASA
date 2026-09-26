@@ -1,0 +1,185 @@
+{
+  "C1": {
+    "pass": false,
+    "per_cell": {
+      "RW9": {
+        "dominant_family": "cccv",
+        "count": 3,
+        "pass": false,
+        "counts": {
+          "cccv": 3,
+          "two_step": 3
+        }
+      },
+      "RW10": {
+        "dominant_family": "three_step",
+        "count": 4,
+        "pass": true,
+        "counts": {
+          "cccv": 2,
+          "three_step": 4
+        }
+      },
+      "RW11": {
+        "dominant_family": "cccv",
+        "count": 6,
+        "pass": true,
+        "counts": {
+          "cccv": 6
+        }
+      },
+      "RW12": {
+        "dominant_family": "two_step",
+        "count": 6,
+        "pass": true,
+        "counts": {
+          "two_step": 6
+        }
+      }
+    },
+    "rule": "For every cell, the same dominant family appears in >= 4 of its Top-6."
+  },
+  "C2": {
+    "pass": false,
+    "cv_pct_peak_current": 42.759347063113786,
+    "threshold_pct": 15.0,
+    "n_elites": 24,
+    "mean": 2.67043591816536,
+    "std": 1.1418609623463756,
+    "min": 1.7812260756258085,
+    "max": 4.616000175476074,
+    "rule": "Coefficient of variation of peak current across all 24 elites < 15%."
+  },
+  "C3": {
+    "pass": false,
+    "per_cell": {
+      "RW9": {
+        "n_feasible_on_all_twins": 6,
+        "of": 6,
+        "pass": true,
+        "profiles": [
+          {
+            "profile_id": "RW9-P1",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW9-P2",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW9-P3",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW9-P4",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW9-P5",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW9-P6",
+            "feasible_on_all_twins": true
+          }
+        ]
+      },
+      "RW10": {
+        "n_feasible_on_all_twins": 2,
+        "of": 6,
+        "pass": false,
+        "profiles": [
+          {
+            "profile_id": "RW10-P1",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW10-P2",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW10-P3",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW10-P4",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW10-P5",
+            "feasible_on_all_twins": true
+          },
+          {
+            "profile_id": "RW10-P6",
+            "feasible_on_all_twins": false
+          }
+        ]
+      },
+      "RW11": {
+        "n_feasible_on_all_twins": 0,
+        "of": 6,
+        "pass": false,
+        "profiles": [
+          {
+            "profile_id": "RW11-P1",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW11-P2",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW11-P3",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW11-P4",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW11-P5",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW11-P6",
+            "feasible_on_all_twins": false
+          }
+        ]
+      },
+      "RW12": {
+        "n_feasible_on_all_twins": 0,
+        "of": 6,
+        "pass": false,
+        "profiles": [
+          {
+            "profile_id": "RW12-P1",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW12-P2",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW12-P3",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW12-P4",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW12-P5",
+            "feasible_on_all_twins": false
+          },
+          {
+            "profile_id": "RW12-P6",
+            "feasible_on_all_twins": false
+          }
+        ]
+      }
+    },
+    "rule": "For every cell, >= 4 of its 6 elites are feasible (V_peak <= 4.20 V and energy target met) on ALL four twins."
+  },
+  "verdict": "FAIL",
+  "all_hold": false
+}
