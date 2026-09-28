@@ -19,8 +19,9 @@ from skopt import gp_minimize
 
 from config import (
     DEGRADATION, GP_BO_SEED, OptimizationSpec, Paths, RESULTS_DIR, REWARD_SCALE,
-    RewardSpec, SearchSpace, SessionSpec, file_hash, family_result_name,
-    provenance, read_json, result_path, set_results_dir, write_json,
+    RewardSpec, SearchSpace, SessionSpec, discrete_current, file_hash,
+    family_result_name, provenance, read_json, result_path, set_discrete_current,
+    set_results_dir, snap_current, write_json,
 )
 from twin import FrozenBDT
 
@@ -43,6 +44,48 @@ def bind_search(spec: Optional[OptimizationSpec] = None) -> None:
     spec = spec or OptimizationSpec.load()
     _space = spec.space
     _session = spec.session
+
+
+_CURRENT_PARAM_NAMES = frozenset({"i_cc", "i1", "i2", "i3", "i_charge", "i_floor"})
+
+
+def _current_levels() -> Tuple[float, ...]:
+    from config import CURRENT_LEVELS_A
+    return tuple(float(level) for level in CURRENT_LEVELS_A)
+
+
+def _descending_levels(currents: Sequence[float]) -> List[float]:
+    """Snap to dataset levels and keep each later current at or below the one before it."""
+    levels = _current_levels()
+    out: List[float] = []
+    cap = None
+    for raw in currents:
+        snapped = snap_current(raw)
+        if cap is None:
+            out.append(snapped)
+        else:
+            allowed = [level for level in levels if level <= cap + 1e-9]
+            out.append(min(allowed, key=lambda level: (abs(level - snapped), level)))
+        cap = out[-1]
+    return out
+
+
+def _place_currents(values: Dict[str, float]) -> Dict[str, float]:
+    if not discrete_current():
+        return values
+    out = dict(values)
+    if "i_cc" in out:
+        out["i_cc"] = snap_current(out["i_cc"])
+    step_keys = [key for key in ("i1", "i2", "i3") if key in out]
+    if step_keys:
+        snapped = _descending_levels([out[key] for key in step_keys])
+        for key, level in zip(step_keys, snapped):
+            out[key] = level
+    if "i_charge" in out and "i_floor" in out:
+        charge, floor = _descending_levels([out["i_charge"], out["i_floor"]])
+        out["i_charge"] = charge
+        out["i_floor"] = floor
+    return out
 
 
 def space() -> SearchSpace:
@@ -109,8 +152,17 @@ class ProfileFamily(ABC):
 
     @classmethod
     def search_space(cls):
-        from skopt.space import Real
-        return [Real(float(lo), float(hi), name=name) for name, (lo, hi) in cls.param_bounds().items()]
+        from skopt.space import Categorical, Real
+        dims = []
+        for name, (lo, hi) in cls.param_bounds().items():
+            if discrete_current() and name in _CURRENT_PARAM_NAMES:
+                levels = [level for level in _current_levels() if lo - 1e-6 <= level <= hi + 1e-6]
+                if not levels:
+                    levels = list(_current_levels())
+                dims.append(Categorical(levels, name=name))
+            else:
+                dims.append(Real(float(lo), float(hi), name=name))
+        return dims
 
     @classmethod
     def from_vector(cls, x: List[float]) -> ProfileParams:
@@ -190,7 +242,9 @@ class CCCVFamily(ProfileFamily):
         i_cc = float(np.clip(values["i_cc"], i_lo, i_hi))
         v_cv = float(np.clip(values["v_cv"], v_lo, v_hi))
         i_cutoff = float(np.clip(values["i_cutoff"], 0.01, min(0.50, i_cc - b.cv_step_a)))
-        return ProfileParams(family_id=cls.family_id, values={"i_cc": i_cc, "v_cv": v_cv, "i_cutoff": i_cutoff})
+        return ProfileParams(family_id=cls.family_id, values=_place_currents({
+            "i_cc": i_cc, "v_cv": v_cv, "i_cutoff": i_cutoff,
+        }))
 
     @classmethod
     def seed_params(cls) -> List[ProfileParams]:
@@ -267,7 +321,9 @@ class TwoStepFamily(ProfileFamily):
             i1 = float(np.clip(i1_raw, i_lo + b.min_step_di_a, i_hi))
             i2 = float(np.clip(i2_raw, i_lo, max(i_lo, i1 - b.min_step_di_a)))
             soc_sw = float(np.clip(values["soc_switch"], soc_lo, soc_hi))
-        return ProfileParams(family_id=cls.family_id, values={"i1": i1, "i2": i2, "soc_switch": soc_sw})
+        return ProfileParams(family_id=cls.family_id, values=_place_currents({
+            "i1": i1, "i2": i2, "soc_switch": soc_sw,
+        }))
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
@@ -346,7 +402,9 @@ class ThreeStepFamily(ProfileFamily):
             i3 = float(np.clip(i3_raw, i_lo, max(i_lo, i2 - b.min_step_di_a)))
         soc1 = float(np.clip(values["soc1"], soc1_lo, soc1_hi))
         soc2 = float(np.clip(values["soc2"], max(soc2_lo, soc1 + b.min_stage_gap_dsoc), soc2_hi))
-        return ProfileParams(family_id=cls.family_id, values={"i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2})
+        return ProfileParams(family_id=cls.family_id, values=_place_currents({
+            "i1": i1, "i2": i2, "i3": i3, "soc1": soc1, "soc2": soc2,
+        }))
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
@@ -427,11 +485,11 @@ class PulsedFamily(ProfileFamily):
         pulse_on = float(np.clip(values["pulse_on_min"], b.pulse_on_min_min, b.pulse_on_max_min))
         rest_frac = float(np.clip(values["rest_fraction"], b.rest_fraction_min, b.rest_fraction_max))
         i_floor = float(np.clip(values["i_floor"], i_lo, min(i_cc - 0.05, i_hi)))
-        return ProfileParams(family_id=cls.family_id, values={
+        return ProfileParams(family_id=cls.family_id, values=_place_currents({
             "i_charge": i_cc, "pulse_on_min": pulse_on,
             "pulse_rest_min": max(0.5, pulse_on * rest_frac),
             "rest_fraction": rest_frac, "i_floor": i_floor,
-        })
+        }))
 
     @classmethod
     def sample_random(cls, rng: np.random.Generator) -> ProfileParams:
@@ -1259,8 +1317,12 @@ def optimize_family_gp_bo(
     seen = set()
     rng = np.random.default_rng(int(seed))
     space = cls.search_space()
-    lo = [float(d.low) for d in space]
-    hi = [float(d.high) for d in space]
+    real_bounds = []
+    for dim in space:
+        if hasattr(dim, "low"):
+            real_bounds.append((float(dim.low), float(dim.high)))
+        else:
+            real_bounds.append(None)
 
     def _jitter(x: List[float]) -> List[float]:
         key = _vector_key(x)
@@ -1268,7 +1330,10 @@ def optimize_family_gp_bo(
             return list(x)
         out = list(x)
         for _ in range(8):
-            for i, (a, b) in enumerate(zip(lo, hi)):
+            for i, bounds in enumerate(real_bounds):
+                if bounds is None:
+                    continue
+                a, b = bounds
                 span = max(b - a, 1e-9)
                 out[i] = float(np.clip(out[i] + rng.normal(0.0, DUPLICATE_JITTER_SCALE * span), a, b))
             if _vector_key(out) not in seen:
@@ -1634,6 +1699,8 @@ def run_cell(
         "wall_clock_s": float(time.perf_counter() - t0),
         "energy_fraction": float(simulator.session.energy_fraction),
         "max_duration_min": float(simulator.session.max_duration_min),
+        "discrete_current": bool(discrete_current()),
+        "current_levels_a": list(_current_levels()) if discrete_current() else None,
         "provenance": provenance(
             method, inputs=[paths.checkpoint(cell)],
         ),
@@ -1943,7 +2010,12 @@ def main() -> int:
                     help="Top-6 table and current figures for the four energy/time cases")
     ap.add_argument("--results-dir", default=None,
                     help="Write here instead of results/. A relative path is inside the package.")
+    ap.add_argument("--discrete-current", action="store_true",
+                    help="Restrict commanded current to 1.0, 1.5, 2.0, 3.0, and 4.5 A.")
     args = ap.parse_args()
+    if args.discrete_current:
+        set_discrete_current(True)
+        print(f"discrete current levels {list(_current_levels())}", flush=True)
     if args.results_dir:
         dest = set_results_dir(args.results_dir)
         print(f"results dir {dest}", flush=True)

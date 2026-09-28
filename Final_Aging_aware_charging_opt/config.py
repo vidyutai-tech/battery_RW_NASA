@@ -33,6 +33,26 @@ CELLS = ["RW9", "RW10", "RW11", "RW12"]
 # Minimum of the four cells' maximum charging currents in the twin training windows.
 I_MAX_A = 4.616000175476074
 
+# Charge-current levels that carry most of the NASA RW charge samples.
+# Used only when discrete-current search is turned on.
+CURRENT_LEVELS_A = (1.0, 1.5, 2.0, 3.0, 4.5)
+DISCRETE_CURRENT = False
+
+
+def set_discrete_current(enabled: bool) -> None:
+    global DISCRETE_CURRENT
+    DISCRETE_CURRENT = bool(enabled)
+
+
+def discrete_current() -> bool:
+    return DISCRETE_CURRENT
+
+
+def snap_current(value: float) -> float:
+    """Nearest dataset level. A tie goes to the lower level."""
+    v = float(value)
+    return float(min(CURRENT_LEVELS_A, key=lambda level: (abs(level - v), level)))
+
 W_SOC = 2.5
 W_LOSS = 7500.0
 W_TIME = 1.1

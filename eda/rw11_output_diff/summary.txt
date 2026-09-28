@@ -1,0 +1,4 @@
+Short charging segments with the same initial voltage, temperature, age, and charging current: 730.
+RW11 voltage or temperature differs on 217 of them. It stays within the thresholds on 513.
+Median RW11 voltage RMSE 0.0118 V. Median RW11 temperature RMSE 0.298 °C.
+This compares the cell response on the matched piece. It does not identify a cause.
