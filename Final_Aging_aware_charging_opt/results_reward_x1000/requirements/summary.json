@@ -1,0 +1,824 @@
+[
+  {
+    "case": "e30_t20",
+    "cell": "RW9",
+    "energy_fraction": 0.3,
+    "max_duration_min": 20.0,
+    "winner_family": "cccv",
+    "reward": 210.22003202876272,
+    "duration_min": 18.483333333333334,
+    "q_total": 9.452160524343367e-05,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.0297650690622024,
+      "v_cv": 4.2,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 210.22003202876272,
+        "duration_min": 18.483333333333334,
+        "loss": -210.19479668126928
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 202.8058182884372,
+        "duration_min": 19.033333333333335,
+        "loss": -202.78678495510383
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 585.3070369337319,
+        "duration_min": 1.2666666666666666,
+        "loss": -326.5027829888127
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 636.2022547888515,
+        "duration_min": 0.65,
+        "loss": -359.67758375058895
+      }
+    }
+  },
+  {
+    "case": "e30_t20",
+    "cell": "RW10",
+    "energy_fraction": 0.3,
+    "max_duration_min": 20.0,
+    "winner_family": "cccv",
+    "reward": 242.27510473060966,
+    "duration_min": 17.25,
+    "q_total": 9.39527013213792e-05,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.1447292278621175,
+      "v_cv": 4.2,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 242.27510473060966,
+        "duration_min": 17.25,
+        "loss": -242.21362331581474
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 216.31304338419682,
+        "duration_min": 18.633333333333333,
+        "loss": -216.29441005086346
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 604.1722932259313,
+        "duration_min": 1.15,
+        "loss": -338.09409558585327
+      },
+      "pulsed": {
+        "feasible": true,
+        "reward": 108.9275149216777,
+        "duration_min": 18.816666666666666,
+        "loss": -108.90869825501102
+      }
+    }
+  },
+  {
+    "case": "e30_t20",
+    "cell": "RW11",
+    "energy_fraction": 0.3,
+    "max_duration_min": 20.0,
+    "winner_family": "two_step",
+    "reward": 397.77134318153537,
+    "duration_min": 10.783333333333333,
+    "q_total": 8.86890491432324e-05,
+    "feasible": true,
+    "best_params": {
+      "family_id": "two_step",
+      "i1": 3.449955360270398,
+      "i2": 3.199955360270398,
+      "soc_switch": 0.6255879748920656
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 397.2176078476626,
+        "duration_min": 10.566666666666666,
+        "loss": -397.20704118099593
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 397.77134318153537,
+        "duration_min": 10.783333333333333,
+        "loss": -397.76055984820204
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 396.42244081000064,
+        "duration_min": 10.466666666666667,
+        "loss": -396.41197414333396
+      },
+      "pulsed": {
+        "feasible": true,
+        "reward": 396.96524887258124,
+        "duration_min": 11.033333333333333,
+        "loss": -396.9542155392479
+      }
+    }
+  },
+  {
+    "case": "e30_t20",
+    "cell": "RW12",
+    "energy_fraction": 0.3,
+    "max_duration_min": 20.0,
+    "winner_family": "three_step",
+    "reward": 194.97797364165672,
+    "duration_min": 17.383333333333333,
+    "q_total": 9.705791495337014e-05,
+    "feasible": true,
+    "best_params": {
+      "family_id": "three_step",
+      "i1": 2.1217684088504356,
+      "i2": 1.8717684088504356,
+      "i3": 1.6217684088504356,
+      "soc1": 0.55,
+      "soc2": 0.67
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 187.83076474502036,
+        "duration_min": 17.233333333333334,
+        "loss": -187.813531411687
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 175.98021902753646,
+        "duration_min": 18.566666666666666,
+        "loss": -175.96165236086983
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 194.97797364165672,
+        "duration_min": 17.383333333333333,
+        "loss": -194.9605903083234
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 700.0127148289963,
+        "duration_min": 0.13333333333333333,
+        "loss": -402.0754025638832
+      }
+    }
+  },
+  {
+    "case": "e40_t30",
+    "cell": "RW9",
+    "energy_fraction": 0.4,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 236.48075540030243,
+    "duration_min": 27.05,
+    "q_total": 0.00011732395980200686,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 1.8483009082811142,
+      "v_cv": 4.2,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 236.48075540030243,
+        "duration_min": 27.05,
+        "loss": -236.40103396780728
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -394.5667043768745
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -394.5667043768745
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 731.9741818994833,
+        "duration_min": 0.65,
+        "loss": -449.45096423327414
+      }
+    }
+  },
+  {
+    "case": "e40_t30",
+    "cell": "RW10",
+    "energy_fraction": 0.4,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 293.09495894250483,
+    "duration_min": 24.116666666666667,
+    "q_total": 0.00011654139048813611,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.0447088233168964,
+      "v_cv": 4.192882439508657,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 293.09495894250483,
+        "duration_min": 24.116666666666667,
+        "loss": -293.0708422758381
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 285.1232462790556,
+        "duration_min": 24.716666666666665,
+        "loss": -285.0985296123889
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 681.660574691437,
+        "duration_min": 1.4833333333333334,
+        "loss": -412.99144112769534
+      },
+      "pulsed": {
+        "feasible": true,
+        "reward": 111.93526660554869,
+        "duration_min": 25.75,
+        "loss": -111.90951660554867
+      }
+    }
+  },
+  {
+    "case": "e40_t30",
+    "cell": "RW11",
+    "energy_fraction": 0.4,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 464.7639141619382,
+    "duration_min": 16.083333333333332,
+    "q_total": 0.0001097754097625608,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 4.616000175476074,
+      "v_cv": 4.05,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 464.7639141619382,
+        "duration_min": 16.083333333333332,
+        "loss": -464.7478308286049
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 463.01660647204596,
+        "duration_min": 16.366666666666667,
+        "loss": -463.0002398053793
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 459.79835673239313,
+        "duration_min": 16.75,
+        "loss": -459.78160673239313
+      },
+      "pulsed": {
+        "feasible": true,
+        "reward": 152.00033343039854,
+        "duration_min": 25.833333333333332,
+        "loss": -151.97450009706517
+      }
+    }
+  },
+  {
+    "case": "e40_t30",
+    "cell": "RW12",
+    "energy_fraction": 0.4,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 265.3799867396028,
+    "duration_min": 21.55,
+    "q_total": 0.00011916161482575299,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.2608062207593873,
+      "v_cv": 4.2,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 265.3799867396028,
+        "duration_min": 21.55,
+        "loss": -265.3584367396028
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 230.9942468195385,
+        "duration_min": 24.716666666666665,
+        "loss": -230.9695301528718
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 245.2371133389738,
+        "duration_min": 22.983333333333334,
+        "loss": -245.21413000564053
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 782.1348183189099,
+        "duration_min": 0.13333333333333333,
+        "loss": -481.5650817344625
+      }
+    }
+  },
+  {
+    "case": "e50_t30",
+    "cell": "RW9",
+    "energy_fraction": 0.5,
+    "max_duration_min": 30.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 215.58279638195495,
+        "duration_min": 30.0,
+        "loss": -174.28842292607692
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -385.4585265138072
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -385.4585265138072
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 731.9741818994833,
+        "duration_min": 0.65,
+        "loss": -445.8518362565062
+      }
+    }
+  },
+  {
+    "case": "e50_t30",
+    "cell": "RW10",
+    "energy_fraction": 0.5,
+    "max_duration_min": 30.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 264.8148044944214,
+        "duration_min": 30.0,
+        "loss": -259.1527513584256
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 681.660574691437,
+        "duration_min": 1.4833333333333334,
+        "loss": -404.5084165320534
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 681.660574691437,
+        "duration_min": 1.4833333333333334,
+        "loss": -404.5084165320534
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 756.8600441648118,
+        "duration_min": 0.5166666666666667,
+        "loss": -467.77155413524605
+      }
+    }
+  },
+  {
+    "case": "e50_t30",
+    "cell": "RW11",
+    "energy_fraction": 0.5,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 467.10572007689194,
+    "duration_min": 22.033333333333335,
+    "q_total": 0.00012851802044365617,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.873290191615414,
+      "v_cv": 4.193269339083441,
+      "i_cutoff": 0.5
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 467.10572007689194,
+        "duration_min": 22.033333333333335,
+        "loss": -467.0836867435586
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 467.037980187194,
+        "duration_min": 22.2,
+        "loss": -467.015780187194
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 456.64006755613855,
+        "duration_min": 21.15,
+        "loss": -456.61891755613857
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 412.05898529667866,
+        "duration_min": 15.383333333333333,
+        "loss": -411.5476150248688
+      }
+    }
+  },
+  {
+    "case": "e50_t30",
+    "cell": "RW12",
+    "energy_fraction": 0.5,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 206.0687848003647,
+    "duration_min": 29.833333333333332,
+    "q_total": 0.00014277052039009358,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.28350704215434,
+      "v_cv": 4.164222472316456,
+      "i_cutoff": 0.01
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 206.0687848003647,
+        "duration_min": 29.833333333333332,
+        "loss": -206.03895146703132
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 640.8029337486989,
+        "duration_min": 1.1,
+        "loss": -359.1278129308314
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 200.565351783261,
+        "duration_min": 29.95,
+        "loss": -200.53540178326102
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 781.9762178739368,
+        "duration_min": 0.13333333333333333,
+        "loss": -481.8213946314112
+      }
+    }
+  },
+  {
+    "case": "e50_t20",
+    "cell": "RW9",
+    "energy_fraction": 0.5,
+    "max_duration_min": 20.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 199.68314454193865,
+        "duration_min": 19.616666666666667,
+        "loss": -87.64341017234199
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 585.3070369337319,
+        "duration_min": 1.2666666666666666,
+        "loss": -307.40000786837544
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 585.3070369337319,
+        "duration_min": 1.2666666666666666,
+        "loss": -307.40000786837544
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 636.1616233053289,
+        "duration_min": 0.65,
+        "loss": -350.0810430292563
+      }
+    }
+  },
+  {
+    "case": "e50_t20",
+    "cell": "RW10",
+    "energy_fraction": 0.5,
+    "max_duration_min": 20.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 220.74818120450493,
+        "duration_min": 20.0,
+        "loss": -125.1128755031691
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 604.1722932259313,
+        "duration_min": 1.15,
+        "loss": -320.6927155452048
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 604.1722932259313,
+        "duration_min": 1.15,
+        "loss": -320.6927155452048
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 657.7095607420695,
+        "duration_min": 0.5166666666666667,
+        "loss": -368.6403303137283
+      }
+    }
+  },
+  {
+    "case": "e50_t20",
+    "cell": "RW11",
+    "energy_fraction": 0.5,
+    "max_duration_min": 20.0,
+    "winner_family": "cccv",
+    "reward": 382.3079466954226,
+    "duration_min": 19.95,
+    "q_total": 0.00013271054801018093,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 4.4854396277217905,
+      "v_cv": 4.061671488749824,
+      "i_cutoff": 0.01
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 382.3079466954226,
+        "duration_min": 19.95,
+        "loss": -382.2879966954226
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 378.4363314052879,
+        "duration_min": 19.883333333333333,
+        "loss": -378.41644807195456
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 371.60450998662753,
+        "duration_min": 19.966666666666665,
+        "loss": -371.58454331996086
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 443.2218986209983,
+        "duration_min": 6.566666666666666,
+        "loss": -290.7212872719815
+      }
+    }
+  },
+  {
+    "case": "e50_t20",
+    "cell": "RW12",
+    "energy_fraction": 0.5,
+    "max_duration_min": 20.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 214.19761780614851,
+        "duration_min": 19.616666666666667,
+        "loss": -159.26582589623604
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 595.3060620396633,
+        "duration_min": 0.7666666666666667,
+        "loss": -306.2035691741946
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 595.4504585571344,
+        "duration_min": 0.7666666666666667,
+        "loss": -306.62191961620647
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 700.0777218175086,
+        "duration_min": 0.13333333333333333,
+        "loss": -400.1722246227941
+      }
+    }
+  },
+  {
+    "case": "e60_t30",
+    "cell": "RW9",
+    "energy_fraction": 0.6,
+    "max_duration_min": 30.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 217.91438196250772,
+        "duration_min": 29.716666666666665,
+        "loss": -132.27319290496473
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -379.38640793842904
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 657.7433116679833,
+        "duration_min": 1.6,
+        "loss": -379.38640793842904
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 731.9730911411252,
+        "duration_min": 0.65,
+        "loss": -443.4527076510461
+      }
+    }
+  },
+  {
+    "case": "e60_t30",
+    "cell": "RW10",
+    "energy_fraction": 0.6,
+    "max_duration_min": 30.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 264.8003614189911,
+        "duration_min": 30.0,
+        "loss": -210.05522589965267
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 681.660574691437,
+        "duration_min": 1.4833333333333334,
+        "loss": -398.85306680162535
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 681.660574691437,
+        "duration_min": 1.4833333333333334,
+        "loss": -398.85306680162535
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 757.4335091685607,
+        "duration_min": 0.5166666666666667,
+        "loss": -465.8528240000211
+      }
+    }
+  },
+  {
+    "case": "e60_t30",
+    "cell": "RW11",
+    "energy_fraction": 0.6,
+    "max_duration_min": 30.0,
+    "winner_family": "cccv",
+    "reward": 480.64811757097107,
+    "duration_min": 28.15,
+    "q_total": 0.00014749197068675334,
+    "feasible": true,
+    "best_params": {
+      "family_id": "cccv",
+      "i_cc": 2.7127174271989203,
+      "v_cv": 4.198785754925808,
+      "i_cutoff": 0.010078571594579306
+    },
+    "by_family": {
+      "cccv": {
+        "feasible": true,
+        "reward": 480.64811757097107,
+        "duration_min": 28.15,
+        "loss": -480.6199675709711
+      },
+      "two_step": {
+        "feasible": true,
+        "reward": 480.57600254893134,
+        "duration_min": 28.033333333333335,
+        "loss": -480.547969215598
+      },
+      "three_step": {
+        "feasible": true,
+        "reward": 472.11624615337627,
+        "duration_min": 27.616666666666667,
+        "loss": -472.0886294867096
+      },
+      "pulsed": {
+        "feasible": true,
+        "reward": 107.73607461209087,
+        "duration_min": 29.383333333333333,
+        "loss": -107.70669127875749
+      }
+    }
+  },
+  {
+    "case": "e60_t30",
+    "cell": "RW12",
+    "energy_fraction": 0.6,
+    "max_duration_min": 30.0,
+    "winner_family": null,
+    "reward": null,
+    "duration_min": null,
+    "q_total": null,
+    "feasible": false,
+    "best_params": null,
+    "by_family": {
+      "cccv": {
+        "feasible": false,
+        "reward": 226.93403204816616,
+        "duration_min": 29.616666666666667,
+        "loss": -225.19043057711417
+      },
+      "two_step": {
+        "feasible": false,
+        "reward": 640.8508204619485,
+        "duration_min": 1.1,
+        "loss": -355.33059170272105
+      },
+      "three_step": {
+        "feasible": false,
+        "reward": 640.8166947093562,
+        "duration_min": 1.1,
+        "loss": -355.2754079863155
+      },
+      "pulsed": {
+        "feasible": false,
+        "reward": 782.1348183189099,
+        "duration_min": 0.13333333333333333,
+        "loss": -480.4659855311799
+      }
+    }
+  }
+]

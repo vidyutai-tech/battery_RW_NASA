@@ -21,7 +21,7 @@ from matplotlib.patches import Patch
 from config import (
     DEGRADATION, OptimizationSpec, Paths, RESULTS_DIR, RewardSpec,
     ensure_matplotlib_cache, family_result_name, provenance, read_json,
-    result_path, write_json,
+    result_path, set_results_dir, write_json,
 )
 from optimization import (
     evaluate_params, get_family, load_anchors, load_degradation_model, make_simulator,
@@ -2076,11 +2076,17 @@ def make_litmus(device=None) -> int:
 
 
 def _run() -> int:
+    global RESULTS_DIR
     ap = argparse.ArgumentParser(description="Write charging figures into results/")
     ap.add_argument("--only", choices=["all", "figures", "litmus"], default="all")
     ap.add_argument("--cells", nargs="+", default=None)
     ap.add_argument("--device", default=None)
+    ap.add_argument("--results-dir", default=None,
+                    help="Read and write this directory instead of results/.")
     args = ap.parse_args()
+    if args.results_dir:
+        RESULTS_DIR = set_results_dir(args.results_dir)
+        print(f"results dir {RESULTS_DIR}", flush=True)
     if args.only in ("all", "figures"):
         make_figures(args.cells)
     if args.only in ("litmus", "all"):

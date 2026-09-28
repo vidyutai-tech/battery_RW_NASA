@@ -20,7 +20,7 @@ from skopt import gp_minimize
 from config import (
     DEGRADATION, GP_BO_SEED, OptimizationSpec, Paths, RESULTS_DIR, REWARD_SCALE,
     RewardSpec, SearchSpace, SessionSpec, file_hash, family_result_name,
-    provenance, read_json, result_path, write_json,
+    provenance, read_json, result_path, set_results_dir, write_json,
 )
 from twin import FrozenBDT
 
@@ -897,15 +897,20 @@ def score_session(
     soc_term = spec.w_soc * delta_soc
     q_term = spec.w_loss * q_total
     time_term = spec.w_time * time_raw
-    reward = REWARD_SCALE * float(soc_term - q_term - time_term)
+    # reward = REWARD_SCALE * float(soc_term - q_term - time_term)
+    reward = 1000.0 * float(soc_term - q_term - time_term)
     if not np.isfinite(reward):
-        reward = -1e6 * REWARD_SCALE
+        reward = -1e6 * 1000.0
 
     shortfall = max(0.0, 1.0 - e_norm)
     peak_v = float(v.max()) if v.size else 0.0
     v_over = max(0.0, peak_v - float(session.get("v_max", 4.2)))
-    penalty = (spec.energy_shortfall_penalty_scale * shortfall
-               + spec.voltage_ceiling_penalty_scale * v_over)
+    # Penalties stay on the same scale as the ×1000 reward, so a charge that
+    # misses the energy target cannot outrank one that finishes.
+    penalty = 1000.0 * (
+        spec.energy_shortfall_penalty_scale * shortfall
+        + spec.voltage_ceiling_penalty_scale * v_over
+    )
     feasible = (e_del >= e_req - 1e-3) and v_over <= 1e-3
     loss = (
         -float(reward)
@@ -1936,7 +1941,12 @@ def main() -> int:
                     help="GP-BO on the energy/time-limit cases")
     ap.add_argument("--top6", action="store_true",
                     help="Top-6 table and current figures for the four energy/time cases")
+    ap.add_argument("--results-dir", default=None,
+                    help="Write here instead of results/. A relative path is inside the package.")
     args = ap.parse_args()
+    if args.results_dir:
+        dest = set_results_dir(args.results_dir)
+        print(f"results dir {dest}", flush=True)
     opt = OptimizationSpec.load()
     paths = Paths.load()
     cells = [c.upper() for c in (args.cells or paths.cells)]

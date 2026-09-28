@@ -4,7 +4,7 @@ Updated GP-BO (the run this package reproduces):
 
 - Reward weights put SOC, degradation, and time on the same scale as a 0.5C
   CCCV charge: ``w_soc = 2.5``, ``w_loss = 7500``, ``w_time = 1.1``.
-- The finished reward is not multiplied by 1000 (``REWARD_SCALE = 1``).
+- The finished reward is multiplied by 1000 so profile-to-profile gaps are larger.
 - Every GP-BO search uses seed 42.
 - Charge current is capped at the minimum training-window maximum across
   RW9–RW12 (4.616 A), not the old 6 A bound.
@@ -37,7 +37,7 @@ W_SOC = 2.5
 W_LOSS = 7500.0
 W_TIME = 1.1
 Z_TIME = 0.55
-REWARD_SCALE = 1.0
+REWARD_SCALE = 1000.0
 GP_BO_SEED = 42
 
 MATLAB_DIR = (
@@ -221,8 +221,19 @@ OPT = OptimizationSpec(
 )
 
 
+def set_results_dir(path: str | Path) -> Path:
+    """Point later writes at ``path``. Relative paths sit inside this package."""
+    global RESULTS_DIR
+    dest = Path(path)
+    if not dest.is_absolute():
+        dest = PACKAGE_DIR / dest
+    dest.mkdir(parents=True, exist_ok=True)
+    RESULTS_DIR = dest
+    return RESULTS_DIR
+
+
 def result_path(name: str) -> Path:
-    """Flat file under ``results/``. No nested output folders."""
+    """Flat file under the active results directory."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     return RESULTS_DIR / name
 

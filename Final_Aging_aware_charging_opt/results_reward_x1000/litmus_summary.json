@@ -1,0 +1,143 @@
+{
+  "k": 6,
+  "n_elite": 24,
+  "family_counts": {
+    "RW9": {
+      "cccv": 6
+    },
+    "RW10": {
+      "cccv": 6
+    },
+    "RW11": {
+      "cccv": 6
+    },
+    "RW12": {
+      "cccv": 5,
+      "two_step": 1
+    }
+  },
+  "spread": {
+    "I_mean (A)": {
+      "n": 24,
+      "mean": 2.342038925144632,
+      "std": 0.5940022218036216,
+      "cv_pct": 25.362610989351477,
+      "min": 1.8239839140863285,
+      "max": 3.341250453562837
+    },
+    "I_max (A)": {
+      "n": 24,
+      "mean": 2.6847903833352476,
+      "std": 1.1447211644412139,
+      "cv_pct": 42.63726403173254,
+      "min": 1.8364072269697636,
+      "max": 4.616000175476074
+    },
+    "Time (min)": {
+      "n": 24,
+      "mean": 22.22083333333333,
+      "std": 4.560898319219676,
+      "cv_pct": 20.52532526931788,
+      "min": 14.983333333333333,
+      "max": 27.166666666666668
+    },
+    "Q_loss": {
+      "n": 24,
+      "mean": 0.00011609728609699138,
+      "std": 3.1640094194689463e-06,
+      "cv_pct": 2.725308683637645,
+      "min": 0.00011055582739198033,
+      "max": 0.00012026184665982491
+    },
+    "Reward": {
+      "n": 24,
+      "mean": -567.9156177613181,
+      "std": 100.75783370932214,
+      "cv_pct": 17.741690941077156,
+      "min": -653.0073466545696,
+      "max": -399.98586020350746
+    },
+    "V_peak (V)": {
+      "n": 24,
+      "mean": 4.18228820959727,
+      "std": 0.020000049619714556,
+      "cv_pct": 0.47820830649163804,
+      "min": 4.145407199859619,
+      "max": 4.200613975524902
+    }
+  },
+  "within_cell_rmse_A": {
+    "RW9": 0.02901354494198006,
+    "RW10": 0.017553035862372234,
+    "RW11": 0.03644311440224888,
+    "RW12": 0.13893219870559723
+  },
+  "between_cell_rmse_A": 0.8162332612333496,
+  "n_profiles_feasible_on_all_twins": 16,
+  "voltage_headroom": {
+    "RW9": {
+      "peak_v_1c": 4.200347900390625,
+      "headroom_1c_mv": -0.34790039062482236,
+      "cccv_2c_feasible": false
+    },
+    "RW10": {
+      "peak_v_1c": 4.20055627822876,
+      "headroom_1c_mv": -0.556278228759588,
+      "cccv_2c_feasible": false
+    },
+    "RW11": {
+      "peak_v_1c": 3.9999077320098877,
+      "headroom_1c_mv": 200.09226799011248,
+      "cccv_2c_feasible": false
+    },
+    "RW12": {
+      "peak_v_1c": 4.17802095413208,
+      "headroom_1c_mv": 21.9790458679201,
+      "cccv_2c_feasible": false
+    }
+  },
+  "twin_voltage_rmse_mv": {},
+  "operating_box": {
+    "soc_start": 0.2,
+    "t0_c": 24.0,
+    "v_max": 4.2,
+    "energy_fraction": 0.4,
+    "i_min_a": 0.75,
+    "i_max_a": 4.616000175476074,
+    "n_evals_per_family": 80
+  },
+  "provenance": {
+    "stage": "14_litmus_top6",
+    "project": "Final_Aging_aware_charging_opt",
+    "created_utc": "2026-09-28T02:42:08+00:00",
+    "git_commit": "e97e3a184c039fa03723787ced7f434e30a125dc",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2"
+    },
+    "settings_sha256": "e12637373816a1eaff10ccfac7e42de1e717ee8f26d05f0fbb98f3669206cef6",
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW9_summary.json",
+        "sha256": "7bf65372d3a7d299cfb6916bae062d3154121477b607746f92b7284d2ac50d44"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW10_summary.json",
+        "sha256": "27e5f4d8ad3025c96577e6024acd24f34bf86217ccb7d7335106647c6c96664b"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW11_summary.json",
+        "sha256": "a5e57b5c19a3c5cc674110bdab5596ef9bcba096a07521c04e4bcfe39b6c49b2"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW12_summary.json",
+        "sha256": "e4cf593ec566f8b412f677b055bf89744a64c311d1b4f0a9dc27cc1df2d36b01"
+      }
+    ]
+  }
+}

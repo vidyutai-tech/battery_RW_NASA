@@ -1,0 +1,255 @@
+{
+  "cells": [
+    "RW9",
+    "RW10",
+    "RW11",
+    "RW12"
+  ],
+  "n_cycles": 600,
+  "paper_rows": [
+    {
+      "cell": "RW9",
+      "family": "CCCV",
+      "duration_min": 27.066666666666666,
+      "reward": 339.53290675831704,
+      "time_vs_halfc": 42.0,
+      "deg_vs_halfc": 12.653777232008,
+      "time_vs_random": -0.06161429451632428,
+      "deg_vs_random": -0.17948339272109404
+    },
+    {
+      "cell": "RW10",
+      "family": "CCCV",
+      "duration_min": 23.866666666666667,
+      "reward": 404.91572722317517,
+      "time_vs_halfc": 48.52624011502516,
+      "deg_vs_halfc": 14.34505081479746,
+      "time_vs_random": 2.518720217835264,
+      "deg_vs_random": 0.13266554508819328
+    },
+    {
+      "cell": "RW11",
+      "family": "Two-step",
+      "duration_min": 15.0,
+      "reward": 535.3248170229358,
+      "time_vs_halfc": 69.09340659340658,
+      "deg_vs_halfc": 17.540875835054976,
+      "time_vs_random": 5.6603773584905674,
+      "deg_vs_random": 3.198974422837221
+    },
+    {
+      "cell": "RW12",
+      "family": "CCCV",
+      "duration_min": 21.366666666666667,
+      "reward": 347.16439674857486,
+      "time_vs_halfc": 56.58652218083305,
+      "deg_vs_halfc": 8.9869247458967,
+      "time_vs_random": -0.15625000000000777,
+      "deg_vs_random": 0.040492736037146475
+    }
+  ],
+  "per_cell": {
+    "RW9": {
+      "cell": "RW9",
+      "random_winner": {
+        "family": "two_step",
+        "reward": 343.42457916793296,
+        "q_total": 0.00011692310905196039,
+        "duration_min": 27.05,
+        "peak_t": 23.98592758178711,
+        "feasible": true
+      },
+      "gp_bo_winner": {
+        "family": "cccv",
+        "reward": 339.53290675831704,
+        "q_total": 0.00011735764613180199,
+        "duration_min": 27.066666666666666,
+        "peak_t": 23.98594856262207,
+        "feasible": true
+      },
+      "gp_bo_health": {
+        "family": "cccv",
+        "reward": 338.67641745994456,
+        "q_total": 0.00011713296661496184,
+        "duration_min": 27.3,
+        "peak_t": 23.985937118530273,
+        "feasible": true
+      },
+      "retention_pct_at_600": {
+        "CCCV 0.5C": 80.0,
+        "CCCV 1C": 80.84829452290667,
+        "Random": 82.56205366410614,
+        "GP-BO (min Q)": 82.5307554464016,
+        "GP-BO (max R)": 82.49724667821026
+      },
+      "n_cycles": 600,
+      "lifetime_mode": "session_Q_index_affine",
+      "lifetime_anchor": "CCCV 0.5C",
+      "lifetime_scale": 248.56714920436107
+    },
+    "RW10": {
+      "cell": "RW10",
+      "random_winner": {
+        "family": "two_step",
+        "reward": 397.1374714281793,
+        "q_total": 0.00011665018191000064,
+        "duration_min": 24.483333333333334,
+        "peak_t": 24.0223388671875,
+        "feasible": true
+      },
+      "gp_bo_winner": {
+        "family": "cccv",
+        "reward": 404.91572722317517,
+        "q_total": 0.00011651792372836775,
+        "duration_min": 23.866666666666667,
+        "peak_t": 24.085643768310547,
+        "feasible": true
+      },
+      "gp_bo_health": {
+        "family": "cccv",
+        "reward": 402.95756231173186,
+        "q_total": 0.00011649542731032337,
+        "duration_min": 24.033333333333335,
+        "peak_t": 24.05184555053711,
+        "feasible": true
+      },
+      "retention_pct_at_600": {
+        "CCCV 0.5C": 80.0,
+        "CCCV 1C": 81.9994180926355,
+        "Random": 82.84625305106664,
+        "GP-BO (min Q)": 82.86901016295948,
+        "GP-BO (max R)": 82.86570199955956
+      },
+      "n_cycles": 600,
+      "lifetime_mode": "session_Q_index_affine",
+      "lifetime_anchor": "CCCV 0.5C",
+      "lifetime_scale": 245.08815828748592
+    },
+    "RW11": {
+      "cell": "RW11",
+      "random_winner": {
+        "family": "cccv",
+        "reward": 531.6456065862469,
+        "q_total": 0.00010985231406197676,
+        "duration_min": 15.9,
+        "peak_t": 24.192371368408203,
+        "feasible": true
+      },
+      "gp_bo_winner": {
+        "family": "cccv",
+        "reward": 535.3248170229358,
+        "q_total": 0.00011126778949595829,
+        "duration_min": 15.0,
+        "peak_t": 24.26389503479004,
+        "feasible": true
+      },
+      "gp_bo_health": {
+        "family": "two_step",
+        "reward": 507.04734833820083,
+        "q_total": 0.00010633816663223931,
+        "duration_min": 19.75,
+        "peak_t": 24.057327270507812,
+        "feasible": true
+      },
+      "retention_pct_at_600": {
+        "CCCV 0.5C": 80.0,
+        "CCCV 1C": 83.10400756131247,
+        "Random": 82.96317137689527,
+        "GP-BO (min Q)": 83.50817516701099,
+        "GP-BO (max R)": 82.74364744064616
+      },
+      "n_cycles": 600,
+      "lifetime_mode": "session_Q_index_affine",
+      "lifetime_anchor": "CCCV 0.5C",
+      "lifetime_scale": 258.48080319747675
+    },
+    "RW12": {
+      "cell": "RW12",
+      "random_winner": {
+        "family": "two_step",
+        "reward": 347.64472887673935,
+        "q_total": 0.00011906521942229118,
+        "duration_min": 21.333333333333332,
+        "peak_t": 24.908733367919922,
+        "feasible": true
+      },
+      "gp_bo_winner": {
+        "family": "cccv",
+        "reward": 347.16439674857486,
+        "q_total": 0.00011909671972757365,
+        "duration_min": 21.366666666666667,
+        "peak_t": 24.895193099975586,
+        "feasible": true
+      },
+      "gp_bo_health": {
+        "family": "cccv",
+        "reward": 309.7992541287889,
+        "q_total": 0.00011901700665727846,
+        "duration_min": 24.716666666666665,
+        "peak_t": 24.317413330078125,
+        "feasible": true
+      },
+      "retention_pct_at_600": {
+        "CCCV 0.5C": 80.0,
+        "CCCV 1C": 81.69161430137858,
+        "Random": 81.7900112264929,
+        "GP-BO (min Q)": 81.79738494917933,
+        "GP-BO (max R)": 81.78519352902978
+      },
+      "n_cycles": 600,
+      "lifetime_mode": "session_Q_index_affine",
+      "lifetime_anchor": "CCCV 0.5C",
+      "lifetime_scale": 254.90215729192573
+    }
+  },
+  "provenance": {
+    "stage": "12_figures",
+    "project": "Final_Aging_aware_charging_opt",
+    "created_utc": "2026-09-28T02:41:56+00:00",
+    "git_commit": "e97e3a184c039fa03723787ced7f434e30a125dc",
+    "host": "gpu-infer-4.cdis.local",
+    "packages": {
+      "python": "3.12.3",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "matplotlib": "3.10.9",
+      "torch": "2.12.0+cu130",
+      "skopt": "0.10.2"
+    },
+    "settings_sha256": "e12637373816a1eaff10ccfac7e42de1e717ee8f26d05f0fbb98f3669206cef6",
+    "inputs": [
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/random_search_RW9_summary.json",
+        "sha256": "2a802b7e6010180e52fb9660ac7f22714c77deeff97378736f5721a55655e118"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/random_search_RW10_summary.json",
+        "sha256": "1e6be01965b73f2fd68ff15355418ffa67b74087eb34fe275a75ccac7dd87fa4"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/random_search_RW11_summary.json",
+        "sha256": "753d60ec9c9d1c3646ec309035d69e88bae56965993a8cab08309cbf2baa86e8"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/random_search_RW12_summary.json",
+        "sha256": "bb839fda3cb1ece16f453dc444a7deaf69e7a29d0ebc51367378544b453da851"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW9_summary.json",
+        "sha256": "7bf65372d3a7d299cfb6916bae062d3154121477b607746f92b7284d2ac50d44"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW10_summary.json",
+        "sha256": "27e5f4d8ad3025c96577e6024acd24f34bf86217ccb7d7335106647c6c96664b"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW11_summary.json",
+        "sha256": "a5e57b5c19a3c5cc674110bdab5596ef9bcba096a07521c04e4bcfe39b6c49b2"
+      },
+      {
+        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_reward_x1000/gp_bo_RW12_summary.json",
+        "sha256": "e4cf593ec566f8b412f677b055bf89744a64c311d1b4f0a9dc27cc1df2d36b01"
+      }
+    ]
+  }
+}
