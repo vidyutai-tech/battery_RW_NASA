@@ -1,12 +1,16 @@
-# GP-BO comparison table (calibrated coefficients, paper Eq. 10)
+# Discrete GP-BO, 40% energy in 30 min
 
-Percent columns use **CCCV 0.5C** as the reference. Positive Time ↓ / Deg. ↓ means GP-BO is faster / lower $Q_{loss}$.
+GP-BO is the best two-step whose second current is reached before the charge ends.
+Time and degradation are compared with the finished CCCV 0.5C charge of the same 40% energy.
+That 0.5C charge takes 51–57 min, so it does not itself meet the 30-minute limit.
+Positive Time ↓ / Deg. ↓ means the two-step is faster or has lower Q_loss.
+Reward is the objective inside the 30-minute search. It is not comparable with the no-limit table.
 
 | Cell | GP-BO family | Time (min) | Time ↓ vs 0.5C | Deg. ↓ vs 0.5C | Time ↓ vs Random | Deg. ↓ vs Random | Reward |
-|---|---|---|---|---|---|---|---|
-| RW9 | CCCV | 28.00 | +45.8% | +13.4% | +2.2% | +0.5% | 371.2794 |
-| RW10 | CCCV | 24.72 | +51.9% | +17.4% | +0.0% | +0.0% | 482.0522 |
-| RW11 | CCCV | 16.82 | +68.6% | +20.4% | -7.5% | +3.0% | 622.2200 |
-| RW12 | CCCV | 24.72 | +56.8% | +15.3% | +0.0% | +0.0% | 410.4469 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| RW9 | Two-step | 28.45 | +45.0% | +13.0% | -5.2% | -1.0% | 225.4 |
+| RW10 | Two-step | 25.48 | +50.4% | +16.1% | -3.1% | -1.5% | 302.5 |
+| RW11 | Two-step | 22.58 | +57.9% | +15.9% | -44.3% | -2.5% | 392.7 |
+| RW12 | Two-step | 28.83 | +49.6% | +11.6% | -16.7% | -4.4% | 189.7 |
 
-Lifetime curves accumulate the session $Q_{\mathrm{loss}}$ index and anchor CCCV 0.5C to 80% remaining capacity at 600 cycles (paper ranking projection). GP-BO (min Q) is the lowest-Q feasible GP-BO trial (health-first). GP-BO (max R) is the Eq.~10 reward maximiser (the profile the proposed algorithm selects).
+Mean across RW9–RW12: time 50.7% faster, degradation 14.1% lower.

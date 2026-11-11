@@ -1,0 +1,198 @@
+{
+  "case": "e40_t30",
+  "note": "GP-BO is the best real two-step from the 40%-in-30-min discrete search. CCCV 0.5C is the finished equal-energy charge (no 30-min cap), anchored to 80% at cycle 600. CCCV 1C is the 30-min-feasible 1C baseline. Random is the best main-search random trial that already delivers the 40% energy within 30 min.",
+  "cells": {
+    "RW9": {
+      "CCCV 0.5C": {
+        "q_total": 0.00013965222922207552,
+        "duration_min": 51.7,
+        "retention_pct_at_600": 80.0,
+        "params": {
+          "i_cc": 1.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "CCCV 1C": {
+        "q_total": 0.00012171238261345035,
+        "duration_min": 27.533333333333335,
+        "retention_pct_at_600": 82.56921736352623,
+        "params": {
+          "i_cc": 2.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "Random": {
+        "q_total": 0.00012028647847674249,
+        "duration_min": 27.033333333333335,
+        "retention_pct_at_600": 82.77342522252724,
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.45976293350329717
+        },
+        "family": "two_step",
+        "reward": 403.0093125735391
+      },
+      "GP-BO": {
+        "q_total": 0.00012149015303932166,
+        "duration_min": 28.45,
+        "retention_pct_at_600": 82.60104350412803,
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.4028627543947257
+        },
+        "family": null,
+        "reward": 225.4358453857419
+      }
+    },
+    "RW10": {
+      "CCCV 0.5C": {
+        "q_total": 0.00014126313885997363,
+        "duration_min": 51.333333333333336,
+        "retention_pct_at_600": 80.0,
+        "params": {
+          "i_cc": 1.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "CCCV 1C": {
+        "q_total": 0.00011670471694254774,
+        "duration_min": 24.716666666666665,
+        "retention_pct_at_600": 83.47697525562833,
+        "params": {
+          "i_cc": 2.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "Random": {
+        "q_total": 0.00011670471694254774,
+        "duration_min": 24.716666666666665,
+        "retention_pct_at_600": 83.47697525562833,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 2.0,
+          "v_cv": 4.2,
+          "i_cutoff": 0.05
+        },
+        "family": "cccv",
+        "reward": 482.0519081829533
+      },
+      "GP-BO": {
+        "q_total": 0.00011847553706722413,
+        "duration_min": 25.483333333333334,
+        "retention_pct_at_600": 83.22626298362768,
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.5353268264033857
+        },
+        "family": null,
+        "reward": 302.532546256939
+      }
+    },
+    "RW11": {
+      "CCCV 0.5C": {
+        "q_total": 0.00013437388739161816,
+        "duration_min": 53.61666666666667,
+        "retention_pct_at_600": 80.0,
+        "params": {
+          "i_cc": 1.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "CCCV 1C": {
+        "q_total": 0.00010967708837922451,
+        "duration_min": 25.95,
+        "retention_pct_at_600": 83.6758330791484,
+        "params": {
+          "i_cc": 2.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "Random": {
+        "q_total": 0.00011026502579338649,
+        "duration_min": 15.65,
+        "retention_pct_at_600": 83.58832539062728,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 4.5,
+          "v_cv": 4.062409499988366,
+          "i_cutoff": 0.24846258211069858
+        },
+        "family": "cccv",
+        "reward": 626.0968307806093
+      },
+      "GP-BO": {
+        "q_total": 0.00011303749451474072,
+        "duration_min": 22.583333333333332,
+        "retention_pct_at_600": 83.17567546657259,
+        "params": {
+          "family_id": "two_step",
+          "i1": 3.0,
+          "i2": 2.0,
+          "soc_switch": 0.3276936774727226
+        },
+        "family": null,
+        "reward": 392.7464469393791
+      }
+    },
+    "RW12": {
+      "CCCV 0.5C": {
+        "q_total": 0.0001405498376992509,
+        "duration_min": 57.166666666666664,
+        "retention_pct_at_600": 80.0,
+        "params": {
+          "i_cc": 1.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "CCCV 1C": {
+        "q_total": 0.00011901700665727846,
+        "duration_min": 24.716666666666665,
+        "retention_pct_at_600": 83.0640847964618,
+        "params": {
+          "i_cc": 2.0
+        },
+        "family": null,
+        "reward": null
+      },
+      "Random": {
+        "q_total": 0.00011901700665727846,
+        "duration_min": 24.716666666666665,
+        "retention_pct_at_600": 83.0640847964618,
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 2.0,
+          "v_cv": 4.2,
+          "i_cutoff": 0.05
+        },
+        "family": "cccv",
+        "reward": 410.4468621589974
+      },
+      "GP-BO": {
+        "q_total": 0.00012429102659695232,
+        "duration_min": 28.833333333333332,
+        "retention_pct_at_600": 82.31360083632245,
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.4028627543947257
+        },
+        "family": null,
+        "reward": 189.73718675453358
+      }
+    }
+  }
+}

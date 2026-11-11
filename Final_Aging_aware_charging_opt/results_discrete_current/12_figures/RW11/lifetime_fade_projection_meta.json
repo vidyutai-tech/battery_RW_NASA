@@ -1,38 +1,52 @@
 {
+  "case": "e40_t30",
+  "energy_fraction": 0.4,
+  "max_duration_min": 30.0,
   "cell": "RW11",
-  "random_winner": {
+  "lifetime_anchor": "completed CCCV 0.5C equal-energy charge (longer than 30 min)",
+  "gp_bo": {
+    "family": "two_step",
+    "selection": "best feasible trial whose second current is actually used",
+    "params": {
+      "family_id": "two_step",
+      "i1": 3.0,
+      "i2": 2.0,
+      "soc_switch": 0.3276936774727226
+    },
+    "duration_min": 22.583333333333332,
+    "q_total": 0.00011303749451474072,
+    "reward_in_30min_search": 392.7464469393791,
+    "retention_pct_at_600": 83.17567546657259
+  },
+  "random": {
     "family": "cccv",
-    "reward": 626.0968307806093,
-    "q_total": 0.00011026502579338649,
+    "selection": "best main-search random trial that delivers 40% energy within 30 min",
+    "params": {
+      "family_id": "cccv",
+      "i_cc": 4.5,
+      "v_cv": 4.062409499988366,
+      "i_cutoff": 0.24846258211069858
+    },
     "duration_min": 15.65,
-    "peak_t": 24.21538543701172,
-    "feasible": true
+    "q_total": 0.00011026502579338649,
+    "retention_pct_at_600": 83.58832539062728
   },
-  "gp_bo_winner": {
-    "family": "cccv",
-    "reward": 622.220033169694,
-    "q_total": 0.00010833561068319378,
-    "duration_min": 16.816666666666666,
-    "peak_t": 24.0594539642334,
-    "feasible": true
+  "cccv_0.5C_completed": {
+    "duration_min": 53.61666666666667,
+    "q_total": 0.00013437388739161816,
+    "i_cc": 1.0,
+    "retention_pct_at_600": 80.0
   },
-  "gp_bo_health": {
-    "family": "cccv",
-    "reward": 611.1769466309146,
-    "q_total": 0.00010696632801559418,
-    "duration_min": 18.366666666666667,
-    "peak_t": 24.0594539642334,
-    "feasible": true
+  "cccv_1C": {
+    "duration_min": 25.95,
+    "q_total": 0.00010967708837922451,
+    "i_cc": 2.0,
+    "retention_pct_at_600": 83.6758330791484
   },
   "retention_pct_at_600": {
     "CCCV 0.5C": 80.0,
     "CCCV 1C": 83.6758330791484,
     "Random": 83.58832539062728,
-    "GP-BO (min Q)": 84.07929842740168,
-    "GP-BO (max R)": 83.87549652895561
-  },
-  "n_cycles": 600,
-  "lifetime_mode": "session_Q_index_affine",
-  "lifetime_anchor": "CCCV 0.5C",
-  "lifetime_scale": 248.06406944369286
+    "GP-BO": 83.17567546657259
+  }
 }

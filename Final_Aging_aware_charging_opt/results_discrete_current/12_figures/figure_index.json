@@ -1,255 +1,259 @@
 {
-  "cells": [
-    "RW9",
-    "RW10",
-    "RW11",
-    "RW12"
-  ],
-  "n_cycles": 600,
+  "case": "e40_t30",
+  "energy_fraction": 0.4,
+  "max_duration_min": 30.0,
+  "archived_no_time_limit": "12_figures/no_time_limit",
+  "trial_logs": "requirements/e40_t30_gp_bo_*.json",
   "paper_rows": [
     {
       "cell": "RW9",
-      "family": "CCCV",
-      "duration_min": 28.0,
-      "reward": 371.2794252551729,
-      "time_vs_halfc": 45.84139264990329,
-      "deg_vs_halfc": 13.39847990480304,
-      "time_vs_random": 2.2118742724097773,
-      "deg_vs_random": 0.5288103831299937
+      "family": "Two-step",
+      "duration_min": 28.45,
+      "reward": 225.4358453857419,
+      "time_vs_halfc": 44.97098646034817,
+      "deg_vs_halfc": 13.005217520640118,
+      "time_vs_random": -5.240443896424159,
+      "deg_vs_random": -1.000673207680531
     },
     {
       "cell": "RW10",
-      "family": "CCCV",
-      "duration_min": 24.716666666666665,
-      "reward": 482.0522254453615,
-      "time_vs_halfc": 51.850649350649356,
-      "deg_vs_halfc": 17.384906223430143,
-      "time_vs_random": 0.0,
-      "deg_vs_random": 3.624673924315163e-05
+      "family": "Two-step",
+      "duration_min": 25.483333333333334,
+      "reward": 302.532546256939,
+      "time_vs_halfc": 50.357142857142854,
+      "deg_vs_halfc": 16.131314918138408,
+      "time_vs_random": -3.101820633850314,
+      "deg_vs_random": -1.5173509443908246
     },
     {
       "cell": "RW11",
-      "family": "CCCV",
-      "duration_min": 16.816666666666666,
-      "reward": 622.220033169694,
-      "time_vs_halfc": 68.63537457258315,
-      "deg_vs_halfc": 20.396492137008444,
-      "time_vs_random": -7.454739084132051,
-      "deg_vs_random": 2.991608403532566
+      "family": "Two-step",
+      "duration_min": 22.583333333333332,
+      "reward": 392.7464469393791,
+      "time_vs_halfc": 57.88001243394467,
+      "deg_vs_halfc": 15.878377332862923,
+      "time_vs_random": -44.302449414270484,
+      "deg_vs_random": -2.514368179216912
     },
     {
       "cell": "RW12",
-      "family": "CCCV",
-      "duration_min": 24.716666666666665,
-      "reward": 410.4468621589974,
-      "time_vs_halfc": 56.763848396501466,
-      "deg_vs_halfc": 15.320423982309022,
-      "time_vs_random": 0.0,
-      "deg_vs_random": 0.0
+      "family": "Two-step",
+      "duration_min": 28.833333333333332,
+      "reward": 189.73718675453358,
+      "time_vs_halfc": 49.562682215743436,
+      "deg_vs_halfc": 11.568004181612258,
+      "time_vs_random": -16.65542818610924,
+      "deg_vs_random": -4.431316236057704
     }
   ],
   "per_cell": {
     "RW9": {
+      "case": "e40_t30",
+      "energy_fraction": 0.4,
+      "max_duration_min": 30.0,
       "cell": "RW9",
-      "random_winner": {
-        "family": "three_step",
-        "reward": 373.7960772988022,
-        "q_total": 0.00012158390164928222,
-        "duration_min": 28.633333333333333,
-        "peak_t": 23.988988876342773,
-        "feasible": true
+      "lifetime_anchor": "completed CCCV 0.5C equal-energy charge (longer than 30 min)",
+      "gp_bo": {
+        "family": "two_step",
+        "selection": "best feasible trial whose second current is actually used",
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.4028627543947257
+        },
+        "duration_min": 28.45,
+        "q_total": 0.00012149015303932166,
+        "reward_in_30min_search": 225.4358453857419,
+        "retention_pct_at_600": 82.60104350412803
       },
-      "gp_bo_winner": {
-        "family": "cccv",
-        "reward": 371.2794252551729,
-        "q_total": 0.00012260820102328633,
-        "duration_min": 28.0,
-        "peak_t": 23.988988876342773,
-        "feasible": true
+      "random": {
+        "family": "two_step",
+        "selection": "best main-search random trial that delivers 40% energy within 30 min",
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.45976293350329717
+        },
+        "duration_min": 27.033333333333335,
+        "q_total": 0.00012028647847674249,
+        "retention_pct_at_600": 82.77342522252725
       },
-      "gp_bo_health": {
-        "family": "cccv",
-        "reward": 325.6011114244043,
-        "q_total": 0.00012094095335314625,
-        "duration_min": 33.35,
-        "peak_t": 23.9705867767334,
-        "feasible": true
+      "cccv_0.5C_completed": {
+        "duration_min": 51.7,
+        "q_total": 0.00013965222922207552,
+        "i_cc": 1.0,
+        "retention_pct_at_600": 80.0
+      },
+      "cccv_1C": {
+        "duration_min": 27.533333333333335,
+        "q_total": 0.00012171238261345035,
+        "i_cc": 2.0,
+        "retention_pct_at_600": 82.56921736352625
       },
       "retention_pct_at_600": {
         "CCCV 0.5C": 80.0,
         "CCCV 1C": 82.56921736352625,
-        "Random": 82.58761749432026,
-        "GP-BO (min Q)": 82.67969598096062,
-        "GP-BO (max R)": 82.44092461591654
-      },
-      "n_cycles": 600,
-      "lifetime_mode": "session_Q_index_affine",
-      "lifetime_anchor": "CCCV 0.5C",
-      "lifetime_scale": 238.68815785479896
+        "Random": 82.77342522252725,
+        "GP-BO": 82.60104350412803
+      }
     },
     "RW10": {
+      "case": "e40_t30",
+      "energy_fraction": 0.4,
+      "max_duration_min": 30.0,
       "cell": "RW10",
-      "random_winner": {
+      "lifetime_anchor": "completed CCCV 0.5C equal-energy charge (longer than 30 min)",
+      "gp_bo": {
+        "family": "two_step",
+        "selection": "best feasible trial whose second current is actually used",
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.5353268264033857
+        },
+        "duration_min": 25.483333333333334,
+        "q_total": 0.00011847553706722413,
+        "reward_in_30min_search": 302.532546256939,
+        "retention_pct_at_600": 83.22626298362768
+      },
+      "random": {
         "family": "cccv",
-        "reward": 482.0519081829533,
+        "selection": "best main-search random trial that delivers 40% energy within 30 min",
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 2.0,
+          "v_cv": 4.2,
+          "i_cutoff": 0.05
+        },
+        "duration_min": 24.716666666666665,
         "q_total": 0.00011670471694254774,
-        "duration_min": 24.716666666666665,
-        "peak_t": 24.02215576171875,
-        "feasible": true
+        "retention_pct_at_600": 83.47697525562833
       },
-      "gp_bo_winner": {
-        "family": "cccv",
-        "reward": 482.0522254453615,
-        "q_total": 0.0001167046746408933,
-        "duration_min": 24.716666666666665,
-        "peak_t": 24.02215576171875,
-        "feasible": true
+      "cccv_0.5C_completed": {
+        "duration_min": 51.333333333333336,
+        "q_total": 0.00014126313885997363,
+        "i_cc": 1.0,
+        "retention_pct_at_600": 80.0
       },
-      "gp_bo_health": {
-        "family": "cccv",
-        "reward": 482.0522254453615,
-        "q_total": 0.0001167046746408933,
+      "cccv_1C": {
         "duration_min": 24.716666666666665,
-        "peak_t": 24.02215576171875,
-        "feasible": true
+        "q_total": 0.00011670471694254774,
+        "i_cc": 2.0,
+        "retention_pct_at_600": 83.47697525562833
       },
       "retention_pct_at_600": {
         "CCCV 0.5C": 80.0,
         "CCCV 1C": 83.47697525562833,
         "Random": 83.47697525562833,
-        "GP-BO (min Q)": 83.47698124468603,
-        "GP-BO (max R)": 83.47698124468603
-      },
-      "n_cycles": 600,
-      "lifetime_mode": "session_Q_index_affine",
-      "lifetime_anchor": "CCCV 0.5C",
-      "lifetime_scale": 235.96625136848215
+        "GP-BO": 83.22626298362768
+      }
     },
     "RW11": {
+      "case": "e40_t30",
+      "energy_fraction": 0.4,
+      "max_duration_min": 30.0,
       "cell": "RW11",
-      "random_winner": {
+      "lifetime_anchor": "completed CCCV 0.5C equal-energy charge (longer than 30 min)",
+      "gp_bo": {
+        "family": "two_step",
+        "selection": "best feasible trial whose second current is actually used",
+        "params": {
+          "family_id": "two_step",
+          "i1": 3.0,
+          "i2": 2.0,
+          "soc_switch": 0.3276936774727226
+        },
+        "duration_min": 22.583333333333332,
+        "q_total": 0.00011303749451474072,
+        "reward_in_30min_search": 392.7464469393791,
+        "retention_pct_at_600": 83.17567546657259
+      },
+      "random": {
         "family": "cccv",
-        "reward": 626.0968307806093,
-        "q_total": 0.00011026502579338649,
+        "selection": "best main-search random trial that delivers 40% energy within 30 min",
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 4.5,
+          "v_cv": 4.062409499988366,
+          "i_cutoff": 0.24846258211069858
+        },
         "duration_min": 15.65,
-        "peak_t": 24.21538543701172,
-        "feasible": true
+        "q_total": 0.00011026502579338649,
+        "retention_pct_at_600": 83.58832539062728
       },
-      "gp_bo_winner": {
-        "family": "cccv",
-        "reward": 622.220033169694,
-        "q_total": 0.00010833561068319378,
-        "duration_min": 16.816666666666666,
-        "peak_t": 24.0594539642334,
-        "feasible": true
+      "cccv_0.5C_completed": {
+        "duration_min": 53.61666666666667,
+        "q_total": 0.00013437388739161816,
+        "i_cc": 1.0,
+        "retention_pct_at_600": 80.0
       },
-      "gp_bo_health": {
-        "family": "cccv",
-        "reward": 611.1769466309146,
-        "q_total": 0.00010696632801559418,
-        "duration_min": 18.366666666666667,
-        "peak_t": 24.0594539642334,
-        "feasible": true
+      "cccv_1C": {
+        "duration_min": 25.95,
+        "q_total": 0.00010967708837922451,
+        "i_cc": 2.0,
+        "retention_pct_at_600": 83.6758330791484
       },
       "retention_pct_at_600": {
         "CCCV 0.5C": 80.0,
         "CCCV 1C": 83.6758330791484,
         "Random": 83.58832539062728,
-        "GP-BO (min Q)": 84.07929842740168,
-        "GP-BO (max R)": 83.87549652895561
-      },
-      "n_cycles": 600,
-      "lifetime_mode": "session_Q_index_affine",
-      "lifetime_anchor": "CCCV 0.5C",
-      "lifetime_scale": 248.06406944369286
+        "GP-BO": 83.17567546657259
+      }
     },
     "RW12": {
+      "case": "e40_t30",
+      "energy_fraction": 0.4,
+      "max_duration_min": 30.0,
       "cell": "RW12",
-      "random_winner": {
-        "family": "cccv",
-        "reward": 410.4468621589974,
-        "q_total": 0.00011901700665727846,
-        "duration_min": 24.716666666666665,
-        "peak_t": 24.317413330078125,
-        "feasible": true
+      "lifetime_anchor": "completed CCCV 0.5C equal-energy charge (longer than 30 min)",
+      "gp_bo": {
+        "family": "two_step",
+        "selection": "best feasible trial whose second current is actually used",
+        "params": {
+          "family_id": "two_step",
+          "i1": 2.0,
+          "i2": 1.5,
+          "soc_switch": 0.4028627543947257
+        },
+        "duration_min": 28.833333333333332,
+        "q_total": 0.00012429102659695232,
+        "reward_in_30min_search": 189.73718675453358,
+        "retention_pct_at_600": 82.31360083632245
       },
-      "gp_bo_winner": {
+      "random": {
         "family": "cccv",
-        "reward": 410.4468621589974,
-        "q_total": 0.00011901700665727846,
+        "selection": "best main-search random trial that delivers 40% energy within 30 min",
+        "params": {
+          "family_id": "cccv",
+          "i_cc": 2.0,
+          "v_cv": 4.2,
+          "i_cutoff": 0.05
+        },
         "duration_min": 24.716666666666665,
-        "peak_t": 24.317413330078125,
-        "feasible": true
+        "q_total": 0.00011901700665727846,
+        "retention_pct_at_600": 83.0640847964618
       },
-      "gp_bo_health": {
-        "family": "cccv",
-        "reward": 410.4468621589974,
-        "q_total": 0.00011901700665727846,
+      "cccv_0.5C_completed": {
+        "duration_min": 57.166666666666664,
+        "q_total": 0.0001405498376992509,
+        "i_cc": 1.0,
+        "retention_pct_at_600": 80.0
+      },
+      "cccv_1C": {
         "duration_min": 24.716666666666665,
-        "peak_t": 24.317413330078125,
-        "feasible": true
+        "q_total": 0.00011901700665727846,
+        "i_cc": 2.0,
+        "retention_pct_at_600": 83.0640847964618
       },
       "retention_pct_at_600": {
         "CCCV 0.5C": 80.0,
         "CCCV 1C": 83.0640847964618,
         "Random": 83.0640847964618,
-        "GP-BO (min Q)": 83.0640847964618,
-        "GP-BO (max R)": 83.0640847964618
-      },
-      "n_cycles": 600,
-      "lifetime_mode": "session_Q_index_affine",
-      "lifetime_anchor": "CCCV 0.5C",
-      "lifetime_scale": 237.1637981159404
-    }
-  },
-  "provenance": {
-    "stage": "12_figures",
-    "project": "Final_Aging_aware_charging_opt",
-    "created_utc": "2026-09-28T10:48:16+00:00",
-    "git_commit": "487dbe8f07e81231ba421ddb411fa0aff5330b87",
-    "host": "gpu-infer-4.cdis.local",
-    "packages": {
-      "python": "3.12.3",
-      "numpy": "1.26.4",
-      "scipy": "1.17.1",
-      "matplotlib": "3.10.9",
-      "torch": "2.12.0+cu130",
-      "skopt": "0.10.2"
-    },
-    "settings_sha256": "e12637373816a1eaff10ccfac7e42de1e717ee8f26d05f0fbb98f3669206cef6",
-    "inputs": [
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/random_search_RW9_summary.json",
-        "sha256": "daf0423148a168a0be4e2da95a999e01b96ef1e0dada55bdcaccf4c8ef469a76"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/random_search_RW10_summary.json",
-        "sha256": "4f8da50973b98284fa243a6c931af8ebbab76304fa9cc2ce900af495f42b4c0c"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/random_search_RW11_summary.json",
-        "sha256": "81077c11cc6da68baa6780babc55ccab05e29cf359c52b50ae4b4e557b5981ce"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/random_search_RW12_summary.json",
-        "sha256": "a5dd0fa1ac9ac2aa24a8f3da599c697bd71af4d454a35cc7d7b09549d137e39b"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/gp_bo_RW9_summary.json",
-        "sha256": "13a4ceabe840aad9526d97d4a362ca54c010c41b1ff3885a657b72f661679557"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/gp_bo_RW10_summary.json",
-        "sha256": "f3fe02cb21263db70b63b3e30117833ba0bed09f7b3be8d349bf78fe9a05a0f4"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/gp_bo_RW11_summary.json",
-        "sha256": "3ce3a73bd89a2ff7c84084ce558c7b056a2fd37b0d9671e91078bf3c865b0fdc"
-      },
-      {
-        "path": "/data/battery_RW_NASA/Final_Aging_aware_charging_opt/results_discrete_current/gp_bo_RW12_summary.json",
-        "sha256": "d14deedc72f009c66776948a77798bb8faa87f22437d803c167b09ef2174fa0f"
+        "GP-BO": 82.31360083632245
       }
-    ]
+    }
   }
 }
