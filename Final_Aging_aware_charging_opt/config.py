@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = PACKAGE_DIR.parent
-RESULTS_DIR = PACKAGE_DIR / "results"
+RESULTS_DIR = PACKAGE_DIR / "results_discrete_current"
 OCV_NPZ = PACKAGE_DIR / "ocv_curves.npz"
 
 CELLS = ["RW9", "RW10", "RW11", "RW12"]
@@ -34,9 +34,9 @@ CELLS = ["RW9", "RW10", "RW11", "RW12"]
 I_MAX_A = 4.616000175476074
 
 # Charge-current levels that carry most of the NASA RW charge samples.
-# Used only when discrete-current search is turned on.
+# The kept pipeline searches only these levels.
 CURRENT_LEVELS_A = (1.0, 1.5, 2.0, 3.0, 4.5)
-DISCRETE_CURRENT = False
+DISCRETE_CURRENT = True
 
 
 def set_discrete_current(enabled: bool) -> None:

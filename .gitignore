@@ -25,7 +25,7 @@ env/
 
 # Result tables for the final package
 *.csv
-!Final_Aging_aware_charging_opt/results/**/*.csv
+!Final_Aging_aware_charging_opt/results_discrete_current/**/*.csv
 
 # Large dataset files — too big for GitHub (>50 MB)
 *.mat

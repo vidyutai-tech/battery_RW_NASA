@@ -2011,10 +2011,11 @@ def main() -> int:
     ap.add_argument("--results-dir", default=None,
                     help="Write here instead of results/. A relative path is inside the package.")
     ap.add_argument("--discrete-current", action="store_true",
-                    help="Restrict commanded current to 1.0, 1.5, 2.0, 3.0, and 4.5 A.")
+                    help="Restrict commanded current to 1.0, 1.5, 2.0, 3.0, and 4.5 A. On by default.")
     args = ap.parse_args()
     if args.discrete_current:
         set_discrete_current(True)
+    if discrete_current():
         print(f"discrete current levels {list(_current_levels())}", flush=True)
     if args.results_dir:
         dest = set_results_dir(args.results_dir)

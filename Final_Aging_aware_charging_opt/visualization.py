@@ -2077,12 +2077,12 @@ def make_litmus(device=None) -> int:
 
 def _run() -> int:
     global RESULTS_DIR
-    ap = argparse.ArgumentParser(description="Write charging figures into results/")
+    ap = argparse.ArgumentParser(description="Write charging figures into results_discrete_current/")
     ap.add_argument("--only", choices=["all", "figures", "litmus"], default="all")
     ap.add_argument("--cells", nargs="+", default=None)
     ap.add_argument("--device", default=None)
     ap.add_argument("--results-dir", default=None,
-                    help="Read and write this directory instead of results/.")
+                    help="Read and write this directory instead of results_discrete_current/.")
     args = ap.parse_args()
     if args.results_dir:
         RESULTS_DIR = set_results_dir(args.results_dir)
