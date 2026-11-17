@@ -2009,7 +2009,7 @@ def main() -> int:
     ap.add_argument("--top6", action="store_true",
                     help="Top-6 table and current figures for the four energy/time cases")
     ap.add_argument("--results-dir", default=None,
-                    help="Write here instead of results/. A relative path is inside the package.")
+                    help="Write here instead of results_discrete_current/. A relative path is inside the package.")
     ap.add_argument("--discrete-current", action="store_true",
                     help="Restrict commanded current to 1.0, 1.5, 2.0, 3.0, and 4.5 A. On by default.")
     args = ap.parse_args()
